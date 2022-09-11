@@ -505,37 +505,33 @@ for `int main( int argc, char* argv[] ) `
 
 ## Converting Between Bases
 
-1. Hex -> Binary
+1. 10 in different number systems -- represents the base
+
+   - in decimal: 10 = 10
+
+   - in binary: 0b10 = 2
+
+     - Note: 0 in front of the leftmost non-0 digit can be ignored. e.g., 
+
+       - 0b0000000000000**1**0 = 0b10 = 0 *  2<sup>0</sup> + 1 * 2<sup>1</sup> + 0 + 0 +... = 3
+
+       - 0b00100 = 0 *  2<sup>0</sup> + 0 * 2<sup>1</sup> + 1 * 2<sup>2</sup> + 0 + 0 = 4
+
+   - in hexadecimal: 0x10 = 0 * 16<sup>0</sup> + 1 * 16 <sup>1</sup> = 16
+
+2. Hex -> Binary
 
    Replace each hex digit with 4 binary digits. e.g. 0x1A = 0001 1010
 
-   0xABCD = 0b 1010 1011 1100 1101
-
-   
-
-   in decimal: 10 = 10
-
-   - 230 = 0230 = 00230
-   - 230 != 2300 != 23000
-
-   in binary: 0b10 = 2
-
-   - 0b0000000000000**1**0 = 0b10 = 0 *  2<sup>0</sup> + 1 * 2<sup>1</sup> + 0 + 0 +... = 3
-   - 0b00100 = 0 *  2<sup>0</sup> + 0 * 2<sup>1</sup> + 1 * 2<sup>2</sup> + 0 + 0 = 4
-
-   in hexadecimal: 0x10 = 0 * 16<sup>0</sup> + 1 * 16 <sup>1</sup> = 16
-
-2. 
-
-2. Binary -> Hex
+3. Binary -> Hex
 
    Group the binary into groups of 4, then convert it to hex. e.g. 0001 1110 = 0x1E
 
-3. Decimal -> Binary / Hex
+4. Decimal -> Binary / Hex
 
    Divide the number by 2 (or 16) repeatedly, then keep track of remainders in reverse order. e.g., 
 
-   ![210-2](/Users/sonia/Documents/MSD_Fall_2022/CS6010/Notes/assets/Dec2Bin.png)
+   ![210-2](./assets/Dec2Bin.png)
 
 # 12 Number Representations
 
@@ -550,36 +546,27 @@ sign and magnitude representation
    - write down 2 in binary using 4 bits: 0010
 
    - flip all bits: 1101. This is treated as -2
+   
+   How do we know 1101 is -2?
 
+    - Step 1: the **most significant bit (MSB)** is 1, so this number is negative.
+    - Step 2: flip all bits, it's 0010, it's 2.
+    - Combine the result of step 1 and step 2, the result is -2.
+   
+1. 3 bits in one's compliment
 
+   | binary | Decimal |
+   | ------ | ------- |
+   | 000    | 0       |
+   | 001    | 1       |
+   | 010    |         |
+   |        |         |
+   |        |         |
+   |        |         |
+   |        |         |
+   |        |         |
 
-How do we know 1101 is -2?
-
-- Step 1: the most significant bit (MSB) is 1, so this number is negative.
-- Step 2: flip all bits, it's 0010, it's 2.
-- Combine the result of step 1 and step 2, the result is -2.
-
-
-
-0110: 6
-
-0111: 7
-
-1000 (one's complement: 0111):  -7
-
-1001 (one's complement: 0110):  -6
-
-1010 (one's complement: 0101): -5
-
-...
-
-1111 (one's complement: 0000): -1
-
-
-
-negative number + positive number = 1111, which is -0. 
-
-We have 0000 for +0 and 1111 for -0. Weird!
+	From above table, we can see that in 1's compliment, negative number + positive number = 1111, which is -0 in decimal. This is weird, since 0 should not have a sign! In addition, we already have 0000 for 0. Using 1111 to represent -0 waste a number!
 
 ## Two's Complement
 
@@ -654,7 +641,7 @@ $$
 
 The picture below can help you better understand the concept "precision":
 
-<img src="/Users/sonia/Documents/MSD_Fall_2022/CS6010/Notes/assets/PAab4ImjEeeMTA56ZcIfig_f64d6390d81ccaf96818493f85e2bca1_3.2.3B-float-double.png" alt="img" style="zoom:150%;" />
+<img src="./assets/PAab4ImjEeeMTA56ZcIfig_f64d6390d81ccaf96818493f85e2bca1_3.2.3B-float-double.png" alt="img" style="zoom:150%;" />
 
 Note, the default print setting for floats and doubles is to **print up to six decimal places**.
 
