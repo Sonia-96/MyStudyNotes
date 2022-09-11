@@ -574,7 +574,7 @@ sign and magnitude representation
    - how many numbers can a signed 3 bits represent? 2 ** 3 = 8
    - for a n-digit binary number (no matter signed or **unsigned**), it can represent 2 ** n numbers
 
-1. All modern machines use 2's complement. By using two's complement, we can have an extra negative number. (save 1111)
+1. All modern machines use 2's complement. By using two's complement, we can have an extra negative number. (1111 for -1)
 
    For example, the range of signed 3 bits:
 
@@ -589,11 +589,13 @@ sign and magnitude representation
    | 110    | -2      |
    | 111    | -1      |
 
-101= -1 *2<sup>2</sup>+ 0 * 2<sup>1</sup> + 1 * 2<sup>0</sup> =-3		
+	From above table, we know:
 
-​	- 3bits represent 8 numbers: non-negative: [0, 3]; negative: [-4, -1]
+	- 3bits represent 8 numbers: non-negative: [0, 3]; negative: [-4, -1]
 
-	- Positive number + negative number = 001 + 111 = 0b000 = 0
+	- how to convert a signed binary number to a decimal number: 101= -1 *2<sup>2</sup>+ 0 * 2<sup>1</sup> + 1 * 2<sup>0</sup> =-3
+
+	- in two's complement, positive number + negative number = 001 + 111 = 0b000 = 0
 
 2. How to represent -2 in 2's complement
 
@@ -618,7 +620,7 @@ sign and magnitude representation
 
    - Step 2: add 1 -> 0b110 
 
-	Note, the **most negative number** cannot be negated in 2's complement. This can cause all sorts of errors if you're not careful!!!
+	Note, the **most negative number** cannot be negated in 2's complement. This can cause all sorts of errors if you're not careful!!! (Why???)
 
 ** Floats are always signed.
 
