@@ -624,6 +624,21 @@ sign and magnitude representation
 
 ** Floats are always signed.
 
+
+
+```
+int countWords(const vector<string>& words);
+string getShortestWord(const vector<string>& words);
+string getLongestWord(const vector<string>& words);
+
+struct Occurrence {
+	
+};
+vector<Occurrence> findKeyWord(const vector<string>& words);
+```
+
+
+
 ## Floating Point Numbers
 
 ### Binary Scientific Notation
@@ -656,46 +671,33 @@ Note, the default print setting for floats and doubles is to **print up to six d
 
 # 13 Bitwise Operations
 
-1. If you are working with bits, it's better to use types like `int8_t`, `uint16_t`, etc., -- preferred an unsigned type.
+If you are working with bits, it's better to use types like `int8_t`（signed int with 8 bits), `uint16_t` (unsigned int with 16 bits), etc., and unsigned types are preferred. (for more types, refer to [\<cstdint>](https://en.cppreference.com/w/cpp/header/cstdint))
 
-2. **bitwise operator**:
+## Bitwise operators
 
-   - `|`: if either of operands are true, the result is true.
-   - `&`: only when both operands are true, the result is true.
-   - `^` (exclusive or, Xor): if either of operands are  true, the result is true. But if both operands are the same, the result is false.
-     - 0 ^ 0 = 0
-     - 0 ^ 1 = 1
-     - 1 ^ 0 = 1
-     - 1 ^ 1 = 0
-   - `~`: bitwise not, which is used to flip the bit
+| Symbol | Function                   | Description                                                  |
+| ------ | -------------------------- | ------------------------------------------------------------ |
+| &      | Bitwise and                | only when both operands are 1, the result is 1               |
+| \|     | Bitwise or                 | if either of operands is 1, the result is 1.<br>  0 ^ 0 = 0<br>  0 ^ 1 = 1<br>  1 ^ 0 = 1 <br>  1 ^ 1 = 0 |
+| ~      | Bitwise not/ complement    | Flip all bits                                                |
+| ^      | Bitwise exclusive or (Xor) | if the operands are different, the results is 1              |
+| >>     | Right shift (divided by 2) | shift bits to the right and fill in 0s to the left<br>e.g., (int8_t) 0110 10<u>10</u> >> 2 = <u>00</u>01 1010 |
+| <<     | Left shift (multiply by 2) | shift bits to the left and fill in 0s to the right<br>e.g., (int8_t) <u>01</u>10 1010 << 2 = 1010 1000 = -88 (The number becomes **negative** because the MSB is 1) |
 
-3. **Bit shifting**:
+## Bit Manipulation
 
-   - right shifting ( `>>`): shift bits to the right and fill in 0s to the left
-     - (int8_t) 0110 10<u>10</u> >> 2 = <u>00</u>01 1010
-     - right shift by 1  = divide the number by 2 in integer math
-   - left shifting (`<<`): shift bits to the left and fill in 0s to the right
-     - (int8_t) <u>01</u>10 1010 << 2 = 1010 1000 = -88 (The number becomes **negative** because the MSB is 1)
-     - left shift by 1 = multiply the number by 2 but may lost MSB
-
-4. Boolean identifiers
-
-   (x is a single bit)
+1. Boolean identifiers (x is a single bit)
 
    - `x | 1 == 1`
    - `x | 0 == x`
    - `x & 1 == x`
    - `x & 0 == 0`
+   - `x ^ 1 == x`
+   - `x ^ 0 == 0`
+   
+2. **Masking**
 
-   Q: how to get last 4 digits of  `int16_t x`?
-
-   ```c++
-   int low4BitsOfX = x & 0x000F
-   ```
-
-5. **Masking**
-
-    think about what bits you want to change, then design a mask. For the bits you want to use, set the values of the mask as 1, otherwise 0. For example: 
+   We can use `x ^ 1 == x` and `x ^ 0 == 0` to design a mask, which is used to remove the bits we don't need and remain the bits we want. For the bits you want to use, set the values as 1, otherwise 0. For example: 
 
    ```c++
    uint32_t x = 0xDEADBEEF;
@@ -706,7 +708,7 @@ Note, the default print setting for floats and doubles is to **print up to six d
    x >> 24; 
    ```
 
-6. **Sign extension**
+3. **Sign extension**
 
    When you assign a smaller signed number to a larger signed number, the new bits will copy the signed bit of the smaller value. For example,
 
@@ -726,7 +728,7 @@ Note, the default print setting for floats and doubles is to **print up to six d
 
    Note, 0xF000 >> 4 = 0x0F00, because <u>hex constants are treated as unsigned</u>. But if you first assign `0x0F00` to a signed int then shift it, you'll get 0x`FF00`.
 
-7. In two's compliment, how to negative a number: flip all bits then add one
+4. In two's compliment, how to negative a number: flip all bits then add one
 
    ```c++
    uint32_t x = 0x00FE;
@@ -734,10 +736,306 @@ Note, the default print setting for floats and doubles is to **print up to six d
    x += 1; // x= 0xFF02
    ```
 
-8. Endianness
+5. Endianness
 
    Endianness referes to the order of the bytes as stored in memory.
 
    - Big-endian (BE): stores the most significant byte at the smallest address and the lease significant byte at the largest address
    - Little-endian (LE): stores the least significant byte at the smallest address
      - MAC is little endianness
+
+# 14 Stack And Heap Memory
+
+## Stack Memory
+
+Stack Memory is also called Call Stack Memory. When a function is called, memory is allocated on the **stack** to store all the variables used by that function.
+
+|      | stack    | Heap                   |
+| ---- | -------- | ---------------------- |
+| Type | pointers | actual data of vectors |
+|      |          |                        |
+|      |          |                        |
+
+## Heap Memory
+
+1. The heap is used for:
+
+   - large chunks of memory
+
+   - variables that must survive longer than a function call
+
+​		(we can only use pointers to access the memory on the heap)
+
+2. `new` keyword
+
+   ```c++
+   int* pInt = new int; // create a new integer on the heap and give me the address
+   double* myArray = new double[10]; // create an array of size 10 and return the adress of the 1st double
+   ```
+
+   memory leak: 
+
+   ```c++
+   double* myArray = new double[10];
+   myArray = &somethingElse; 
+   ```
+
+   in Java, double[10] will be deleted, but in C++ won'tt. This is called "memory leak" in C++.
+
+3. `delete` keyword
+
+   This keyword will not delete the data. It tells the system that our program is not going to use the memory anymore, then the system will reallocate it to something else.
+
+   ```c++
+   delete pInt;
+   delete [] array; // need []!!!
+   ```
+
+4. Note: an array can be stored in stack
+
+   ```c++
+   double d1[3]; // the actual data is stored in stack
+   
+   double* d2 = new double[3]; // the actual data is stored in heap
+   delete[] d2; // remember to delete the array in heap!!!
+   ```
+
+   
+
+# 15 Classes and Objectes
+
+## Classes
+
+A class is similar to a struct but with one minor difference: everything in a `struct` is public by default, while everything in a `class` is private by default.
+
+### Access modifiers
+
+- `public`: everyone can see this piece of the class
+- `private`: only accessible within the class that defines them
+- `protected`: accessible within the class that defines them and other classes which inherit from that class
+
+### Variables
+
+Use trailing underscore to mark a class variable, distinguishing from local variables. e.g., `size_`, `capacity_`
+
+### Constructor
+
+Constructor is a "function" used to create a object. A constructor must:
+
+- has the same name as the class
+- Does not have any return type (including  `void`)
+
+### Method (member functions)
+
+- A class is declared in a .hpp file. Its methods are implemented in .cpp file.
+
+- A method that doesn't change anyt data within a class should be declared `const`.
+
+  - Note, remember to add `const` after the function_name in both .cpp and .hpp files, or you'll get a linking erorr.
+
+  ```c++
+  // defined within the class
+  <return_type> <method_name>(params) const {...};
+  
+  // defined outside the class
+  <return_type> <class_name>::<method_name>(params) const {...};
+  ```
+
+### Desctructor
+
+Destructor is a method which is invoked whenever an object is going to be destroyed.
+
+1. Destructor has the same name as the class but preceeded with a tilde(~) symbol. It neither requires any argument nor returns any value
+
+   ```c++
+   // defined within the class
+   ~<class_name> {...};
+   
+   // defined outside the class
+   <class_name>::~<class_name> {...};
+   ```
+
+2. **When is destructor called?**
+   - For objects in stack memory, destructor is automatically called when the objects are out of scope, such as:
+     - the function ends 
+     - the program ends 
+     - a block containing local variables ends 
+   - For objects in heap memory (i.e., objects that are created by using `new`), destructor is only called when we use `delete` operator.
+
+3. In destructor, objects are destroyed in the reverse of an object creation.
+
+   ```c++
+   #include<iostream>
+   using namespace std;
+   
+   int count=0;
+   class Test {
+       public:
+           Test() {
+               count++;
+               cout<<"\n No. of Object created:\t"<<count;
+           }
+            
+           ~Test() {
+               cout<<"\n No. of Object destroyed:\t"<<count;
+               --count;
+           }
+   };
+    
+   main() {
+       Test t,t1,t2;
+       return 0;
+   }
+   ```
+
+   Output:
+
+   ```bash
+   No. of Object created:    1
+   No. of Object created:    2
+   No. of Object created:    3
+   No. of Object destroyed:    3
+   No. of Object destroyed:    2
+   No. of Object destroyed:    1
+   ```
+
+4. Note:
+
+   - Destructor can never be overloaded, which means we can only have one destructor in a single class
+   - When there's a pointer in the class, you must define your own destructor to avoid **memory leak**!!!
+
+## Objects
+
+Objects are instantiations (or instances) of classes.
+
+## Example
+
+1. declare a class in .hpp file
+
+   ```c++
+   #ifndef hepers_hpp
+   #define hepers_hpp
+   
+   #include <stdio.h>
+   #include <iostream>
+   
+   using namespace std;
+   
+   class MyVector {
+       
+   private:
+       // use trailing underscore to mark class variables
+       double* data_;
+       size_t size_, capacity_;
+       void setCapacity(size_t capacity) {
+           capacity_ = capacity;
+       }
+        
+   public:
+       // constructors
+       MyVector();
+       MyVector(double data[], size_t size);
+           
+       // destructor
+       ~MyVector();
+       
+       // If a function never change the data within the class, we can mark it as const
+       size_t size() const;
+       void setSize(size_t inputSize);
+       double vecSum();
+       void printVector();
+   };
+   
+   
+   #endif /* hepers_hpp */
+   ```
+
+2. implement methods in .cpp file
+
+   ```c++
+   #include "helpers.hpp"
+   
+   // constructors
+   
+   MyVector::MyVector() {
+       size_ = 0;
+       capacity_ = 0;
+       data_ = nullptr;
+   }
+   
+   MyVector::MyVector(double data[], size_t size) {
+       setSize(size);
+       data_ = new double[size]; // allocate spaces
+       for (size_t i = 0; i < size; i++) { // copy the data
+           data_[i] = data[i];
+       }
+   }
+   
+   // destructor
+   MyVector::~MyVector() {
+       cout << "destructor executed, the size is " << size() << endl;
+       delete [] data_;
+       data_ = nullptr;
+       size_ = 0;
+       capacity_ = 0;
+   }
+   
+   size_t MyVector::size() const {
+       return size_;
+   }
+   
+   void MyVector::setSize(size_t inputSize) {
+       if (inputSize < 0) {
+           size_ = 0;
+       } else {
+           size_ = inputSize;
+       }
+   }
+   
+   double MyVector::vecSum() {
+       double sum = 0.0;
+       for (int i = 0; i < size(); i++) {
+           sum += data_[i];
+       }
+       return sum;
+   }
+   
+   void MyVector::printVector() {
+       for (size_t i = 0; i < size_; i++) {
+           cout << data_[i] << " ";
+       }
+       cout << endl;
+   };
+   ```
+
+3. main.cpp:
+
+   ```c++
+   #include <iostream>
+   #include "helpers.hpp"
+   
+   int main(int argc, const char * argv[]) {
+       double someData[5] = {1, 2, 3, 4, 5}; //someData is stored in stack memory
+       MyVector vec(someData, 5);
+       vec.printVector();
+   
+       // use pointer to store a class object
+       MyVector* p = new MyVector(someData, 5);
+       p->printVector();
+       delete p; //the descrutor of p will be invoked when I delete the pointer 
+   		// the desctrutor of vec will be called automatically before the program ends
+       return 0;
+   }
+   ```
+
+   Output:
+
+   ```bash
+   1 2 3 4 5 
+   6 7 8 
+   destructor executed, the size is 3
+   destructor executed, the size is 5
+   Program ended with exit code: 0
+   ```
+
+   
