@@ -624,21 +624,6 @@ sign and magnitude representation
 
 ** Floats are always signed.
 
-
-
-```
-int countWords(const vector<string>& words);
-string getShortestWord(const vector<string>& words);
-string getLongestWord(const vector<string>& words);
-
-struct Occurrence {
-	
-};
-vector<Occurrence> findKeyWord(const vector<string>& words);
-```
-
-
-
 ## Floating Point Numbers
 
 ### Binary Scientific Notation
@@ -800,7 +785,30 @@ Stack Memory is also called Call Stack Memory. When a function is called, memory
    delete[] d2; // remember to delete the array in heap!!!
    ```
 
-   
+
+## A practice
+
+Draw the picture of memory for the following code:
+
+```c++
+void foo() {
+  int y = 4;
+  myVector v1;
+  MyVector* v2 = new MyVector();
+}
+
+int main() {
+  bool b = true;
+  int x;
+  int y = 3;
+  foo();
+  double d = 1.234;
+  double* p = new double[10]; // Can I initialize a class without a parenthesis?
+  p[1] = 2;
+}
+```
+
+
 
 # 15 Classes and Objectes
 
@@ -827,9 +835,11 @@ Constructor is a "function" used to create a object. A constructor must:
 
 ### Method (member functions)
 
+- The functions inside a class are called methods.
+
 - A class is declared in a .hpp file. Its methods are implemented in .cpp file.
 
-- A method that doesn't change anyt data within a class should be declared `const`.
+- A method that doesn't change any data within a class should be declared `const`.
 
   - Note, remember to add `const` after the function_name in both .cpp and .hpp files, or you'll get a linking erorr.
 
@@ -837,7 +847,7 @@ Constructor is a "function" used to create a object. A constructor must:
   // defined within the class
   <return_type> <method_name>(params) const {...};
   
-  // defined outside the class
+  // defined outside the class ("<class_name>::" is called scope notation)
   <return_type> <class_name>::<method_name>(params) const {...};
   ```
 
@@ -849,10 +859,10 @@ Destructor is a method which is invoked whenever an object is going to be destro
 
    ```c++
    // defined within the class
-   ~<class_name> {...};
+   ~<class_name>() {...};
    
    // defined outside the class
-   <class_name>::~<class_name> {...};
+   <class_name>::~<class_name>() {...};
    ```
 
 2. **When is destructor called?**
@@ -1038,4 +1048,173 @@ Objects are instantiations (or instances) of classes.
    Program ended with exit code: 0
    ```
 
+# 16 Overloading operators
+
+Overloading: functions with the same name but different parameters.
+
+## +
+
+1. `+` is an **overloaded** method. It had different functions when meeting different parameters:
+
+  - Addition: 3 + 4 = 7
+
+  - concanetation: "Hello" + " World" = "Hello World"
+
+  - **unary operator** (operators that act upon a single operand to produce a new value): convert a character into a number. for example:
+
+    ```c++
+    cout << +'a'; // the output is 97
+    ```
+
+2. Create the `+` method
+
+   ```c++
+   //add the value of rhs to lhs
+   MyVector MyVector::operator+(const MyVector& rhs) {
+       // in a method, rhs can access its private variables
+       MyVector res = MyVector(max(size_, rhs.size_));
+       for (int i = 0; i < res.capacity_; i++) {
+           double val1 = 0, val2 = 0;
+           if (i < size_) {
+               val1 = data_[i];
+           }
+           if (i < rhs.getSize()) {
+               val2 = rhs.data_[i];
+           }
+           res.pushBack(val1 + val2);
+       }
+       return res;
+   }
    
+   ```
+
+   Note: in a method, other object can access its private variables. 
+
+   Q: how about objects from other classes? ??
+
+## +=
+
+create the `+=` operand for `MyVector`:
+
+```c++
+// add the value of rhs to lhs
+MyVector& MyVector::operator+=(const MyVector& rhs) {
+    for (int i = 0; i < min(size_, rhs.getSize()); i++) {
+        data_[i] += rhs.get(i);
+    }
+    return *this;
+}
+```
+
+In this function, we return a reference to `MyVector`.  `this` is a pointer to the object itself, and `*this` is dereference. Therefore,  `return *this` will return this object. Since the return type is `MyVector&`, we only copy the address of this object to the new variable. However, if the return type is `MyVector`, we will create a new object and copy all values of this object.
+
+## []
+
+Create the `[]` operand for MyVector, so we can use it in this way: `int i = dec[2]`
+
+```c++
+double& MyVector::operator[](size_t index) {
+    return data_[index];
+}
+
+// the first const means the return object won't be changed
+// the second const means this method won't change any data
+const double& MyVector::operator()(size_t index) const {
+    cout << "use const []\n";
+    return data_[index];
+}
+```
+
+When these two methods both exists, only the first one will be called. 
+
+```c++
+// vec3.data_ = {7, 9, 11, 4, 5}
+double x = vec3[1];
+cout << x << endl;
+
+const double y = vec3[1];
+cout << y << endl;
+```
+
+Output: `use const []` doesn't appear!
+
+```bash
+9
+9
+```
+
+为什么优先执行非const的方法？首先，这跟方法被声明的先后顺序无关。我猜测的原因：带const的方法优先级比同名的其他方法要低？
+
+## ()
+
+- `Matrix mat(3, 4)` : this is a constructor
+- `float d = mat(3, 4)`: mat is a method
+
+## <<
+
+Note, `<<` cannot be a method. We must implement `<<` as a function!!
+
+```c++
+ostream& operator<<(ostream& out, const MyVector& vec) {
+    for (int i = 0; i < vec.getSize(); i++) {
+        cout << vec.get(i) << " ";
+    }
+    cout << endl;
+    return out;
+}
+```
+
+Why we return out? Because we may use it to print the next vector. For example, in `cout << vec1 << vec2 << vec3`. `cout << vec1` returns a `ostream` object, then we use this object to print `vec2`. Same with `vec3`.
+
+## Copy constructor
+
+There are two kinds of copy:
+
+- shallow copy: copy the address
+
+- deep copy: copy the data
+
+Normally, when we do `MyVector v2 = v1`, we are doing shallow copy. Therefore, when v2 was destroyed (goes out of scope), the memory that `v1` still points at will be deleted.
+
+We use a copy constructor to do deep copy. The constructor takes in an object of the same type as its parameter:
+
+```c++
+MyVector::MyVector(MyVector& rhs) {
+    data_ = new double[rhs.getSize()];
+    capacity_ = rhs.getSize();
+    for (int i = 0; i < rhs.getSize(); i++) {
+        data_[i] = rhs.get(i);
+    }
+    size_ = rhs.getSize();
+}
+```
+
+The copy constructor is called when we create a new object, e.g.:
+
+- `MyVector v4 = v1` : (important!!!) Normally, `=` only do shallow copy, but with a copy constructor, `=` will do deep copy.
+- `MyVector v4 {v3}`
+- `MyVector v4(v3)`
+
+## =
+
+```c++
+MyVector& MyVector::operator=(MyVector& rhs) {
+    // or this->data_ == rhs.data_ (这里老师是怎么比的？？)
+    if (this == &rhs) return *this; // this = &(*this)
+    capacity_ = rhs.capacity_;
+    size_ = rhs.size();
+    // deep copy
+    data_ = new double[capacity_];
+    for (int i = 0; i < size_; i++) {
+        data_[i] = rhs[i];
+    }
+    
+    return *this;
+}
+```
+
+Note: while copy constructor and `=` operator are very similar, we have to implement both. (Why??)
+
+## The rule of 3
+
+If you have any of 3: destructor, copy constructor, and operator =. You have to implement all 3. This guarantees that each object is created and destroyed properly.
