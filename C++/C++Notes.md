@@ -769,22 +769,32 @@ Stack Memory is also called Call Stack Memory. When a function is called, memory
 
 3. `delete` keyword
 
-   This keyword will not delete the data. It tells the system that our program is not going to use the memory anymore, then the system will reallocate it to something else.
+   This keyword will not delete the data. It tells the system that our program is not going to use the memory anymore, then the system will reallocate it to something else. (This memory is available for other programs)
 
    ```c++
    delete pInt;
    delete [] array; // need []!!!
    ```
 
-4. Note: an array can be stored in stack
+4. memory leak & memory corruption
+
+   - **memory leak**: if you use `new` to get memory on the heap but never use `delete`  to get rid of it, you'll meet the error of memory leak. (You can never use this memory later. This is a big problem for your computer!!)
+   - **memory corruption**: If you already delete a `pointer` that points to a memory on the heap, but assign a value to the memory later, you'll meet an error of memory corruption. That's why wee should assign `nullptr` to the pointer after deleting it. (This is my own understanding. I am not sure if it's correct.)
+
+   ```c++
+   delete [] data; // avoid memory leak
+   data = nullptr; // avoid memory corruption
+   ```
+
+5. Note: an array can be stored in stack
 
    ```c++
    double d1[3]; // the actual data is stored in stack
    
    double* d2 = new double[3]; // the actual data is stored in heap
    delete[] d2; // remember to delete the array in heap!!!
+   d2 = nullptr; 
    ```
-
 
 ## A practice
 
@@ -1056,41 +1066,64 @@ Overloading: functions with the same name but different parameters.
 
 1. `+` is an **overloaded** method. It had different functions when meeting different parameters:
 
-  - Addition: 3 + 4 = 7
+     - Addition: 3 + 4 = 7
 
-  - concanetation: "Hello" + " World" = "Hello World"
 
-  - **unary operator** (operators that act upon a single operand to produce a new value): convert a character into a number. for example:
+     - concanetation: "Hello" + " World" = "Hello World"
 
-    ```c++
-    cout << +'a'; // the output is 97
-    ```
 
-2. Create the `+` method
+     - **unary operator** (operators that act upon a single operand to produce a new value): convert a character into a number. for example:
+    
+       ```c++
+       cout << +'a'; // the output is 97
+       ```
 
-   ```c++
-   //add the value of rhs to lhs
-   MyVector MyVector::operator+(const MyVector& rhs) {
-       // in a method, rhs can access its private variables
-       MyVector res = MyVector(max(size_, rhs.size_));
-       for (int i = 0; i < res.capacity_; i++) {
-           double val1 = 0, val2 = 0;
-           if (i < size_) {
-               val1 = data_[i];
-           }
-           if (i < rhs.getSize()) {
-               val2 = rhs.data_[i];
-           }
-           res.pushBack(val1 + val2);
+
+2. Create the `+` method 
+
+   - Method 1: return a new object
+
+     ```c++
+     //add the value of rhs to lhs
+     MyVector<T> MyVector::operator+(const MyVector& rhs) {
+         // in a method, rhs can access its private variables
+         MyVector res(max(size_, rhs.size_));
+         for (int i = 0; i < res.capacity_; i++) {
+             double val1 = 0, val2 = 0;
+             if (i < size_) {
+                 val1 = data_[i];
+             }
+             if (i < rhs.getSize()) {
+                 val2 = rhs.data_[i];
+             }
+             res.pushBack(val1 + val2);
+         }
+         return res;
+     }
+     ```
+
+   - Method 2: return a reference
+
+     Must use pointer to store `res` on stack memory, or `res` will disappear after the method returns!!
+
+     ```c++
+     MyVector<T>& operator+(const MyVector& rhs) {
+       // the variable on stack will disappear after the program returns
+       // so we must create an array on the heap
+       MyVector* res = new MyVector(std::max(size_, rhs.size_));
+       for (int i = 0; i < res->capacity_; i++) {
+         T val1 = 0, val2 = 0;
+         if (i < size_) {
+           val1 = data_[i];
+         }
+         if (i < rhs.getSize()) {
+           val2 = rhs.data_[i];
+         }
+         res->pushBack(val1 + val2);
        }
-       return res;
-   }
-   
-   ```
-
-   Note: in a method, other object can access its private variables. 
-
-   Q: how about objects from other classes? ??
+       return *res;
+     }
+     ```
 
 ## +=
 
@@ -1110,16 +1143,18 @@ In this function, we return a reference to `MyVector`.  `this` is a pointer to t
 
 ## []
 
-Create the `[]` operand for MyVector, so we can use it in this way: `int i = dec[2]`
+Create the `[]` operand for `MyVector`, so we can use it in this way: `int i = vec[2]`, and `vec[0] = 1`.
 
 ```c++
+// & is useful when we want to do vec[0] = 1
 double& MyVector::operator[](size_t index) {
     return data_[index];
 }
 
 // the first const means the return object won't be changed
 // the second const means this method won't change any data
-const double& MyVector::operator()(size_t index) const {
+// if we set return type as const, we cannot do assignment like vec[0] = 1.
+const double& MyVector::operator()(size_t index) const { 
     cout << "use const []\n";
     return data_[index];
 }
@@ -1170,9 +1205,9 @@ Why we return out? Because we may use it to print the next vector. For example, 
 
 There are two kinds of copy:
 
-- shallow copy: copy the address
+- shallow copy: copy the **address**
 
-- deep copy: copy the data
+- deep copy: copy the actual data and store it in a new address
 
 Normally, when we do `MyVector v2 = v1`, we are doing shallow copy. Therefore, when v2 was destroyed (goes out of scope), the memory that `v1` still points at will be deleted.
 
@@ -1191,24 +1226,22 @@ MyVector::MyVector(MyVector& rhs) {
 
 The copy constructor is called when we create a new object, e.g.:
 
-- `MyVector v4 = v1` : (important!!!) Normally, `=` only do shallow copy, but with a copy constructor, `=` will do deep copy.
+- `MyVector v4 = v1` : (important!!!) Normally, `=` only do shallow copy, but with a copy constructor, `=` will do deep copy. (This depends on the compiler. Somtimes the compiler will do `=` assginment by using copy constructor, an do copy by using `=`. But sometimes the compiler may do wrong things. So make sure we implement both `=` operator and copy constructor in our program!!)
 - `MyVector v4 {v3}`
 - `MyVector v4(v3)`
 
 ## =
 
 ```c++
-MyVector& MyVector::operator=(MyVector& rhs) {
-    // or this->data_ == rhs.data_ (这里老师是怎么比的？？)
-    if (this == &rhs) return *this; // this = &(*this)
-    capacity_ = rhs.capacity_;
-    size_ = rhs.size();
-    // deep copy
+MyVector& MyVector::operator=(const MyVector& rhs) {
+    if (this == &rhs) return *this;
+    capacity_ = rhs.getCapacity();
+    size_ = rhs.getSize();
+    //deep copy
     data_ = new double[capacity_];
     for (int i = 0; i < size_; i++) {
-        data_[i] = rhs[i];
+        data_[i] = rhs.get(i);
     }
-    
     return *this;
 }
 ```
@@ -1218,3 +1251,18 @@ Note: while copy constructor and `=` operator are very similar, we have to imple
 ## The rule of 3
 
 If you have any of 3: destructor, copy constructor, and operator =. You have to implement all 3. This guarantees that each object is created and destroyed properly.
+
+// TODO: stuffs about = and copy constructor
+
+# 17 Template
+
+template methods and functions should be put in .hpp files
+
+# 18 Final Project
+
+## SFML 
+
+## homebrew
+
+## Make
+
