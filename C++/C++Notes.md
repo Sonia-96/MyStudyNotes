@@ -235,7 +235,7 @@ clang++ -std=c++11 -c *.cpp
 clang++ -o myProgram *.o
 ```
 
-## Vecotr
+## Vector
 
 1. Create a vector:
 
@@ -1260,9 +1260,222 @@ template methods and functions should be put in .hpp files
 
 # 18 Final Project
 
-## SFML 
+## SFML
+
+[SFML](https://www.sfml-dev.org/tutorials/2.5/) -- Simple Fast Multimedia Library
+
+
 
 ## homebrew
 
+[homebrew](https://brew.sh) is a package manager for MAC.
+
+Commands: 
+
+- `brew doctor`: check to make sure `brew` is working properly on your system
+- `brew install bat`: install the package bat
+  - bat is similar to cat, but with syntax highlighting and Git integration
+
+- `brew uninstall bat`: uninstall the package bat
+- brew install tree
+
 ## Make
 
+### Makefile
+
+### CMake
+
+CMake Tutorial: https://cmake.org/cmake/help/latest/guide/tutorial/A%20Basic%20Starting%20Point.html
+
+## Build the project
+
+1. create a `CMakeLists.txt`
+
+   ```bash
+   #use a recent version of CMake
+   cmake_minimum_required(VERSION 3.15)
+   
+   #the project is called testSFML
+   project(testSFML)
+   
+   #the project contains an executable named testSFML that uses the following cpp files
+   # if you create other cpp files, remember to add them here
+   add_executable(testSFML src/helloSFML.cpp) 
+   
+   #create a folder named "cmake" at the top of your project and put the
+   #findSFML.cmake file in it.  This line tells Cmake to look there for
+   #find____.cmake files
+   #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+   
+   #this says find the graphics, window, and system libraries
+   #it uses the FindSFML.cmake file to do so and sets
+   #some variables ($SFML_LIBRARIES and SFML_INCLUDE_DIRECTORIES) that are used below
+   find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
+   
+   #tells Cmake that the testSFML executable needs to be linked with SFML
+   target_link_libraries(testSFML sfml-graphics)
+   
+   #passes an option to clang when compiling to use recent c++ stuff
+   target_compile_options(testSFML PUBLIC -std=c++17)
+   ```
+
+2. create a folder `src` to store all code files (.cpp, .hpp)
+
+3. create a folder `xcode`, and enter this folder, then use `cmake` to generate an xcode object
+
+   ```bash
+   cmake .. -G Xcode  # use the CmakeLists.txt file from 1 level up to generate an XCode project
+   open testSFML.xcodeproj #open it in xcode
+   ```
+
+4. create a folder `build` to put all stuffs that CMake produces
+
+   ```bash
+   mkdir build
+   cd build
+   cmake ..
+   ```
+
+5. run your program in terminal: `./testSFML` (the program name is written in `CMakeLists.txt`)
+
+# 19 STL & GIT
+
+## Standard Temporary Library (STL)
+
+STL has 2 main parts:
+
+- **containers**: 
+  - std::vector, set, map, queue, list, etc
+- **algorithms**: use **iterator** to traverse data
+  - std::sort, [count_if](https://en.cppreference.com/w/cpp/algorithm/count), reverse, unique, random
+
+### Iterator
+
+syntax: 
+
+```c++
+vector<int> nums = {1, 2, 3, 4, 5};
+vector<int>::interator numsIter;
+numsIter = nums.begin();
+```
+
+use dereference to get the value of a iterator:
+
+```c++
+
+```
+
+implement your own iterator:
+
+```c++
+// in the class
+const T* begin() const {
+  return data_;
+}
+
+const T* end() const {
+  return data_ + size_;
+}
+
+// then you can use for-each loop
+for (int i : vec1) {
+    std::cout << i << " ";
+}
+```
+
+
+
+### Functions as parameters
+
+Use `[]` to create anonymous/lambda functions. Lambda functions can only be used as parameters.
+
+```c++
+[](char & c) { // parameter
+  c = tolower(c); // body
+}
+
+[](float a, float b) {
+  return a < b; // return things
+}
+```
+
+### Auto
+
+when to use auto?
+
+## GIT
+
+git stash?
+
+# 20 Set & Map
+
+## Set
+
+## Map
+
+map<key, index>
+
+1. Q: How to deference a self-defined datatype?
+
+2. use template
+
+   ```c++
+   template<typename K, typename V>
+   Map<K, V> map;
+   ```
+
+   
+
+# 21 Advanced stuffs
+
+## C++ Move semantics
+
+```c++
+Pointer p1 = (1.0, 2.0);
+Pointer p2;
+p2 = std::move(p1); // p2 steals p1's memory, p1 is empty now
+p4 = std::move(p2 + p3); // not deep copy, just type casting???
+  
+```
+
+move is more efficient than copy!!
+
+deep copy is expensive, shallow copy is not
+
+(steal means shallow copy?)
+
+std::move() moves an lvalue to an rvalue (why????)
+
+## Rule of 5
+
+### move constructor (steal/move during construction)
+
+1. Syntax: `MyVector(MyVector&& rhs)`
+   - && is an rvalue reference (an unamed variable) - move constructor
+   - & is an lvalue reference - copy constructor
+2. lvalue (named variables) & rvalue (unamed variables)
+   - for copy constructor: MyVector v2(v1): v1 is lvalue??
+
+### move assignment operator  (steal/move during assignment)
+
+v4 = v1 + v2;
+
+v1 + v2 is an temperary vector, when it is assigned to v4, it will be destroyed by destroy constructor 
+
+If we have move and copy constructor/operator both, the compiler will choose move, because it's cheaper. 
+
+
+
+v6(v2 + v3) : capacity constructor -> move constructor -> destructor -> directly move to v6 so no move constructor
+
+// TODO: review the lecture!!
+
+
+
+## Smart Pointers
+
+Smart pointers: you don't need to manually delete these pointers
+
+- `std::unique_ptr<T>`
+- `std::shared_ptr<T>`
+- `std::weak_ptr<T>`: a pointer that holds a non-owning reference to an object managed by `shared_ptr`
