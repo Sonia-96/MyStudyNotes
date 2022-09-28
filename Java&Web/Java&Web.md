@@ -4,15 +4,15 @@
 
 ### Unix Permissions
 
-d rwx r-x ---
+d<span style="color:red">rwx</span><span style="color:blue">r-x</span><span style="color:green">---</span>
 
 - d - directory
-- owner's permissions
-- group's permissions (try running groups in cmd)
-- everyone else
-- % chmod go+rX images # change permissions for group and other to read and execute
+- <span style="color:red">owner's permissions</span>
+- <span style="color:blue">group's permissions</span> (try running groups in cmd)
+- <span style="color:green">everyone else</span>
+- `% chmod go+rX images # change permissions for group and other to read and execute`
   - capital X???
-- ls -ld
+- `ls -ld`
 
 ### Home Directory
 
@@ -82,8 +82,6 @@ the smallest trunk the computer deals with - 1 byte
 normal size  - 8 bytes
 
 We use int to store color, extra 1 byte is used for opacity
-
-<span style="color:red">this text is red</span>
 
 ## CSS
 
