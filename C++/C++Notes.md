@@ -357,7 +357,7 @@ Read and write data from files. Library to use: `fstream`
 
 ## Array
 
-Array is fixed-sized, and has no member functinos, e.g., .size(). 
+Array is fixed-sized, and has no member functinos, e.g., `.size()`. 
 
 1. create an array: `type arrayName[size]`
 
@@ -392,7 +392,7 @@ Array is fixed-sized, and has no member functinos, e.g., .size().
       }
       ```
 
-2. use `->` to access a pointer of a struct's field:
+2. pointers use `->` to objects' field:
 
    ```c++
    struct Point {
@@ -733,15 +733,11 @@ If you are working with bits, it's better to use types like `int8_t`（signed in
 
 ## Stack Memory
 
-Stack Memory is also called Call Stack Memory. When a function is called, memory is allocated on the **stack** to store all the variables used by that function.
-
-|      | stack    | Heap                   |
-| ---- | -------- | ---------------------- |
-| Type | pointers | actual data of vectors |
-|      |          |                        |
-|      |          |                        |
+Stack Memory is also called **Call Stack Memory**. When a function is called, memory is allocated on the **stack** to store all the variables used by that function.
 
 ## Heap Memory
+
+### new & delete
 
 1. The heap is used for:
 
@@ -749,7 +745,7 @@ Stack Memory is also called Call Stack Memory. When a function is called, memory
 
    - variables that must survive longer than a function call
 
-​		(we can only use pointers to access the memory on the heap)
+​		we can only use pointers to access the memory on the heap.
 
 2. `new` keyword
 
@@ -758,35 +754,7 @@ Stack Memory is also called Call Stack Memory. When a function is called, memory
    double* myArray = new double[10]; // create an array of size 10 and return the adress of the 1st double
    ```
 
-   memory leak: 
-
-   ```c++
-   double* myArray = new double[10];
-   myArray = &somethingElse; 
-   ```
-
-   in Java, double[10] will be deleted, but in C++ won'tt. This is called "memory leak" in C++.
-
-3. `delete` keyword
-
-   This keyword will not delete the data. It tells the system that our program is not going to use the memory anymore, then the system will reallocate it to something else. (This memory is available for other programs)
-
-   ```c++
-   delete pInt;
-   delete [] array; // need []!!!
-   ```
-
-4. memory leak & memory corruption
-
-   - **memory leak**: if you use `new` to get memory on the heap but never use `delete`  to get rid of it, you'll meet the error of memory leak. (You can never use this memory later. This is a big problem for your computer!!)
-   - **memory corruption**: If you already delete a `pointer` that points to a memory on the heap, but assign a value to the memory later, you'll meet an error of memory corruption. That's why wee should assign `nullptr` to the pointer after deleting it. (This is my own understanding. I am not sure if it's correct.)
-
-   ```c++
-   delete [] data; // avoid memory leak
-   data = nullptr; // avoid memory corruption
-   ```
-
-5. Note: an array can be stored in stack
+   Note: only when you use `new` to create an object, the heap memory can be used. Therefore, the array can be either stored on stack or heap.
 
    ```c++
    double d1[3]; // the actual data is stored in stack
@@ -795,6 +763,65 @@ Stack Memory is also called Call Stack Memory. When a function is called, memory
    delete[] d2; // remember to delete the array in heap!!!
    d2 = nullptr; 
    ```
+
+3. `delete` keyword
+
+   This keyword will not delete the data. It tells the system that our program is not going to use the memory anymore, then the system will reallocate it to something else. 
+
+   ```c++
+   delete pInt;
+   delete [] array; // need []!!!
+   ```
+
+### Pointer Errors
+
+#### Memory Leak
+
+if you use `new` to get memory on the heap but never use `delete`  to get rid of it, you'll meet the error of memory leak.For example:
+
+```c++
+double* myArray = new double[10];
+myArray = &somethingElse; 
+```
+
+You don't delete `myArray` before assigning a new address to it. Then this memory won't be used when your program is running. This error is called "memory leak". (Memory leak is very dangerous. It will make your program become very huge, and freeze your computer!!)
+
+#### Memory Corruption
+
+If you already delete a pointer that points to a memory on the heap, when you assign a value to the memory later, you'll meet an error of memory corruption. That's why wee should assign `nullptr` to the pointer after deleting it. 
+
+```c++
+delete [] data; // avoid memory leak
+data = nullptr; // avoid memory corruption
+```
+
+#### Dangling Pointers
+
+Dangling pointers are pointers that points to a deleted object. For example,
+
+```c++
+double* myArray = new double[10];
+delete [] myArray;
+```
+
+If you don't assign `nullptr` to `myArray`, then `myArray` will become a dangling pointer.
+
+<img src="./assets/page1-423px-Dangling_Pointer.pdf.jpg" alt="img" style="zoom:80%;" />
+
+#### Double Delete
+
+Delete the same pointer for twice. If the compiler can't find this error, this may cause undefined bahavior while the program is running. (Very dangerous!!)
+
+> Your program could crash. Your data could be corrupted. The direct deposit of your next paycheck could instead take 5 million dollars out of your account. [What happens in a double delete?](https://stackoverflow.com/questions/9169774/what-happens-in-a-double-delete)
+
+```c++
+Obj *op = new Obj;
+Obj *op2 = op;
+delete op;
+delete op2;
+```
+
+
 
 ## A practice
 

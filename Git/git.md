@@ -220,3 +220,12 @@ rebase bugfix分支，会使bugfix分支的历史记录被添加在master分支�
 
 目的：避免每次push都要输入密码
 
+# 有用的指令
+
+1. Remove the files that are listed in `.gitignore` but are still in the repo:
+
+   ```bash
+   git rm --cached `git ls-files -i -c --exclude-from=.gitignore`
+   ```
+
+   
