@@ -57,13 +57,13 @@ difference?
 | Primitive data type | Wrapper class (Object data type) |
 | ------------------- | -------------------------------- |
 | int                 | Integer                          |
-| byte                |                                  |
-| short               |                                  |
-| long                |                                  |
-| float               |                                  |
-| double              |                                  |
-| char                |                                  |
-| Boolean             |                                  |
+| byte                | Byte                             |
+| short               | Short                            |
+| long                | Long                             |
+| float               | Float                            |
+| double              | Double                           |
+| char                | Character                        |
+| boolean             | Boolean                          |
 
 ### Array
 
@@ -96,20 +96,21 @@ difference?
 
 1. walking through 
 
-  - for-loop
+     - for-loop
+     
+     - for-each loop
+     
+     -  **Iterator**
+     
+       ```java
+       Iterator iter = names.iterator();
+       while (iter.hasNext()) {
+         out.println(iter.next());
+       }
+       ```
 
-  - for-each loop
 
-  - **Iterator**
-
-    ```java
-    Iterator iter = names.iterator();
-    while (iter.hasNext()) {
-      out.println(iter.next());
-    }
-    ```
-
-2. copy // TODO!!!
+2. copy
 
    ```java
    ArrayList<String> moreNamew = new ArrayList<>(names); // this is a shllow copy!!! TODO
@@ -139,30 +140,36 @@ difference?
    int i = sc.nextInt(); // read next int
    ```
 
-   // TODO: try scanner using file input
 
 #### File Output
 
 ##### FileWriter
 
 ```java
-FileWriter myWrite= mew FileWriter("<filename>");
+FileWriter myWriter = new FileWriter("<filename>");
 myWriter.write("Put this text into a file.\n");
 myWriter.close();
 ```
 
-##### PrintWriter
+##### [PrintWriter](https://docs.oracle.com/javase/7/docs/api/java/io/PrintWriter.html)
 
-printerwriter不用outputstream也行
+```java
+PrintWriter pw = new PrintWriter("<filename>");
+pw.print(...);
+pw.printf(...);
+pw.println(...);
+pw.close();
+```
 
-为什么scanner必须用inputstream？？
+[PrintWriter vs. FileWriter](https://medium.com/geekculture/using-printwriter-vs-filewriter-in-java-2958df85f105)
 
 ### Modifiers
 
-|                       |      |      |      |      |
-| --------------------- | ---- | ---- | ---- | ---- |
-| public                |      |      |      |      |
-| private               |      |      |      |      |
-| protected             |      |      |      |      |
-| default (no modifier) |      |      |      |      |
+|                       | class | package | subclass (same pkg) | subclass (diff pkg) | World |
+| --------------------- | ----- | ------- | ------------------- | ------------------- | ----- |
+| public                | Y     | Y       | Y                   | Y                   | Y     |
+| protected             | Y     | Y       | Y                   | Y                   |       |
+| default (no modifier) | Y     | Y       | Y                   |                     |       |
+| private               | Y     |         |                     |                     |       |
 
+https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html

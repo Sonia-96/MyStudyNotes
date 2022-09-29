@@ -179,6 +179,7 @@ A packet based on TCP/IP protocol has following information:
   - Version/type/length
   - ID/Flags
   - Time/protocol/Checksum
+    - checksum: A checksum is a value that represents the number of bits in a transmission message and is used by IT professionals to detect high-level errors within data transmissions.
 - TCP header
   - Source
   - Destination
