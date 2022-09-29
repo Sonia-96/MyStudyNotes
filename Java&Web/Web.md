@@ -133,81 +133,120 @@ link script to html
 
 ## Client / Server Model
 
+Most networking applications are using client / server model, e.g., web browser, zoom, facebook.
+
 ![Lightbox](./assets/801.png)
 
-## Data Transfer Layers
+* Networked applications without cline/servers are often called "**peer to peer**" applications, e.g., BitTorrent.
 
-1. generic client process:
-   - find server
-   - find path to server
-   - Handle "dropper packets"
-   - Manage bandwidth use
-2. **OSI Layer Model**
-   - :star::star:Application: 
-   - :star:Transport: TCP/IP(most common), UDP
-     - TCP gurantees your will receive all data (will resend lost package), UDP don't. live video may use UDP, because you can't move back
-   - Network: iPv4, iPv6
-   - Link: ethernet, wifi
-   - Physical: radio
-   
-   sockets in TCP???
+## Data Transfer Layers - OSI layer model
 
-### Sending Data
+OSI (Open Systems Interconnection) Layer Model. From the bottom to the top, the layers are:
 
-Protocol: how two programs communicates. e.g., HTTP, ssh, smtp
+1. **Physical layer**: the physical medium that transmits raw bit stream between devices, e.g., radio wave, electric signals
+2. **Link layer**: breaks up packets into frames and sends them from source to destination. e.g., ethernet, wifi
+3. **Network layer**: how information is sent across the internet. The network layer use IP to route packets to a destination node, e.g., iPv4, iPv6
+4. :star:**Transport layer**: how data gets from a **program** to another program
+   - we use **port** to decide which program the data belongs to
+   - TCP & UDP - standards that enable application program and computing devices to exchange data over network
+     - **UDP** defines source port and destination port, but cannot check if the data is received. 
+     - **TCP** gurantees your will receive all data because it will resend lost package
 
-- Http & https difference?
+5. :star::star:**Application layer**: how your application parses the data it sends/receives. (eg. **HTTP**)
 
-- IP header
+## Protocols
+
+Protocols define how two programs communicates. e.g., HTTP, ssh, smtp
+
+- **HTTP**: Hypertext Transfer Protocol -- a request-response protocol that describes the order and syntax for presenting information.
+  - text-based, stateless (no session information), for web pages
+- **HTTPS**: HTTP  with encryption and verification
+- UDP: compare to TCP, UDP is not reliable, because it can't gurantee all data will be received. (live video may use UDP, because users can't move back)
+- **DNS** (Domain name system): translate human readable computer names into unique IP address
+- TLS (Transport Layer Security): TLS is used in HTPPS to secure data. i.e., TLS pacekt is secured.
+
+### Protocol layers
+
+- lowest level - internet protocol: specifies how small “packets” of data (with no inherent semantic information) are passed between machines.
+- Next - TCP
+- highest level - application protocol
+
+### TCP/IP
+
+A packet based on TCP/IP protocol has following information:
+
+- IP header: 
+  - Version/type/length
+  - ID/Flags
+  - Time/protocol/Checksum
 - TCP header
   - Source
-  - Checksum: https://www.techtarget.com/searchsecurity/definition/checksum
-- Payload: application data
-
-#### Protocols
-
-Cookies
-
-DNS: 
+  - Destination
+- Payload (application data)
 
 #### IP Address
 
-IP: a unique machine ID
+1. IP: a unique machine ID
 
-1. IPv4: 32 bits, ~4.3 billion addresses
-2. IPv6: 64 bits,
+   - IPv4: 32 bits, ~4.3 billion addresses
+     - e.g., 10.17.165.139: 4 sections, each section's value is 0~255 (8 bits)
 
+   - IPv6: 128 bits. Every atom in the universe can has its IP.
 
-
-reading your IP address:
-
-- Ifconfig, find inet in en0
-  - 10.17.165.139: country code, area code, 
+2. reading your IP address: run `Ifconfig` in the terminal, your IPv4 address is under `en0` and next to `inet` and IPv6 address is near to `inet6`
 
 #### TCP
 
-specifies which program on the machine gets the data (program id) - port number
+1. TCP specifies which program on the machine gets the data - **port** number
 
-common port numbers:
+2. Many common applications use fixed port numbers:
 
-- HTTP - 80
-
-- https - 443
-
-- ssh - 21 
-
-- Doom - 666 ???
+   - HTTP - 80
 
 
+   - HTPPS - 443
 
-404 - data not found
 
-200 - OK
+   - ssh - 21
+     - School of Computing change the port to 5522 to avoid hits
 
-### Wireshark
 
-- en0
-- Lookback
+   - Doom - 666
+
+
+## Wireshark
+
+- loopback: look for the traffic of the program on your computer
+- Wifi: en0: look for the traffic of programs over internet
+
+## Lab
+
+### Ping
+
+`ping` command relies on the Internet Control Message Protocol (ICMP). Its basic use is to confirm the connectivity between two hosts.
+
+```bash
+ping 10.17.165.139 # send requests to this IP address
+ping -c 10 10.17.165.139 # send 10 echo requests
+```
+
+`ping` can show **round-trip time** (response time + reply time) for each transmitted packet
+
+```bash
+sonia@Yues-MacBook-Pro Java&Web % ping -c 5 google.com
+PING google.com (142.250.189.14): 56 data bytes
+64 bytes from 142.250.189.14: icmp_seq=0 ttl=57 time=46.433 ms
+64 bytes from 142.250.189.14: icmp_seq=1 ttl=57 time=51.359 ms
+64 bytes from 142.250.189.14: icmp_seq=2 ttl=57 time=46.906 ms
+64 bytes from 142.250.189.14: icmp_seq=3 ttl=57 time=60.286 ms
+64 bytes from 142.250.189.14: icmp_seq=4 ttl=57 time=53.585 ms
+
+--- google.com ping statistics ---
+5 packets transmitted, 5 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 46.433/51.714/60.286/5.062 ms
+```
+
+
 
 # 3 Basic Networking
 
