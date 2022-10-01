@@ -46,7 +46,7 @@
 
 # Syntax
 
-### Data types
+## Data types
 
 primitives are stored on stack
 
@@ -65,7 +65,7 @@ difference?
 | char                | Character                        |
 | boolean             | Boolean                          |
 
-### Array
+## Array
 
 1. fixed array
 
@@ -92,7 +92,7 @@ difference?
      v.remove(v.size() - 1);
      ```
 
-#### ArrayList\<T>
+### ArrayList\<T>
 
 1. walking through 
 
@@ -116,9 +116,9 @@ difference?
    ArrayList<String> moreNamew = new ArrayList<>(names); // this is a shllow copy!!! TODO
    ```
 
-### File I/O
+## File I/O
 
-#### Scanner
+### Scanner
 
 1. user input
 
@@ -141,9 +141,9 @@ difference?
    ```
 
 
-#### File Output
+### File Output
 
-##### FileWriter
+#### FileWriter
 
 ```java
 FileWriter myWriter = new FileWriter("<filename>");
@@ -151,7 +151,7 @@ myWriter.write("Put this text into a file.\n");
 myWriter.close();
 ```
 
-##### [PrintWriter](https://docs.oracle.com/javase/7/docs/api/java/io/PrintWriter.html)
+#### [PrintWriter](https://docs.oracle.com/javase/7/docs/api/java/io/PrintWriter.html)
 
 ```java
 PrintWriter pw = new PrintWriter("<filename>");
@@ -163,9 +163,9 @@ pw.close();
 
 [PrintWriter vs. FileWriter](https://medium.com/geekculture/using-printwriter-vs-filewriter-in-java-2958df85f105)
 
-### Modifiers
+## Modifiers
 
-1. access:
+### Access modifiers
 
 |                       | class | package | subclass (same pkg) | subclass (diff pkg) | World |
 | --------------------- | ----- | ------- | ------------------- | ------------------- | ----- |
@@ -176,13 +176,13 @@ pw.close();
 
 https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html
 
-2. ..
-   - final - content
-   - 
+### Final
 
-# Static
+Use `final` to mark constants: `public final String resourcePath = "../resources/"`
 
-## Methods
+### Static
+
+##### Methods
 
 A static method does not have an object attached to it. So we don't need an object to access it.
 
@@ -209,7 +209,7 @@ public class Main {
 }
 ```
 
-## Variable
+##### Variable
 
 # Exception
 
@@ -278,6 +278,8 @@ public Fraction( long n, long d ) throws ArithmeticException {
 
 # String
 
+String is immutable in Java.
+
 ## String literals & String Objects
 
 ```java
@@ -288,7 +290,7 @@ System.out.println(s1 == s2); // true
 System.out.println(s1 == s3); // false
 ```
 
-## String Pool
+### String Pool
 
 Java has a String Pool in the heap to store all string literals. When we create a string literal, JVM will first check if the literal exisits in the pool. If the literal already exists, JVM will return a reference to the pooled instance. If not, JVM will create a new String object in the String Pool.
 
