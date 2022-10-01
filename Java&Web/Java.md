@@ -27,7 +27,7 @@
    - java don't use pointers, only use reference
      - difference between pointers & reference? https://www.tutorialspoint.com/what-is-difference-between-a-pointer-and-reference-parameter-in-cplusplus
 
-4. Garbage collection: Java scans memory on a regular basis to find non-accessible heap memory, and then automatically frees it
+4. **Garbage collection**: Java scans memory on a regular basis to find non-accessible heap memory, and then automatically frees it
 
 5. compilation
 
@@ -165,6 +165,8 @@ pw.close();
 
 ### Modifiers
 
+1. access:
+
 |                       | class | package | subclass (same pkg) | subclass (diff pkg) | World |
 | --------------------- | ----- | ------- | ------------------- | ------------------- | ----- |
 | public                | Y     | Y       | Y                   | Y                   | Y     |
@@ -173,3 +175,123 @@ pw.close();
 | private               | Y     |         |                     |                     |       |
 
 https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html
+
+2. ..
+   - final - content
+   - 
+
+# Static
+
+## Methods
+
+A static method does not have an object attached to it. So we don't need an object to access it.
+
+```java
+public class Main {
+    static int x = 0;
+    int y = 10;
+  
+  	void print_ns() {
+        System.out.println(x);
+        System.out.println(y);
+    }
+
+    void static print_s() {
+        System.out.println(x); 
+        // System.out.println(y); // syntax error!
+    }
+  
+  	void static main(String[] args) {
+      	Main test = new Main();
+      	test.print_ns(); // must use object to use non-static methods
+      	Main.print_s(); // must use class name to use static methods // error
+    }
+}
+```
+
+## Variable
+
+# Exception
+
+Exceptions are a way of handling unexpected errors.
+
+- thow an exception: when we encounter an exception, the program will stop
+
+  ```java
+  public void add(T x) {
+    if (x == null) {
+      throw new IllegalArgumentException("can't add null");
+    }
+    ...
+  }
+  ```
+
+- catch an exception: when we encounter an exception, the program will output the error information but not stop
+
+  ```java
+  try {
+      // something that may throw an exception
+  } catch (Exception e) {
+      // Do something about it 
+  }
+  ```
+
+## Exception types
+
+- `IoException`
+- `FileNotFoundException`
+- `ArithmeticException`
+- `ClassNotFoundException`
+- `ArrayIndexOutOfBoundsException`
+
+## Useful methods for exceptions
+
+```java
+public Fraction( long n, long d ) throws ArithmeticException {
+  if (d == 0) {
+    throw new ArithmeticException("denominator can't be 0!");
+  }
+}
+```
+
+1. printStackTrace(): display the class stack down to where the exception occurred
+
+   ```java
+   try {
+     Fraction f9 = new Fraction(30, 0);
+   } catch (ArithmeticException e) {
+     e.printStackTrace();
+   }
+   ```
+
+2. getMessage()
+
+   ```java
+   try {
+     Fraction f9 = new Fraction(30, 0);
+   } catch (ArithmeticException e) {
+     System.out.println(e.getMessage()); // what's the difference between  print(e) & print(e.getMessage())?
+   }
+   ```
+
+   
+
+# String
+
+## String literals & String Objects
+
+```java
+String s1 = "Hello"; // string literal
+String s2 = "Hello"; // string literal
+String s3 = new String("Hello"); // string object
+System.out.println(s1 == s2); // true
+System.out.println(s1 == s3); // false
+```
+
+## String Pool
+
+Java has a String Pool in the heap to store all string literals. When we create a string literal, JVM will first check if the literal exisits in the pool. If the literal already exists, JVM will return a reference to the pooled instance. If not, JVM will create a new String object in the String Pool.
+
+When we use `new` to create a `String`, we are creating a String object. In this case, JVM will create a new String object in the normal heap space (not in the string pool). 
+
+<img src="./assets/image-20220930231107775.png" alt="image-20220930231107775" style="zoom:50%;" />
