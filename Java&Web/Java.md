@@ -54,16 +54,16 @@ objects are created on the heap, and any variable referring to an object is a po
 
 difference?
 
-| Primitive data type | Wrapper class (Object data type) |
-| ------------------- | -------------------------------- |
-| int                 | Integer                          |
-| byte                | Byte                             |
-| short               | Short                            |
-| long                | Long                             |
-| float               | Float                            |
-| double              | Double                           |
-| char                | Character                        |
-| boolean             | Boolean                          |
+| Primitive data type | Size/bits | Wrapper class (Object data type) | Size/bits |
+| ------------------- | --------- | -------------------------------- | --------- |
+| int                 | 32        | Integer                          |           |
+| byte                | 8         | Byte                             |           |
+| short               | 16        | Short                            |           |
+| long                | 64        | Long                             |           |
+| float               | 32        | Float                            |           |
+| double              | 64        | Double                           |           |
+| char                | 16        | Character                        |           |
+| boolean             | 1         | Boolean                          |           |
 
 ## Array
 
@@ -182,7 +182,19 @@ Use `final` to mark constants: `public final String resourcePath = "../resources
 
 ### Static
 
+##### Classes
+
 ##### Methods
+
+- **static methods**: we should use className to call a static method
+  - `main()` should always be static 
+- **non-static methods (instance methods)**: we should use methodName to call a non-static method
+
+differences:
+
+1. instance methods can access both static & non-static variables and methods inside the class
+2. static methods can only access static variables and methods
+3. static methods can't use `this` keyword 
 
 A static method does not have an object attached to it. So we don't need an object to access it.
 
@@ -236,6 +248,8 @@ Exceptions are a way of handling unexpected errors.
   }
   ```
 
+Note: only throw an exception when you can handle it!
+
 ## Exception types
 
 - `IoException`
@@ -254,7 +268,7 @@ public Fraction( long n, long d ) throws ArithmeticException {
 }
 ```
 
-1. printStackTrace(): display the class stack down to where the exception occurred
+1. `printStackTrace()`: display the class stack down to where the exception occurred
 
    ```java
    try {
@@ -264,7 +278,7 @@ public Fraction( long n, long d ) throws ArithmeticException {
    }
    ```
 
-2. getMessage()
+2. `getMessage()`
 
    ```java
    try {
@@ -297,3 +311,98 @@ Java has a String Pool in the heap to store all string literals. When we create 
 When we use `new` to create a `String`, we are creating a String object. In this case, JVM will create a new String object in the normal heap space (not in the string pool). 
 
 <img src="./assets/image-20220930231107775.png" alt="image-20220930231107775" style="zoom:50%;" />
+
+# Inheritance
+
+## Interface
+
+Interface is a blueprint of a class. An Interface doesn't implement its methods, only specifies their signatures. These methods are called **abstract methods**.
+
+Note, a subclass and its parent class should be "is-a" relationship. For example:
+
+- Cat "is-a" Animal:white_check_mark: 
+- Cat "has-a" Claw:x:
+
+If you want to implement a method in a Interface, the method should be `default`
+
+### Implements
+
+When you initialize a subclass, the type can be either superclass or subclass. If it is superclass, the object can only use the methods of superclass. If it's subclass, the object can only use the methods of subclass.
+
+```java
+Interface Drawable {
+  void draw();
+}
+
+class Bird implements Drawable {
+  private String name;
+  private String color;
+  
+  public void draw() {System.out.println("Drawing a bird")};
+  public void fly() {System.out.println("A bird can fly")};
+  
+  public static void main(String[] args) {
+    Drawable b1 = Bird();
+    b1.draw();
+    // b1.fly(); // b1 cannot fly, because it's not Bird!!
+    
+    Bird b2 = Bird();
+    b2.fly(); // b2 cannot 
+  }
+}
+```
+
+## Override
+
+Overriding vs. Overloading:
+
+- Overriding（方法重写）: two functions have same name and same signatures. Overriding is usually happened when a subclass inherits a baseclass, and we should add `@Override` annotation in front of the method in the subclass.
+- Overloading（方法重载）: two functions have same name but different signatures
+
+### Dynamic method selection
+
+A variable has two types:
+
+- **compile-time type (static type)** **编译类型**：the type in the variable declaration
+- **run-time type (dynamic type)** **运行时的类型**：the type in the variable initializaiton
+
+For example, 
+
+```java
+Person employee = new Employee();
+```
+
+for the object `employee`, its static type is `Employee`, and dynamic type is `Person`. 
+
+When java runs a overriden method, it will first choose the method in the dynamic type. This principle is called ”dynamic method selection“.
+
+注意：这个原则**不**适用于重载的方法。对于重载的方法，java只匹配变量的static type。
+
+https://cs61b.bencuan.me/oop/dynamic-method-selection
+
+## Extends
+
+If a subclass `extends` a base class, the subclass can inherite the following things from the base class:
+
+- all static variables and instance variables
+- all non-private methods
+- all non-private inner classes
+
+### super
+
+A subclass can use `super` to use the variables and methods from its base class.
+
+- use constructor: `super(parameters required in base class)`
+- use methods: `super.methodName(parameters)`
+- use variables: `super.variableName`
+
+
+
+### extends vs. implements
+
+
+
+## Abstraction
+
+## Polymorphism
+
