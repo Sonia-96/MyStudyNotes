@@ -46,11 +46,9 @@
 
 # Data types
 
-primitives are stored on stack
+## Primitive types
 
-objects are created on the heap, and any variable referring to an object is a pointer
-
-difference?
+Primitives are stored on stack. Anything other than primitive types are reference types. Reference types are stored on the heap.
 
 | Primitive data type | Size/bits | Wrapper class (Object data type) | Size/bits |
 | ------------------- | --------- | -------------------------------- | --------- |
@@ -62,6 +60,28 @@ difference?
 | double              | 64        | Double                           |           |
 | char                | 16        | Character                        |           |
 | boolean             | 1         | Boolean                          |           |
+
+## String
+
+String is reference type, and is immutable in Java.
+
+### String literals & String Objects
+
+```java
+String s1 = "Hello"; // string literal
+String s2 = "Hello"; // string literal
+String s3 = new String("Hello"); // string object
+System.out.println(s1 == s2); // true
+System.out.println(s1 == s3); // false
+```
+
+### String Pool
+
+Java has a String Pool in the heap to store all string literals. When we create a string literal, JVM will first check if the literal exisits in the pool. If the literal already exists, JVM will return a reference to the pooled instance. If not, JVM will create a new String object in the String Pool.
+
+When we use `new` to create a `String`,  JVM will create a new String object in the normal heap space intead  of the string pool. 
+
+<img src="./assets/image-20220930231107775.png" alt="image-20220930231107775" style="zoom:50%;" />
 
 # Array
 
@@ -116,18 +136,13 @@ difference?
 
 # File I/O
 
-## Adapters
+## Streams & Adapters
 
-Adapters are higher level objects that use streams to provide higher level operations.
+**Streams** read or write by bytes, which are not readable for human. **Adapters** are higher level objects that use streams to provide higher level operations. We can use adapters to deal with normal data types, e.g. String, numeric values, etc.
 
-1. Input:
-   - Scanner: read bytes and returns numeric values, strings, etc.
-2. Output:
-   - PrintWriter: takes in variables and sends their values to associated output streams
+## File Input
 
-We use adapters to read and write bytes (raw), then we can deal with normal data types, e.g. String, int, etc.
-
-## Scanner
+### Scanner
 
 1. user input
 
@@ -297,29 +312,6 @@ public Fraction( long n, long d ) throws ArithmeticException {
    }
    ```
 
-   
-
-# String
-
-String is immutable in Java.
-
-## String literals & String Objects
-
-```java
-String s1 = "Hello"; // string literal
-String s2 = "Hello"; // string literal
-String s3 = new String("Hello"); // string object
-System.out.println(s1 == s2); // true
-System.out.println(s1 == s3); // false
-```
-
-### String Pool
-
-Java has a String Pool in the heap to store all string literals. When we create a string literal, JVM will first check if the literal exisits in the pool. If the literal already exists, JVM will return a reference to the pooled instance. If not, JVM will create a new String object in the String Pool.
-
-When we use `new` to create a `String`,  JVM will create a new String object in the normal heap space intead  of the string pool. 
-
-<img src="./assets/image-20220930231107775.png" alt="image-20220930231107775" style="zoom:50%;" />
 
 # Inheritance
 
@@ -414,4 +406,3 @@ A subclass can use `super` to use the variables and methods from its base class.
 ## Abstraction
 
 ## Polymorphism
-
