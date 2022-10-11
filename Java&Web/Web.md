@@ -267,17 +267,6 @@ Streams read or write **bytes**.
    - `FileOutputStream`
    - `ObjectOutputStream`
 
-## Adapters
-
-Adapters are higher level objects that use streams to provide higher level operations.
-
-1. Input:
-   - Scanner: read bytes and returns numeric values, strings, etc.
-2. Output:
-   - PrintWriter: takes in variables and sends their values to associated output streams
-
-We use adapters to read and write bytes (raw), then we can deal with normal data types, e.g. String, int, etc.
-
 ## Socket
 
 Socket is an **open TCP connection** to a program somewhere else. A Socket includes the information of source and destination IPs and source and destination port numbers. We use Socket to transmit information between the server and the client.
@@ -345,7 +334,7 @@ Connection: keep-alive
 Cookie: PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120
 Pragma: no-cache
 Cache-Control: no-cache
-
+ # A blank line is treated as the termination of a request or a response.
 ```
 
 Important!! A blank line is treated as the termination of a request or a response.
@@ -353,7 +342,7 @@ Important!! A blank line is treated as the termination of a request or a respons
 ### HTTP Response
 
 ```bash
-HTTP/1.1 200 OK # HTTP status code
+HTTP/1.1 200 OK # HTTP status code # or 404 file not found
 Transfer-Encoding: chunked
 Date: Sat, 28 Nov 2009 04:36:25 GMT
 Server: LiteSpeed
@@ -389,3 +378,12 @@ Vary: Accept-Encoding, Cookie, User-Agent
 2. port
 
    Lower port are reserved and require administrator privileges, so we use 8080 - `localhost:8080`
+
+# 4 JavaFX
+
+## Object Destruction
+
+1. create an widget: add it to both arraylist and root
+2. delete an widget:
+   - `root.getChildren.remove(sw)`
+   - components.remove(sw)

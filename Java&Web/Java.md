@@ -44,9 +44,7 @@
 
    - All java code is written in classes
 
-# Syntax
-
-## Data types
+# Data types
 
 primitives are stored on stack
 
@@ -65,7 +63,7 @@ difference?
 | char                | 16        | Character                        |           |
 | boolean             | 1         | Boolean                          |           |
 
-## Array
+# Array
 
 1. fixed array
 
@@ -116,9 +114,20 @@ difference?
    ArrayList<String> moreNamew = new ArrayList<>(names); // this is a shllow copy!!! TODO
    ```
 
-## File I/O
+# File I/O
 
-### Scanner
+## Adapters
+
+Adapters are higher level objects that use streams to provide higher level operations.
+
+1. Input:
+   - Scanner: read bytes and returns numeric values, strings, etc.
+2. Output:
+   - PrintWriter: takes in variables and sends their values to associated output streams
+
+We use adapters to read and write bytes (raw), then we can deal with normal data types, e.g. String, int, etc.
+
+## Scanner
 
 1. user input
 
@@ -141,9 +150,9 @@ difference?
    ```
 
 
-### File Output
+## File Output
 
-#### FileWriter
+### FileWriter
 
 ```java
 FileWriter myWriter = new FileWriter("<filename>");
@@ -151,7 +160,7 @@ myWriter.write("Put this text into a file.\n");
 myWriter.close();
 ```
 
-#### [PrintWriter](https://docs.oracle.com/javase/7/docs/api/java/io/PrintWriter.html)
+### [PrintWriter](https://docs.oracle.com/javase/7/docs/api/java/io/PrintWriter.html)
 
 ```java
 PrintWriter pw = new PrintWriter("<filename>");
@@ -163,9 +172,9 @@ pw.close();
 
 [PrintWriter vs. FileWriter](https://medium.com/geekculture/using-printwriter-vs-filewriter-in-java-2958df85f105)
 
-## Modifiers
+# Modifiers
 
-### Access modifiers
+## Access modifiers
 
 |                       | class | package | subclass (same pkg) | subclass (diff pkg) | World |
 | --------------------- | ----- | ------- | ------------------- | ------------------- | ----- |
@@ -176,27 +185,27 @@ pw.close();
 
 https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html
 
-### Final
+## Final
 
 Use `final` to mark constants: `public final String resourcePath = "../resources/"`
 
-### Static
+## Static
 
-##### Classes
+#### Classes
 
-##### Methods
+#### Methods
 
 - **static methods**: we should use className to call a static method
   - `main()` should always be static 
 - **non-static methods (instance methods)**: we should use methodName to call a non-static method
+  - A static method does not have an object attached to it. So we don't need an object to access it.
+
 
 differences:
 
 1. instance methods can access both static & non-static variables and methods inside the class
 2. static methods can only access static variables and methods
 3. static methods can't use `this` keyword 
-
-A static method does not have an object attached to it. So we don't need an object to access it.
 
 ```java
 public class Main {
@@ -221,7 +230,7 @@ public class Main {
 }
 ```
 
-##### Variable
+#### Variable
 
 # Exception
 
@@ -308,7 +317,7 @@ System.out.println(s1 == s3); // false
 
 Java has a String Pool in the heap to store all string literals. When we create a string literal, JVM will first check if the literal exisits in the pool. If the literal already exists, JVM will return a reference to the pooled instance. If not, JVM will create a new String object in the String Pool.
 
-When we use `new` to create a `String`, we are creating a String object. In this case, JVM will create a new String object in the normal heap space (not in the string pool). 
+When we use `new` to create a `String`,  JVM will create a new String object in the normal heap space intead  of the string pool. 
 
 <img src="./assets/image-20220930231107775.png" alt="image-20220930231107775" style="zoom:50%;" />
 
