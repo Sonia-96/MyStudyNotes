@@ -28,7 +28,7 @@ public class CharacterCounts {
             String word = fileReader.next();
             for (int i = 0; i < word.length(); i++) {
                 char c = Character.toLowerCase(word.charAt(i));
-                if (c >= 'a' & c <= 'z' ) {
+                if (c >= 'a' && c <= 'z' ) {
                     letterOccurs[c - 'a'] += 1;
                 }
             }
