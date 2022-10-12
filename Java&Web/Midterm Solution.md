@@ -7,9 +7,20 @@ Ask the user for a file name.  (Continue asking until a valid (existing) file na
 ```java
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class CharacterCounts {
+    private static class Pair{
+        char letter;
+        int count;
+
+        Pair(char c, int i) {
+            letter = c;
+            count = i;
+        }
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         boolean stop = false;
         File file = null;
@@ -23,26 +34,39 @@ public class CharacterCounts {
             }
         }
         Scanner fileReader = new Scanner(file);
-        int[] letterOccurs = new int[26];
+        int[] letterCounts = new int[26];
         while (fileReader.hasNext()) {
             String word = fileReader.next();
             for (int i = 0; i < word.length(); i++) {
                 char c = Character.toLowerCase(word.charAt(i));
                 if (c >= 'a' && c <= 'z' ) {
-                    letterOccurs[c - 'a'] += 1;
+                    letterCounts[c - 'a'] += 1;
                 }
             }
         }
 
-        PriorityQueue<int[]> maxHeap = new PriorityQueue<>((c1, c2) -> (c2[1] - c1[1]));
-        for (int i = 0; i < letterOccurs.length; i++) {
-            maxHeap.add(new int[] {'a' + i, letterOccurs[i]});
+        Pair[] pairs = new Pair[26];
+        for (int i = 0; i < 26; i++) {
+            pairs[i] = new Pair((char) ('a' + i), letterCounts[i]);
         }
-        while (!maxHeap.isEmpty()) {
-            int[] temp = maxHeap.poll();
-            System.out.println((char) temp[0] + " " + temp[1]);
+        Arrays.sort(pairs, (c1, c2) -> (c2.count - c1.count));
+        for (Pair p : pairs) {
+            System.out.println(p.letter + " " + p.count);
         }
     }
+}
+```
+
+another way to sort the characters: use maxHeap (too advanced)
+
+```java
+PriorityQueue<int[]> maxHeap = new PriorityQueue<>((c1, c2) -> (c2[1] - c1[1]));
+for (int i = 0; i < letterOccurs.length; i++) {
+  maxHeap.add(new int[] {'a' + i, letterOccurs[i]});
+}
+while (!maxHeap.isEmpty()) {
+  int[] temp = maxHeap.poll();
+  System.out.println((char) temp[0] + " " + temp[1]);
 }
 ```
 
