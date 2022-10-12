@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class CharacterCounts {
-    private static class Pair{
+    private static class Pair {
         char letter;
         int count;
 

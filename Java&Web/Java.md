@@ -83,7 +83,7 @@ When we use `new` to create a `String`,  JVM will create a new String object in 
 
 <img src="./assets/image-20220930231107775.png" alt="image-20220930231107775" style="zoom:50%;" />
 
-# Array
+## Array
 
 1. fixed array
 
@@ -324,13 +324,16 @@ Note, a subclass and its parent class should be "is-a" relationship. For example
 - Cat "is-a" Animal:white_check_mark: 
 - Cat "has-a" Claw:x:
 
-If you want to implement a method in a Interface, the method should be `default`
+If you want to implement a method in a Interface, the method should be `default`。
+
+// TODO: add an example
 
 ### Implements
 
 When you initialize a subclass, the type can be either superclass or subclass. If it is superclass, the object can only use the methods of superclass. If it's subclass, the object can only use the methods of subclass.
 
 ```java
+// TODO not a good example
 Interface Drawable {
   void draw();
 }
@@ -339,6 +342,7 @@ class Bird implements Drawable {
   private String name;
   private String color;
   
+  @Override
   public void draw() {System.out.println("Drawing a bird")};
   public void fly() {System.out.println("A bird can fly")};
   
@@ -373,11 +377,11 @@ For example,
 Person employee = new Employee();
 ```
 
-for the object `employee`, its static type is `Employee`, and dynamic type is `Person`. 
+for the object `employee`, its static type is `Person`, and dynamic type is `Employee`. 
 
 When java runs a overriden method, it will first choose the method in the dynamic type. This principle is called ”dynamic method selection“.
 
-注意：这个原则**不**适用于重载的方法。对于重载的方法，java只匹配变量的static type。
+Note, this princinple does not apply to overloaded methods. For overloaded methods, java only matches the methods in its static type.
 
 https://cs61b.bencuan.me/oop/dynamic-method-selection
 
@@ -389,15 +393,13 @@ If a subclass `extends` a base class, the subclass can inherite the following th
 - all non-private methods
 - all non-private inner classes
 
-### super
+### keyword super
 
 A subclass can use `super` to use the variables and methods from its base class.
 
 - use constructor: `super(parameters required in base class)`
 - use methods: `super.methodName(parameters)`
 - use variables: `super.variableName`
-
-
 
 ### extends vs. implements
 
@@ -406,3 +408,50 @@ A subclass can use `super` to use the variables and methods from its base class.
 ## Abstraction
 
 ## Polymorphism
+
+Polymorphism provides a single interface to entities of different types
+
+### Interface Comparable
+
+`Comparable<T>` is a built-in interface in Java. Many built-in classes in Java have implemented `Comparable<T>`, e.g., `String`, `Integer`. To implements Comparable Interface, the class must implements the method `int compareTo(T o)`.
+
+```java
+public class Dog implements Comparable<Dog>{
+    private String name;
+    private int size;
+
+    @Override
+    public int compareTo(Dog o) {
+        return this.size - o.size; // if return value < 0, this < o; if > 0, this > o, else equals
+    }
+}
+```
+
+After implementing the `Comparable<T>` interface, the objects of this class can be sorted by methods like `Collections.sort()`, `Arrays.sort()`.
+
+### Interface Comparator
+
+`Comparator<T>` is also a built-in interface in Java. We need to import this interface before implementing if (`Comparable` doesn't need this).  To implement `Comparator`, we need to implement the method `public int compare(Object o1, Object o2)`.
+
+```java
+public class DogComparator implements Comparator<Dog> {
+  	@Overrie
+  	public int compare(Dog d1, Dog d2) {
+      return d1.size - d2.size; 
+    }
+}
+```
+
+When sorting Dog objects, we need to create a new DogComparator:
+
+```java
+Dog[] dogs = {dog1, dog2, ...};
+Arrays.sort(dogs, new DogComparator());
+```
+
+We can use lamda function to create a comparator directly, instead of first defining a new class :
+
+```java
+Arrays.sort(dogs, (c1, c2) -> (c1.size - c2.size));
+```
+
