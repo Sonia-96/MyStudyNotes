@@ -379,11 +379,222 @@ Vary: Accept-Encoding, Cookie, User-Agent
 
    Lower port are reserved and require administrator privileges, so we use 8080 - `localhost:8080`
 
-# 4 JavaFX
+# 4 JavaScript
 
-## Object Destruction
+JS can make web pages interactice, may be the most used programming language in the world.
 
-1. create an widget: add it to both arraylist and root
-2. delete an widget:
-   - `root.getChildren.remove(sw)`
-   - components.remove(sw)
+- script language: no need to set up environment, no compiler
+
+## Variable Declaration
+
+Dynamic Typing: JS has no explicit types. 
+
+- `let someName = value;`：use `let` to declare a variable, the type and value of the variable can be changed. But NEVER change the data type of a variable!! You may forget the type of the variable later.
+- `const SOME_Name = value;`：declaring a constant variable
+- 用`var`声明变量的方式已过时，可以使用但没必要，而且scope很奇怪（？）
+
+```javascript
+let x;
+let y = 10;
+y = "hello"; // DON'T do this!
+let arr = [4, 7.2, "hello"];
+let obj = {};
+obj = {"name": "john", "gpa": 3.7, "year": 3}; 
+obj.gender = "male";
+```
+
+## Objects
+
+- similar to map -- key-value pairs
+- no pre-set structure
+- Accesse field:
+  - `obj.field`
+  - `obj['field']`: but `obj.2` is illegal
+
+- add a method: `obj.aMethod = function(parameters) {...};`
+- call a method: `obj.aMethod()`
+
+## Functions
+
+### Declaration
+
+There are two ways to declare a function:
+
+1. function declaration
+
+   `function myFunctionName(param1, param2) {}`
+
+2. function expression
+
+   create a function like a variable: `let myFunctionName = function(param1, param2)`
+
+### Arguments
+
+1. `arguments` is an hidden variable, which is an array, containing the parameters of a function
+
+   ```javascript
+   function. doit(x, y, z) {
+     console.log(arguments.length);
+     console.log(arguments[0]);
+     console.log(y);
+   }
+   
+   doit(99);
+   ```
+
+   Output:
+
+   ```javascript
+   3
+   99
+   undefined
+   ```
+
+   
+
+## Miscellaneous
+
+- No Main
+- "use strict": "bad syntax" is not allowed
+
+### Equals
+
+```javascript
+3 == '3';// true. JS tries to convert things to match
+3 === '3'; // false. strictly equal
+```
+
+### loops
+
+1. For-each loop
+
+   ```javascript
+   for (let prop in obj); // iterate through the fileds of an object
+   for (let val of array); // iterate through the items in an array
+   ```
+
+2. for loop & while loop are the same with Java 
+
+   ```javascript
+   let x = Math.random().toFixed(2); // x = 0.35, a string!!
+   x += 10; // 0.3510
+   x = Number(x) // convert x to a number
+   ```
+
+## JSON
+
+JSON (JavaScript Object Notation), a way of serializing data.
+
+// TODO find an example
+
+## DOM
+
+DOM(Document Object Model).
+
+A JS file will be run as soon as it is seen.
+
+- window: web browser 
+  - `window.onload = main`: set main() to `onload` (here `main()` is a **callback function**)
+    - The `onload` event occurs when an object has been loaded. onload is most often used within the \<body> element to execute a script once <u>a web page has completely loaded all content (including images, script files, CSS files, etc.)</u>.
+
+### Selecting Elements
+
+1. Select elements
+
+   - 法一：`document.<elementName>`
+
+   - 法二：getElement()
+
+     - `document.getElementById()`
+
+     - `document.getElementsByTagName()`
+
+     - `document.getElementsByClassName()`
+
+   - 法三：querySelector()【最常用】
+
+     - `document.querySelector()`：选择符合条件的第一个元素，筛选条件可以为元素名、#Id、.class，例：
+
+       ```javascript
+       document.querySelector('h1'); // finds first h1 element
+       document.querySelector('#red'); // find first element with ID od red
+       document.querySelector('.big'); // find first element with class of big
+       document.querySelector('a[title="Java"]'); // find first <a> with attribute title of "Java"
+       ```
+
+      - `document.querySelectorAll()`：选择符合条件的所有元素
+
+### Traversing DOM
+
+- `parentElement`：父结点
+
+- `children`：子结点
+
+- `nextSibling` & `previousSibling`：同胞结点
+
+- `nextElementSibling` & `previoudElementSibling`
+
+  - `nextElementSibling`返回的是一个元素的结点，而`nextSibling`可能返回非元素的结点
+
+  - 例如：有两个连续的\<img>
+
+    ```javascript
+    const img = document.querySelector('img');
+    img.nextSibling; // 返回的是#text，这是两个img元素之间留的空白
+    img.nextElementSibling; // 返回的是下一个img
+    ```
+
+
+### Modifying DOM
+
+1. createElement(...);
+
+   ```javascript
+   let myP = document.createElement('p'); // create a paragraph
+   let myText = document.createTextNode("This is a paragraph");
+   myP.appendChildren(myText);
+   document.body.appendChild(myP); // to show the paragraph
+   ```
+
+2. set styles
+
+   ```java
+   myP.style.background = "red";
+   myP.style.fontWeight = "bold";
+   ```
+
+3. Note, a node can have only one parent! if you want to set a node as children for multiple parents, you should use `<nodeName>.cloneNode()`
+
+  # 5 AJAX & Callbacks
+
+## Event bases programming
+
+Callbacks - listeners: respond to the user's actions
+
+3 different ways to do this:
+
+- in HTML
+
+  ```html
+  <img onclick="myClickFunction()" ...>
+  ```
+
+- in JS, define a function
+
+  ```javascript
+  element.onclick = function(event) {...};
+  ```
+
+- in JS, add a listener:
+
+  ```javascript
+  element.addEventListener("click", functionName);
+  element.addEventListener("click", function() {...});
+  ```
+
+## AJAX
+
+1. sync & async
+
+
+

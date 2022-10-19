@@ -78,3 +78,152 @@ if (i == 10) {
 }
 ```
 
+# Q3
+
+Assume January 1 is a Monday. Ask the user to enter a day of the year (1-365) and display what day of the week it is.  Hint: Use the mod (%) function: If the user enters 1, you would display Monday. If the user enters 2, Tuesday ... enters 7, display Sunday - what about 8?  Monday again.
+
+```java
+Scanner scanner = new Scanner(System.in); 
+System.out.println("Enter a day of the year (1 - 365):");
+int dayOfYear = scanner.nextInt();
+int dayOfWeek = dayOfYear % 7;
+String[] dayStrings = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sundy"};
+System.out.println(dayStrings[(dayOfWeek + 6) % 7]);
+```
+
+|         | Remainder | (dayOfWeek + 6) % 7 |
+| ------- | --------- | ------------------- |
+| Monday  | 1         | 0                   |
+| Tuesday | 2         | 8 % 7 = 1           |
+|         |           |                     |
+|         |           |                     |
+|         |           |                     |
+|         |           |                     |
+| Sunday  | 0         | 6                   |
+
+## Scanners
+
+1. read from user:
+
+   ```java
+   Scanner scanner = new Scanner(System.int)
+   ```
+
+2. read from file:
+
+   ```java
+   File file = new File(<fileName>);
+   if (!file.exists()) {
+     // output a message and end the program
+   }
+   Scanner scanner = new Scanner(file);
+   ```
+
+# Q4
+
+Write a function that takes in an array of numbers and returns the 3 largest numbers in that array. (Consider how you would do it using just basic programming techniques, and then how you could do it (much more easily) using more advanced data structures (and associated methods).
+
+1. basic programming techniques:
+
+   ```java
+   int[] get3BiggestNumbers(int[] nums) {
+     SelectionSort(nums); // sort nums in descending order
+     int[] result = new int[3];
+     for (int i = 0; i < result.length; i++) {
+       result[i] = nums[i];
+     }
+     return result;
+   }
+   ```
+
+2. more advanced data structures
+
+   ```java
+   int[] get3BiggestNumbers(int[] nums) {
+   	Arrays.sort(nums);
+     int[] result = new int[3];
+     for (int i = 0; i < result.length; i++) {
+       result[i] = nums[nums.length - 1 - i]
+     }
+     return result;
+   }
+   ```
+
+   i = 0, last element of nums - nums.length - 1;
+
+   i = 1, last bust 1 element - nums.length - 2;
+
+   i = 2, nums.length - 3;
+
+## Selection Sort
+
+### In ascending order
+
+1.Iterate through unsorted part, and find the min value
+
+2.Swap the min value with the first element in the unsorted part
+
+```java
+// Iterate through unsorted part, and find the min value
+int findMinValueIndex(int[] nums, int start) { // i - start index of unsorted part
+  int minValue = nums[start];
+  int minValueIndex = start;
+  for (int i = start; i < nums.length; i++) {
+    if (nums[i] < minValue) {
+      minValue = nums[i];
+      minValueIndex = i;
+    }
+  }
+  return minValueIndex;
+}
+
+void swap(int[] nums, int a, int b) {
+  int temp = nums[a];
+  nums[a] = nums[b];
+  nums[b] = temp;
+}
+
+void SelectionSort(int[] nums) {
+  for (int i = 0; i < nums.length; i++) {
+    // 1. find the min value index
+    int minValueIndex = findMinValueIndex(nums, i);
+    // 2. swap minValue with the first element of the unsorted part
+    swap(nums, i, minValueIndex);
+  }
+}
+```
+
+### In descending order
+
+```java
+// Iterate through unsorted part, and find the max value
+int findMaxValueIndex(int[] nums, int start) { // i - start index of unsorted part
+  int maxValueIndex = start;
+  for (int i = start; i < nums.length; i++) {
+    if (nums[i] > nums[maxValueIndex]) {
+      maxValueIndex = i;
+    }
+  }
+  return maxValueIndex;
+}
+
+void swap(int[] nums, int a, int b) {
+  int temp = nums[a];
+  nums[a] = nums[b];
+  nums[b] = temp;
+}
+
+void SelectionSort(int[] nums) {
+  for (int i = 0; i < nums.length; i++) {
+    // 1. find the max value index
+    int minValueIndex = findMaxValueIndex(nums, i);
+    // 2. swap maxValue with the first element of the unsorted part
+    swap(nums, i, minValueIndex);
+  }
+}
+```
+
+
+
+## Bubble Sort
+
