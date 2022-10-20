@@ -279,20 +279,6 @@ round-trip min/avg/max/stddev = 46.433/51.714/60.286/5.062 ms
 
 # 3 Basic Networking
 
-## Streams
-
-Streams read or write **bytes**.
-
-1. Input Streams
-   - `System.in`: Stream connected to the console
-   - `FileInputStream`: Stream connected to a file
-   - `ByteArrayInputStream`
-   - `ObjectInputStream`: reads in an "Object", so you can send it across the network, or to a file
-2. Output Streams
-   - `System.out`
-   - `FileOutputStream`
-   - `ObjectOutputStream`
-
 ## Socket
 
 Socket is an **open TCP connection** to a program somewhere else. A Socket includes the information of source and destination IPs and source and destination port numbers. We use Socket to transmit information between the server and the client.

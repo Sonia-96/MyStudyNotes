@@ -144,7 +144,19 @@ When we use `new` to create a `String`,  JVM will create a new String object in 
 
 ## Streams & Adapters
 
-**Streams** read or write by bytes, which are not readable for human. **Adapters** are higher level objects that use streams to provide higher level operations. We can use adapters to deal with normal data types, e.g. String, numeric values, etc.
+**Streams** read or write by bytes, which are not readable for human. 
+
+1. Input Streams
+   - `System.in`: Stream connected to the console
+   - `FileInputStream`: Stream connected to a file
+   - `ByteArrayInputStream`
+   - `ObjectInputStream`: reads in an Object, so you can send it across the network, or to a file
+2. Output Streams
+   - `System.out`
+   - `FileOutputStream`
+   - `ObjectOutputStream`
+
+**Adapters** are higher level objects that use streams to provide higher level operations. We can use adapters to deal with normal data types, e.g. String, numeric values, etc.
 
 ## File Input
 
@@ -181,6 +193,14 @@ myWriter.write("Put this text into a file.\n");
 myWriter.close();
 ```
 
+return a whole file to the output stream:
+
+```java
+FileInputStream fin = new FileInputStream("filename");
+fin.transferTo(outStream);
+pw.flush()
+```
+
 ### [PrintWriter](https://docs.oracle.com/javase/7/docs/api/java/io/PrintWriter.html)
 
 ```java
@@ -197,12 +217,14 @@ pw.close();
 
 ## Access modifiers
 
+Access modifiers are used to control access to members of a class.
+
 |                       | class | package | subclass (same pkg) | subclass (diff pkg) | World |
 | --------------------- | ----- | ------- | ------------------- | ------------------- | ----- |
 | public                | Y     | Y       | Y                   | Y                   | Y     |
-| protected             | Y     | Y       | Y                   | Y                   |       |
-| default (no modifier) | Y     | Y       | Y                   |                     |       |
-| private               | Y     |         |                     |                     |       |
+| protected             | Y     | Y       | Y                   | Y                   | N     |
+| default (no modifier) | Y     | Y       | Y                   | N                   | N     |
+| private               | Y     | N       | N                   | N                   | N     |
 
 https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html
 
@@ -216,17 +238,21 @@ Use `final` to mark constants: `public final String resourcePath = "../resources
 
 #### Methods
 
-- **static methods**: we should use className to call a static method
+- **static methods (class methods)** : class methods belongs to the whole class, instead of an instance of that class. 
+  - A static method does not have an object attached to it. So we don't need an object or `this` to access it.
+  -  we should use className to call a static method, e.g., `Math.min()`
   - `main()` should always be static 
-- **non-static methods (instance methods)**: we should use methodName to call a non-static method
-  - A static method does not have an object attached to it. So we don't need an object to access it.
+  
+- **non-static methods (instance methods)**: instance methods belong to a single object
+  - we should use objectName to call a non-static method, e.g., `f1.reduce()` in the Fraction assignment
 
 
-differences:
 
-1. instance methods can access both static & non-static variables and methods inside the class
-2. static methods can only access static variables and methods
-3. static methods can't use `this` keyword 
+differences between static & non-static methods:
+
+1. Static methods can only access static variables and methods. If a static method wants to access non-static variables/methods, it must use an object.
+2. Instance methods can access both static & non-static variables and methods inside the class
+3. Static methods can't use `this` keyword 
 
 ```java
 public class Main {
@@ -238,20 +264,23 @@ public class Main {
         System.out.println(y);
     }
 
-    void static print_s() {
+    static void print_s() {
         System.out.println(x); 
         // System.out.println(y); // syntax error!
     }
   
   	void static main(String[] args) {
       	Main test = new Main();
-      	test.print_ns(); // must use object to use non-static methods
-      	Main.print_s(); // must use class name to use static methods // error
+      	test.print_ns(); // use an object to call a non-static method
+      	Main.print_s(); // use class name to call static methods (or just print_s() here)
     }
 }
 ```
 
 #### Variable
+
+- static variable belongs to the whole class, all instances of the class share the same static variable. Static variables already exist before an object is created.
+- non-static variable only belongs to an object
 
 # Exception
 
