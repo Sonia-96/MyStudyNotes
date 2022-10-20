@@ -8,48 +8,68 @@ d<span style="color:red">rwx</span><span style="color:blue">r-x</span><span styl
 
 - d - directory
 - <span style="color:red">owner's permissions</span>
+  - r - read
+  - w - write
+  - x - execute (run a program, or allows cd into a directory)
+
 - <span style="color:blue">group's permissions</span> (try running groups in cmd)
-- <span style="color:green">everyone else</span>
-- `% chmod go+rX images # change permissions for group and other to read and execute`
-  - capital X???
-- `ls -ld`
+- <span style="color:green">everyone else's permissions</span>
+
+commands:
+
+- `chmod` (change mode): modifies the permission of the file. `chmod [+-=][permissions] [filename]`
+  - `chmod go+rX images`: add read and execute permissions for group and others
+  - `chmod u=rwx,g=rx,o=r myfile`: the user can read, write, execute; group can ...
+
+- `ls -l`: list information of each file under the path
+- `ls -ld`: ???
 
 ### Home Directory
 
 commands: 
 
-- `echo $HOME`
-- `cd $HOME / cd ~ / cd`: enter home directory
-- `echo $PATH`: what is $PATH? list of dire the computer will look through to find commands you run
-- `echo $SHELL`
+- `echo`: display the string or text or variable that passed as an argument
+  - `echo $HOME`: display home directory (i.e. `~`)
+  - `echo $PATH`: $PATH is a list of directories the computer will look through to find commands you run
+  - `echo $SHELL`
+
+- `cd $HOME ` / `cd ~` / `cd`: enter home directory
 - `env`: environment variables in your system 
 
 ## Web Client & Server
 
-- web client: web browser - display info
-- web server: a program that allows a web browser to talk to it and sends it the requested files
+- web client: web browser -> display info that is hosted on the web server
+- web server: a program that allows a web browser to talk with and receive requested files
   - popular web servers:
-    - Apach
-    - Apach Tomcat
-    - Nginx
-    - LiteSpeed
+    - Apach (Free, 34% of the market)
+    - Apach Tomcat (Java based)
+    - Nginx (Free, 34% of the market)
+    - LiteSpeed (Paid, 8% of the market)
 
 ## HTML
 
+HTML - Hyper Text Markup Language
+
 1. HTML is a static language, not programming language
 
-2. Tags & Attributes: 
+2. Tags & Attributes:  tags make up the HTML code; attributes are used to modify the tag
 
    - `<tag attr1="value1" attr2="value2"> stuff </tag>`
      - Attributes can be from CSS
-   - <tag/>: tags don't contain "stuff"
+   - `<tag>`: some tags don't contain "stuff", like `<img src="...">` 
 
-3. HTML web page pieces //TODO
+3. basic HTML web page frame
 
    ```html
+   <!DOCTYPE html>
    <html>
-     	head
-   		body
+     <head lang="en"> - header info for the web page
+       <meta charset="utf-8">
+       <title>Webpage Title</title>
+     </head>
+   	<body> - the real information of the web page
+       
+     </body>
    </html>
    ```
 
@@ -58,7 +78,7 @@ commands:
 - `<a href="https://google.com"> This is a link for google </a>`: a hyperlink
   - <a href="https://google.com"> This is a link for google </a>
 
-- `<img src="name.png"/>`: no closing tag
+- `<img src="name.png">`: no closing tag
 
 - `<ul>`: unordered list
 
@@ -73,33 +93,47 @@ commands:
 
 - `<script>`: for Javascript
 
+- `<video>`
+
 ### Colors
 
-stored as RGB, 1 byte for each value. e.g., 0xFF0033 is red
+1. Color is stored as RGB, and 1 byte for each value.  e.g., 0xFF0033 is mostly red, with a little blue. 
 
-the smallest trunk the computer deals with - 1 byte
+2. We use int (4 bytes) to store color. The extra 1 byte is used for opacity.
 
-normal size  - 8 bytes
-
-We use int to store color, extra 1 byte is used for opacity
+Note, the smallest trunk that the computer deals with is 1 byte. For 32-bits systems, the normal size they deal with is 4 bytes. For 64-bits systems, the normal size is 8 bytes.
 
 ## CSS
+
+CSS: Cascading Style Sheets - describes the styling
 
 1. Link CSS file to your HTML file: (rel is for relation)
 
    ```html
    <head>
-     <link rel="stylesheet" type="text/css" href="styles.css">  //  TODO
+     <link rel="stylesheet" type="text/css" href="styles.css">
    </head>
    ```
 
-2. Selector:
+2. Selectors:
 
-3. Class
+   ```css
+   /* tag selector */
+   tagName {}
+   
+   /* class selector */
+   .className {}
+   
+   /* id selector */
+   #id {}
+   
+   /* descendent selector (select all a inside li)*/
+   li a {}
+   ```
 
-4. id
+   [CSS selectors references](https://www.w3schools.com/cssref/css_selectors.asp)
 
-## Emacs
+## Emacs shortcuts
 
 open emacs editor: `emacs -nw`
 
@@ -112,22 +146,12 @@ open emacs editor: `emacs -nw`
 7. fg: return Emacs
 8. cancel a command: C-g
 9. save file: C-x C-s
-10. mark set: C-space （必须首先调成英文模式）
+10. mark set: C-space (the language mode should be English, not Chinese)
 11. copy: M-w
 12. cut: C-w
 13. paste: C-y
 14. move the cursor:
     - By line: C-a to start, C-e to end
-
-TODO: create a html file and css file in Emacs
-
-what's the address for html file in a remote server?
-
-## Javascript
-
-link script to html
-
-## Testing
 
 # 2 Basic Network Architecture
 
@@ -146,13 +170,13 @@ OSI (Open Systems Interconnection) Layer Model. From the bottom to the top, the 
 1. **Physical layer**: the physical medium that transmits **raw bit stream** between devices, e.g., radio wave, electric signals
 2. **Data Link layer**: breaks up packets into frames and sends them from source to destination. e.g., ethernet, wifi
 3. **Network layer**: transmit data from one host to the other in different networks. The network layer use **IP** to route packets to a destination node, e.g., iPv4, iPv6
-4. :star:**Transport layer**: how data gets from a **program** to another program
+4. :star:**Transport layer**: how data gets from a **program** to another program (deal with bytes)
    - we use **port** to decide which program the data belongs to
    - TCP & UDP - standards that enable application program and computing devices to exchange data over network
      - **UDP** defines source port and destination port, but cannot check if the data is received. 
      - **TCP** gurantees your will receive all data because it will resend lost package
 
-5. :star::star:**Application layer**: how your application parses the data it sends/receives. (eg. **HTTP**)
+5. :star::star:**Application layer**: how your application parses the data it sends/receives. (eg. **HTTP**) (deal with important information)
 
 https://www.geeksforgeeks.org/layers-of-osi-model/
 
@@ -387,7 +411,7 @@ JS can make web pages interactice, may be the most used programming language in 
 
 ## Variable Declaration
 
-Dynamic Typing: JS has no explicit types. 
+**Dynamic Typing**: JS has no explicit types. 
 
 - `let someName = value;`：use `let` to declare a variable, the type and value of the variable can be changed. But NEVER change the data type of a variable!! You may forget the type of the variable later.
 - `const SOME_Name = value;`：declaring a constant variable
@@ -596,5 +620,16 @@ Callbacks - listeners: respond to the user's actions
 
 1. sync & async
 
+# 6 Drawing with JS
 
+two ways to draw with JS:
 
+- \<canvas>
+
+  ```html
+  <canvas width="1000" height="500"></canvas>
+  ```
+
+  
+
+- \<svg>
