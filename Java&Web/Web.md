@@ -438,14 +438,14 @@ There are two ways to declare a function:
 
 2. function expression
 
-   create a function like a variable: `let myFunctionName = function(param1, param2)`
+   create a function like a variable: `let myFunctionName = function(param1, param2) {}`
 
 ### Arguments
 
-1. `arguments` is an hidden variable, which is an array, containing the parameters of a function
+1. `arguments` is an hidden variable for functions , which is an array containing the parameters of the function
 
    ```javascript
-   function. doit(x, y, z) {
+   function doit(x, y, z) {
      console.log(arguments.length);
      console.log(arguments[0]);
      console.log(y);
@@ -462,7 +462,12 @@ There are two ways to declare a function:
    undefined
    ```
 
-   
+
+Q: Functions in Java vs. Javascript?
+
+- In Java, a function must be declared inside of a class. In JS, a function  can be an object.
+- In JS, a function can be saved in a variable. In Java, it can't.
+- In Java, functions has access modifiers like `public`, `protected`, `default`, `private`. In JS, they don't. 
 
 ## Miscellaneous
 
@@ -577,11 +582,11 @@ A JS file will be run as soon as it is seen.
 
 3. Note, a node can have only one parent! if you want to set a node as children for multiple parents, you should use `<nodeName>.cloneNode()`
 
-  # 5 AJAX & Callbacks
+  # 5 Callbacks & AJAX
 
-## Event bases programming
+## Callbacks
 
-Callbacks - listeners: respond to the user's actions
+A callback function is a function passed into another function as a parameter, which is then invoked by the outer function to complete some kind of  action. In event based programming, we use callbacks (or listeners) to respond to user's actions and inputs.
 
 3 different ways to do this:
 
@@ -597,16 +602,55 @@ Callbacks - listeners: respond to the user's actions
   element.onclick = function(event) {...};
   ```
 
-- in JS, add a listener:
+- in JS, add a listener (recommended)
 
   ```javascript
   element.addEventListener("click", functionName);
   element.addEventListener("click", function() {...});
   ```
 
-## AJAX
+## AJAX - Asynchronous JS and XML
 
-1. sync & async
+AJAX is mainly a web dev technique used to send and retreive data in the background **without refreshing a webpage**. 
+
+With AJAX, you can:
+
+- Read data from a web server - after a web page has loaded
+- Update a webpage - without reloading a webpage (which can reduce the load of the server and make you webpage faster)
+- Send data to a web server -  in the background
+
+### sync & async
+
+- Syn: step1 -> step2 -> step3 (only starts step2 until we finish the step1)
+- Async: starts step 1, step 2, and step3 together, and use callbacks to know when they each is done. Asyncrhonous program is more efficient!
+
+![image-20221020155549022](./assets/image-20221020155549022.png)
+
+### Implmentation
+
+```javascript
+let request = new XMLHTTPRequest();
+request.open("GET", <url>); // other methods: POST, PUT
+// check if the requested data is available
+request.addEventListeners("load", handleAjaxSuccessCB); // CB - callbacks. You should define it by yourself
+request.addEventListeners("error", handleAjaxErrorCB);
+requenst.send(); // send the request
+```
+
+Note:
+
+- In `handleAjaxSuccessCb()`, we can get the requested data by accessing the filed `request.reponseText`.
+
+### Other useful methods
+
+- `window.onload = function() {...}`: call this function after HTML/CSS have finished loading
+- `window.setInterval(func, delay)`:  run `func` every `delay` ms
+  - we can use this method to request data from the server every 10 seconds
+- `window.setTimeOut(func, delay)`: run `func` after a `delay` ms (not recommended)
+- `window.requestAnimationFrame(callback)`: the browser will run `callback` 60 times per second (60 Hz). 
+  - I think this method is like a faster version of `window.setInterval`. In other words, `window.requestAnimationFrame(callback)` has the same effect as`window.setInterval(callback, 16.7)`. (1000 ms / 60 = 16.7 ms)
+- `<event>.stopPropagation()`: prevents further propagation of the current event in the capturing and bubbling phases. But it can not stop default behaviors like clicking on a link.
+- `<event>.preventDefault()`: if the event does not get explicitly handled, its default action should not be taken as it normally would be. In this way, you can stop default behaviors like clicking on a link.
 
 # 6 Drawing with JS
 

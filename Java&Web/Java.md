@@ -286,6 +286,8 @@ public class Main {
 
 Exceptions are a way of handling unexpected errors.
 
+- throws an exception: // TODO 
+
 - thow an exception: when we encounter an exception, the program will stop
 
   ```java
