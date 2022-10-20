@@ -777,7 +777,7 @@ Stack Memory is also called **Call Stack Memory**. When a function is called, me
 
 #### Memory Leak
 
-if you use `new` to get memory on the heap but never use `delete`  to get rid of it, you'll meet the error of memory leak.For example:
+if you use `new` to get memory on the heap but never use `delete`  to get rid of it, you'll meet the error of memory leak. For example:
 
 ```c++
 double* myArray = new double[10];
@@ -810,7 +810,7 @@ If you don't assign `nullptr` to `myArray`, then `myArray` will become a danglin
 
 #### Double Delete
 
-Delete the same pointer for twice. If the compiler can't find this error, this may cause undefined bahavior while the program is running. (Very dangerous!!)
+Delete the same object for twice. If the compiler can't find this error, this may cause undefined bahavior while the program is running. (Very dangerous!!)
 
 > Your program could crash. Your data could be corrupted. The direct deposit of your next paycheck could instead take 5 million dollars out of your account. [What happens in a double delete?](https://stackoverflow.com/questions/9169774/what-happens-in-a-double-delete)
 

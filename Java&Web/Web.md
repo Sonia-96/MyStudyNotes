@@ -38,7 +38,7 @@ commands:
 
 ## Web Client & Server
 
-- web client: web browser -> display info that is hosted on the web server
+- web client: e.g., web browser -> display info that is hosted on the web server
 - web server: a program that allows a web browser to talk with and receive requested files
   - popular web servers:
     - Apach (Free, 34% of the market)
@@ -161,7 +161,7 @@ Most networking applications are using client / server model, e.g., web browser,
 
 ![Lightbox](./assets/801.png)
 
-* Networked applications without cline/servers are often called "**peer to peer**" applications, e.g., BitTorrent.
+Networked applications without cline/servers are often called "**peer to peer**" applications, e.g., BitTorrent.
 
 ## Data Transfer Layers - OSI layer model
 
@@ -170,13 +170,14 @@ OSI (Open Systems Interconnection) Layer Model. From the bottom to the top, the 
 1. **Physical layer**: the physical medium that transmits **raw bit stream** between devices, e.g., radio wave, electric signals
 2. **Data Link layer**: breaks up packets into frames and sends them from source to destination. e.g., ethernet, wifi
 3. **Network layer**: transmit data from one host to the other in different networks. The network layer use **IP** to route packets to a destination node, e.g., iPv4, iPv6
-4. :star:**Transport layer**: how data gets from a **program** to another program (deal with bytes)
+4. :star:**Transport layer**: how data gets from a **program** to another program. Transport layer deals with bytes.
    - we use **port** to decide which program the data belongs to
    - TCP & UDP - standards that enable application program and computing devices to exchange data over network
      - **UDP** defines source port and destination port, but cannot check if the data is received. 
      - **TCP** gurantees your will receive all data because it will resend lost package
-
-5. :star::star:**Application layer**: how your application parses the data it sends/receives. (eg. **HTTP**) (deal with important information)
+   - We use Sockets to connect client and server
+   
+5. :star::star:**Application layer**: how your application parses the data it sends/receives. (eg. **HTTP**) (Application layer deals with important information)
 
 https://www.geeksforgeeks.org/layers-of-osi-model/
 
@@ -194,7 +195,7 @@ Protocols define how two programs communicates. e.g., HTTP, ssh, smtp
 ### Protocol layers
 
 - lowest level - internet protocol: specifies how small “packets” of data (with no inherent semantic information) are passed between machines.
-- Next - TCP
+- next level- TCP
 - highest level - application protocol
 
 ### TCP/IP
@@ -211,20 +212,21 @@ A packet based on TCP/IP protocol has following information:
   - Destination
 - Payload (application data)
 
-#### IP Address
+#### IP
 
 1. IP: a unique machine ID
 
-   - IPv4: 32 bits, ~4.3 billion addresses
-     - e.g., 10.17.165.139: 4 sections, each section's value is 0~255 (8 bits)
-
+   - IPv4: 32 bits, ~4.3 billion addresses.
+     - an IPv4 address is like W.X.Y.Z., each number is in range of [0, 255]. e.g., 10.17.165.139
+     - W.X.Y routs the data to a local network, Z specifies the machine on the network
+     
    - IPv6: 128 bits. Every atom in the universe can has its IP.
 
-2. reading your IP address: run `Ifconfig` in the terminal, your IPv4 address is under `en0` and next to `inet` and IPv6 address is near to `inet6`
+2. reading your IP address: run `ifconfig` in the terminal, your IPv4 address is under `en0` and next to `inet` and IPv6 address is near to `inet6`
 
 #### TCP
 
-1. TCP specifies which program on the machine gets the data - **port** number
+1. TCP specifies which program on the machine gets the data -- **port** number
 
 2. Many common applications use fixed port numbers:
 
@@ -240,13 +242,13 @@ A packet based on TCP/IP protocol has following information:
    
       - Doom - 666
    
-3. socket: TCP connection
+3. **socket**: TCP connection
 
 
 ## Wireshark
 
-- loopback: look for the traffic of the program on your computer
-- Wifi: en0: look for the traffic of programs over internet
+- `loopback`: look for the traffic of the program on your computer
+- `Wifi: en0`: look for the traffic of programs over internet
 
 ## Lab
 

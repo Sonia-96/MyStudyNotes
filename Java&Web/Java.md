@@ -6,13 +6,18 @@
 
    - java is safer (not crash) than C++
 
-     - array bound checking
+     - automatically check array bounds
 
-     - hides pointers
+     - hides pointers: **java don't use pointers, only use reference**
+       - To know more about C++ pointer errors, please refer to my C++ Notes.
+
+     - explicitly requires exception handling
 
    - java programs are portable
 
-2. Java platform components
+2. **Garbage collection**: Java scans memory on a regular basis to find non-accessible heap memory, and then automatically frees it. As a result, unreferenced objects will be removed, which makes Java memory-efficient.
+
+3. Java platform components
 
    - **JRE** (Java Runtime Environment): a software that Java programs require to run correctly. For Java web & mobile applications, JRE communicates between the Java program and the operating system. With JRE, you can run your program in any operating system.
 
@@ -22,14 +27,7 @@
 
    - **JVM** (Java Virtual Machine): a program to run java program anywhere
 
-3. Java & Pointers
-
-   - java don't use pointers, only use reference
-     - difference between pointers & reference? https://www.tutorialspoint.com/what-is-difference-between-a-pointer-and-reference-parameter-in-cplusplus
-
-4. **Garbage collection**: Java scans memory on a regular basis to find non-accessible heap memory, and then automatically frees it
-
-5. compilation
+4. compilation
 
    - C++: .cpp -> .o -> executable
 
@@ -40,7 +38,7 @@
      java HelloWorld # run the program
      ```
 
-6. Java vs. C++
+5. Java vs. C++
 
    - All java code is written in classes
 
@@ -48,22 +46,30 @@
 
 ## Primitive types
 
-Primitives are stored on stack. Anything other than primitive types are reference types. Reference types are stored on the heap.
+Primitives are stored on stack. Anything other than primitive types are reference types (or objects). All reference types are 8 bytes, which holds the address of the real data. And the real data is stored on heap.
 
-| Primitive data type | Size/bits | Wrapper class (Object data type) | Size/bits |
-| ------------------- | --------- | -------------------------------- | --------- |
-| int                 | 32        | Integer                          |           |
-| byte                | 8         | Byte                             |           |
-| short               | 16        | Short                            |           |
-| long                | 64        | Long                             |           |
-| float               | 32        | Float                            |           |
-| double              | 64        | Double                           |           |
-| char                | 16        | Character                        |           |
-| boolean             | 1         | Boolean                          |           |
+[![reference_types](./assets/reference_types.png)](https://github.com/Sonia-96/UCB-CS61B-Data_Structures_Fall_2020/blob/master/notes/images/reference_types.png)
+
+| Primitive types | Size/bits | Wrapper class (Object data type) | Size/bits |
+| --------------- | --------- | -------------------------------- | --------- |
+| int             | 32        | Integer                          | 64        |
+| byte            | 8         | Byte                             | 64        |
+| short           | 16        | Short                            | 64        |
+| long            | 64        | Long                             | 64        |
+| float           | 32        | Float                            | 64        |
+| double          | 64        | Double                           | 64        |
+| char            | 16        | Character                        | 64        |
+| boolean         | 1         | Boolean                          | 64        |
+
+We use primitives' corresponding wrapper classes in generic types. e.g., 
+
+```java
+List<Integer> list = new ArrayList<>();
+```
 
 ## String
 
-String is reference type, and is immutable in Java.
+String is a reference type, and is immutable in Java -- even if appending a char to a String, we need to rebuild the whole String.
 
 ### String literals & String Objects
 
