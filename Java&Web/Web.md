@@ -393,17 +393,17 @@ Vary: Accept-Encoding, Cookie, User-Agent
 
 # 4 JavaScript
 
-JS can make web pages interactice, may be the most used programming language in the world.
+JS can make web pages interactive, may be the most used programming language in the world.
 
 - script language: no need to set up environment, no compiler
 
 ## Variable Declaration
 
-**Dynamic Typing**: JS has no explicit types. 
+**Dynamic Typing**: variables in JavaScript has no explicit types. 
 
-- `let someName = value;`：use `let` to declare a variable, the type and value of the variable can be changed. But NEVER change the data type of a variable!! You may forget the type of the variable later.
-- `const SOME_Name = value;`：declaring a constant variable
-- 用`var`声明变量的方式已过时，可以使用但没必要，而且scope很奇怪（？）
+- `let someName = value;`：use `let` to declare a variable, the type and value of the variable can be changed. But DON'T CHANGE A VARIABLE"S DATA TYPE!! You may forget the type of the variable later.
+- `const SOME_NAME = value;`：declaring a constant variable
+- `var x`: old version, and scoping is strange -- don't use!!
 
 ```javascript
 let x;
@@ -415,17 +415,6 @@ obj = {"name": "john", "gpa": 3.7, "year": 3};
 obj.gender = "male";
 ```
 
-## Objects
-
-- similar to map -- key-value pairs
-- no pre-set structure
-- Accesse field:
-  - `obj.field`
-  - `obj['field']`: but `obj.2` is illegal
-
-- add a method: `obj.aMethod = function(parameters) {...};`
-- call a method: `obj.aMethod()`
-
 ## Functions
 
 ### Declaration
@@ -434,11 +423,11 @@ There are two ways to declare a function:
 
 1. function declaration
 
-   `function myFunctionName(param1, param2) {}`
+   `function myFunctionName(param1, param2) {...}`
 
 2. function expression
 
-   create a function like a variable: `let myFunctionName = function(param1, param2) {}`
+   create a function like a variable: `let myFunctionName = function(param1, param2) {...}`
 
 ### Arguments
 
@@ -462,12 +451,31 @@ There are two ways to declare a function:
    undefined
    ```
 
-
 Q: Functions in Java vs. Javascript?
 
 - In Java, a function must be declared inside of a class. In JS, a function  can be an object.
 - In JS, a function can be saved in a variable. In Java, it can't.
 - In Java, functions has access modifiers like `public`, `protected`, `default`, `private`. In JS, they don't. 
+
+## Objects
+
+Objects in JS is similar to map -- key-value pairs
+
+- no pre-set structure
+- Accesse a field:
+  - `obj.field`
+  - `obj['field']`: but `obj.2` is illegal
+
+- add a method: `obj.aMethod = function(parameters) {...};`
+- call a method: `obj.aMethod()`
+
+```javascript
+let mouse = {};
+mouse.x = 0;
+mouse.y = 100;
+mouse['moveRight'] = true;
+mouse.draw = function(a, b) {...};
+```
 
 ## Miscellaneous
 
@@ -490,7 +498,7 @@ Q: Functions in Java vs. Javascript?
    for (let val of array); // iterate through the items in an array
    ```
 
-2. for loop & while loop are the same with Java 
+2. for loop & while loop are the same as Java 
 
    ```javascript
    let x = Math.random().toFixed(2); // x = 0.35, a string!!
@@ -500,37 +508,61 @@ Q: Functions in Java vs. Javascript?
 
 ## JSON
 
-JSON (JavaScript Object Notation), a way of serializing data.
+JSON (JavaScript Object Notation), a way of serializing data. JSON is used to represent objects and pass them (their data) around in many different applications.
 
-// TODO find an example
+An example:
+
+```json
+{  
+    "employee": [
+      {  
+        "name":       "sonoo",   
+        "salary":      56000,   
+        "married":    true  
+    	},
+      {
+        "name": "Sonia",
+        "slalry": 100000,
+        "married": false
+      }
+    ]
+}  
+```
 
 ## DOM
 
-DOM(Document Object Model).
+DOM(Document Object Model). A page is stored as a tree; each element is a node. And the root is `document`.
 
-A JS file will be run as soon as it is seen.
+JavaScript use DOM to manipulate. A JS file will be run as soon as it is seen.
 
 - window: web browser 
   - `window.onload = main`: set main() to `onload` (here `main()` is a **callback function**)
-    - The `onload` event occurs when an object has been loaded. onload is most often used within the \<body> element to execute a script once <u>a web page has completely loaded all content (including images, script files, CSS files, etc.)</u>.
+    - The `onload` event occurs when an object has been loaded. Onload is most often used within the \<body> element to execute a script once <u>a web page has completely loaded all content (including images, script files, CSS files, etc.)</u>.
+
+### Document
+
+document is the root of DOM.
+
+- `document.writeln( “<p> Hello World </p> “ );`: adds the text directly to the body
+- `document.body`: the \<body> element of the page
 
 ### Selecting Elements
 
 1. Select elements
 
-   - 法一：`document.<elementName>`
+   - Method 1：`document.<elementName>`
 
-   - 法二：getElement()
+   - Method 2：`getElement()`
 
-     - `document.getElementById()`
+     - `document.getElementById()`: return only one element
 
-     - `document.getElementsByTagName()`
+     - `document.getElementsByTagName()`: reutrn an array
 
-     - `document.getElementsByClassName()`
+     - `document.getElementsByClassName()`: return an array
 
-   - 法三：querySelector()【最常用】
+   - Method 3：querySelector() (most commonly used)
 
-     - `document.querySelector()`：选择符合条件的第一个元素，筛选条件可以为元素名、#Id、.class，例：
+     - `document.querySelector()`：choose the first selector that meets the condition, the condition can be elementName, #id, and .class:
 
        ```javascript
        document.querySelector('h1'); // finds first h1 element
@@ -539,13 +571,15 @@ A JS file will be run as soon as it is seen.
        document.querySelector('a[title="Java"]'); // find first <a> with attribute title of "Java"
        ```
 
-      - `document.querySelectorAll()`：选择符合条件的所有元素
+      - `document.querySelectorAll()`：choose all selectors that meet the condition
 
 ### Traversing DOM
 
 - `parentElement`：父结点
 
 - `children`：子结点
+
+  - `element.querySelectorAll()`: find all descendents meeting the condition
 
 - `nextSibling` & `previousSibling`：同胞结点
 
@@ -569,18 +603,29 @@ A JS file will be run as soon as it is seen.
    ```javascript
    let myP = document.createElement('p'); // create a paragraph
    let myText = document.createTextNode("This is a paragraph");
-   myP.appendChildren(myText);
+   myP.appendChild(myText);
    document.body.appendChild(myP); // to show the paragraph
    ```
 
-2. set styles
+2. remove elements:
+
+   ```javascript
+   element.remove();
+   node.removeChild(element);
+   ```
+
+   
+
+3. set styles
 
    ```java
    myP.style.background = "red";
    myP.style.fontWeight = "bold";
+   myP.innerText = "Hello World";
+   myP.innerHTML = "To <a src='www.google.com'>Google</a>"
    ```
 
-3. Note, a node can have only one parent! if you want to set a node as children for multiple parents, you should use `<nodeName>.cloneNode()`
+4. Note, a node can have only one parent! if you want to set a node as children for multiple parents, you should use `<nodeName>.cloneNode()`
 
   # 5 Callbacks & AJAX
 
@@ -658,10 +703,49 @@ two ways to draw with JS:
 
 - \<canvas>
 
+  Wee need an element `canvas` in HTML:
+
   ```html
   <canvas width="1000" height="500"></canvas>
   ```
 
-  
+  Draw in JavaScript file:
+
+  ```javascript
+  let canvas = document.getElementsByTagName("canvas")[0];
+  let context = canvas.getContext("2d");
+  // draw images
+  let img = new Image();
+  image.src = "cheese.png";
+  context.draw(image, 0, 0, img.width * 0.5, img.height * 0.5); // x, y, width, height
+  // erase the context
+  context.fillStyle = "#FFFFFF";
+  context.fillRec(0, 0, canvas.width, canvans.height);
+  ```
 
 - \<svg>
+
+# 7 Web Sockets
+
+## Imeplemntation
+
+```javascript
+let ws = new WebSocket(url); // e.g. ws://localhost:8080/
+ws.onOpen = handleConnectCB;
+ws.onError = handleErrorCB;
+ws.onClose = handleCloseCB;
+ws.onmessage = handleMessageCB;
+ws.send("<message>");
+ws.close();
+
+wsOpen = false;
+function handleConnectCB() {
+  wsOpen = true;
+  // other actions
+}
+```
+
+Q: difference between AJAX and web sockets?
+
+- AJAX is a client-side approach, web sockets is a bi-direction communication
+- AJAX is a single request, web sockets will keep opening.
