@@ -5,12 +5,7 @@
 Ask the user for a file name.  (Continue asking until a valid (existing) file name is entered.)  Read all text from that file and calculate, store, and print out the number of times each letter occurs.  As an extra challenge, print out the letters (and corresponding counts) in order of the most occurring to the least.
 
 ```java
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.Scanner;
-
-public class CharacterCounts {
+public class LetterCount {
     private static class Pair {
         char letter;
         int count;
@@ -22,32 +17,26 @@ public class CharacterCounts {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        boolean stop = false;
         File file = null;
-        while (!stop) {
+        while (file == null || !file.exists()) {
             Scanner sinReader = new Scanner(System.in);
             System.out.print("Enter a file name: ");
             String filename = sinReader.nextLine();
             file = new File(filename);
-            if (file.exists()) {
-                stop = true;
-            }
         }
         Scanner fileReader = new Scanner(file);
-        int[] letterCounts = new int[26];
+        Pair[] pairs = new Pair[26];
+        for (int i = 0; i < 26; i++) {
+            pairs[i] = new Pair((char) ('a' + i), 0);
+        }
         while (fileReader.hasNext()) {
             String word = fileReader.next();
             for (int i = 0; i < word.length(); i++) {
                 char c = Character.toLowerCase(word.charAt(i));
                 if (c >= 'a' && c <= 'z' ) {
-                    letterCounts[c - 'a'] += 1;
+                    pairs[c - 'a'].count += 1;
                 }
             }
-        }
-
-        Pair[] pairs = new Pair[26];
-        for (int i = 0; i < 26; i++) {
-            pairs[i] = new Pair((char) ('a' + i), letterCounts[i]);
         }
         Arrays.sort(pairs, (c1, c2) -> (c2.count - c1.count));
         for (Pair p : pairs) {
@@ -57,89 +46,96 @@ public class CharacterCounts {
 }
 ```
 
-another way to sort the characters: use maxHeap (too advanced)
-
-```java
-PriorityQueue<int[]> maxHeap = new PriorityQueue<>((c1, c2) -> (c2[1] - c1[1]));
-for (int i = 0; i < letterOccurs.length; i++) {
-  maxHeap.add(new int[] {'a' + i, letterOccurs[i]});
-}
-while (!maxHeap.isEmpty()) {
-  int[] temp = maxHeap.poll();
-  System.out.println((char) temp[0] + " " + temp[1]);
-}
-```
-
 ## Q2
 
+Choose a random number from 1 to 100.  Ask the user to guess that number.  After each guess, tell the user if their guess was too low or too high (or that they win).  Additional challenges: a) only allow the user to make 10 guesses before they lose; b) Let the user know if they have already guessed a number.
+
 ```java
-Random rand = new Random();
-int answer = rand.nextInt(100) + 1;
-int i = 0;
-boolean stop = false;
-while (i < 10 && !stop) {
-  Scanner sc = new Scanner(System.in);
-  System.out.print("Guess a number: ");
-  int guess = sc.nextInt();
-  if (guess < answer) {
-    System.out.println("Your guess is too low");
-  } else if (guess > answer) {
-    System.out.println("Your guess is too high");
-  } else {
-    System.out.println("Your guess is correct!");
-    stop = true;
-  }
-  i++;
-}
-if (!stop) {
-  System.out.print("You lose.");
+public class GuessGame {
+    public static void main(String[] args) {
+        Random rand = new Random();
+        int answer = rand.nextInt(100) + 1;
+        boolean[] numOccur = new boolean[100];
+        Arrays.fill(numOccur, false);
+        int i = 0;
+        while (i < 10) {
+            Scanner sc = new Scanner(System.in);
+            System.out.print("Guess a number: ");
+            int guess = sc.nextInt();
+            if (numOccur[guess - 1]) {
+                System.out.println("You already guessed the number!");
+                continue;
+            }
+            if (guess < answer) {
+                System.out.println("Your guess is too low");
+            } else if (guess > answer) {
+                System.out.println("Your guess is too high");
+            } else {
+                System.out.println("Your guess is correct!");
+                break;
+            }
+            numOccur[guess - 1] = true;
+            i++;
+        }
+        if (i == 10) {
+            System.out.println("You lose.");
+        } else {
+          	Syste.out.prinln("You win.")
+        }
+    }
 }
 ```
 
 ## Q3
 
+Assume January 1 is a Monday. Ask the user to enter a day of the year (1-365) and display what day of the week it is.  Hint: Use the mod (%) function: If the user enters 1, you would display Monday. If the user enters 2, Tuesday ... enters 7, display Sunday - what about 8?  Monday again.
+
 ```java
 Scanner sc = new Scanner(System.in);
-boolean stop = false;
 int day = -1;
-while (!stop) {
-  System.out.println("Enter a day of the year (1 - 365)");
+while (day < 1 || day > 365) {
+  System.out.print("Enter a day of the year (1 - 365): ");
   day = sc.nextInt();
-  if (day >= 1 && day <= 365) {
-    stop = true;
-  }
 }
-day %= 7;
-String dayOfWeek = ""; // remember to initialize the String
-switch(day) {
-  case 0:
-    dayOfWeek = "Sunday";
-    break;
-  case 1:
-    dayOfWeek = "Monday";
-    break;
-  case 2:
-    dayOfWeek = "Tuesday";
-    break;
-  case 3:
-    dayOfWeek = "Wednesday";
-    break;
-  case 4:
-    dayOfWeek = "Thursday";
-    break;
-  case 5:
-    dayOfWeek = "Friday";
-    break;
-  case 6:
-    dayOfWeek = "Saturday";
-    break;
-}
-System.out.println("This is " + dayOfWeek);
+String[] dayStrings = {"Sundy", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+System.out.println("This is " + dayStrings[day % 7]);
 ```
 
 ## Q4
 
-Solution 1: Arrays.sort
+Write a function that takes in an array of numbers and returns the 3 largest numbers in that array. (Consider how you would do it using just basic programming techniques, and then how you could do it (much more easily) using more advanced data structures (and associated methods).
+
+### Solution 1: Selection Sort
+
+```java
+public void selectionSort(int[] nums) {
+  for (int i = 0; i < nums.length - 1; i++) {
+    int maxIndex = i;
+    for (int j = i + 1; j < nums.length; j++) {
+      if (nums[j] > nums[maxIndex]) {
+        maxIndex = j;
+      }
+    }
+    int temp = nums[maxIndex];
+    nums[maxIndex] = nums[i];
+    nums[i] = temp;
+  }
+}
+
+public int[] getThreeBiggestNumbers(int[] nums) {
+  if (nums.length < 3) {
+    throw new RuntimeException("The length of array should be greater than 3!");
+  }
+  selectionSort(nums);
+  int[] result = new int[3];
+  for (int i = 0; i < 3; i++) {
+    result[i] = nums[i];
+  }
+  return result;
+}
+```
+
+### Solution 2: Arrays.sort
 
 ```java
 public int[] get3BiggestNumbers(int[] arr) {
@@ -152,23 +148,9 @@ public int[] get3BiggestNumbers(int[] arr) {
 }
 ```
 
-Solution 2: max heap
-
-```java
-public int[] get3BiggestNumbers(int[] arr) {
-	PriorityQueue<Integer> maxHeap = new PriorityQueue<>((c1, c2) -> (c2 - c1));
-  for (int i : arr) {
-    maxHeap.add(i);
-  }
-  int[] res = new int[3];
-  for (int i = 0; i < 3; i++) {
-    res[i] = maxHeap.poll();
-  }
-  return res;
-}
-```
-
 ## Q5
+
+What is the output of the following code (and why)?
 
 ```java
 int  x = 130; // 130 = 0b 0 1000 0010
@@ -204,7 +186,7 @@ public static void main(String[] args) throws IOException {
   String message = firstLine.split(" ")[1];
   message = message.substring(1);
   System.out.println(message);
-  client.close();
+  client.close(); // remember to close the client and server
   server.close();
 }
 ```
