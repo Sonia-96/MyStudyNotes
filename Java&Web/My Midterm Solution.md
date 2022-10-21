@@ -4,6 +4,8 @@
 
 Ask the user for a file name.  (Continue asking until a valid (existing) file name is entered.)  Read all text from that file and calculate, store, and print out the number of times each letter occurs.  As an extra challenge, print out the letters (and corresponding counts) in order of the most occurring to the least.
 
+### Solution 1: Comparator
+
 ```java
 public class LetterCount {
     private static class Pair {
@@ -38,13 +40,65 @@ public class LetterCount {
                 }
             }
         }
-        Arrays.sort(pairs, (c1, c2) -> (c2.count - c1.count));
+        Arrays.sort(pairs, (c1, c2) -> (c2.count - c1.count)); // comparator
         for (Pair p : pairs) {
             System.out.println(p.letter + " " + p.count);
         }
     }
 }
 ```
+
+### Solution 2: Comparable
+
+another way: Pair implements Comparable Interface, then it can be sorted by Arrays.sort()
+
+```java
+public class LetterCount {
+    private static class Pair implements Comparable<Pair>{
+        char letter;
+        int count;
+
+        Pair(char c, int i) {
+            letter = c;
+            count = i;
+        }
+
+        public int compareTo(Pair rhs) {
+            return rhs.count - this.count;
+        }
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        File file = null;
+        while (file == null || !file.exists()) {
+            Scanner sinReader = new Scanner(System.in);
+            System.out.print("Enter a file name: ");
+            String filename = sinReader.nextLine();
+            file = new File(filename);
+        }
+        Scanner fileReader = new Scanner(file);
+        Pair[] pairs = new Pair[26];
+        for (int i = 0; i < 26; i++) {
+            pairs[i] = new Pair((char) ('a' + i), 0);
+        }
+        while (fileReader.hasNext()) {
+            String word = fileReader.next();
+            for (int i = 0; i < word.length(); i++) {
+                char c = Character.toLowerCase(word.charAt(i));
+                if (c >= 'a' && c <= 'z' ) {
+                    pairs[c - 'a'].count += 1;
+                }
+            }
+        }
+        Arrays.sort(pairs);
+        for (Pair p : pairs) {
+            System.out.println(p.letter + " " + p.count);
+        }
+    }
+}
+```
+
+
 
 ## Q2
 

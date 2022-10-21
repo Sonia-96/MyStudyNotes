@@ -79,6 +79,7 @@ String s2 = "Hello"; // string literal
 String s3 = new String("Hello"); // string object
 System.out.println(s1 == s2); // true
 System.out.println(s1 == s3); // false
+System.out.println(s1.equals(s3)); // true;
 ```
 
 ### String Pool
@@ -137,7 +138,7 @@ When we use `new` to create a `String`,  JVM will create a new String object in 
 2. copy
 
    ```java
-   ArrayList<String> moreNamew = new ArrayList<>(names); // this is a shllow copy!!! TODO
+   ArrayList<String> moreNamew = new ArrayList<>(names); // this is a shllow copy!!! 
    ```
 
 # File I/O
@@ -366,10 +367,7 @@ public Fraction( long n, long d ) throws ArithmeticException {
    }
    ```
 
-
-# Inheritance
-
-## Interface
+# Interface
 
 Interface is a blueprint of a class. An Interface doesn't implement its methods, only specifies their signatures. These methods are called **abstract methods**.
 
@@ -380,7 +378,7 @@ Note, a subclass and its parent class should be "is-a" relationship. For example
 
 If you want to implement a method in a Interface, the method should be `default`。
 
-### Implements
+## Implements
 
 When you initialize a subclass, the type can be either superclass or subclass. If it is superclass, the object can only use the methods of superclass. If it's subclass, the object can only use the methods of subclass.
 
@@ -407,6 +405,24 @@ class Bird implements Drawable {
   }
 }
 ```
+
+# Inheritance
+
+## Extends
+
+If a subclass `extends` a base class, the subclass can inherite the following things from the base class:
+
+- all static variables and instance variables
+- all **non-private** methods
+- all non-private inner classes
+
+### keyword super
+
+A subclass can use `super` to use the variables and methods from its base class.
+
+- use constructor: `super(parameters)`
+- use methods: `super.methodName(parameters)`
+- use variables: `super.variableName`
 
 ## Override
 
@@ -436,22 +452,6 @@ Note, this princinple does not apply to overloaded methods. For overloaded metho
 
 https://cs61b.bencuan.me/oop/dynamic-method-selection
 
-## Extends
-
-If a subclass `extends` a base class, the subclass can inherite the following things from the base class:
-
-- all static variables and instance variables
-- all **non-private** methods
-- all non-private inner classes
-
-### keyword super
-
-A subclass can use `super` to use the variables and methods from its base class.
-
-- use constructor: `super(parameters)`
-- use methods: `super.methodName(parameters)`
-- use variables: `super.variableName`
-
 ### extends vs. implements
 
 | implements                                                 | Extends                                                      |
@@ -465,7 +465,7 @@ A subclass can use `super` to use the variables and methods from its base class.
 
 ## Polymorphism
 
-Polymorphism means "many forms". In Java, polymorphism refers to the ability of a class to ptovide different implementations of a method. To achieve this, we provide a single interface to different classes.
+Polymorphism means "many forms". In Java, polymorphism refers to the ability of a class to provide different implementations of a method. 
 
 ### Interface Comparable
 

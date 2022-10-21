@@ -254,7 +254,7 @@ A packet based on TCP/IP protocol has following information:
 
 ### Ping
 
-`ping` command relies on the Internet Control Message Protocol (ICMP). Its basic use is to confirm the connectivity between two hosts.
+`ping`: send ICMP ECHO_REQUEST packets to network hosts. `ping`'s' basic use is to confirm the connectivity between two hosts.
 
 ```bash
 ping 10.17.165.139 # send requests to this IP address
@@ -276,6 +276,12 @@ PING google.com (142.250.189.14): 56 data bytes
 5 packets transmitted, 5 packets received, 0.0% packet loss
 round-trip min/avg/max/stddev = 46.433/51.714/60.286/5.062 ms
 ```
+
+### curl
+
+transfer data from or to a server
+
+- `curl -v localhost:8080`, `curl example.com`
 
 # 3 Basic Networking
 
@@ -391,6 +397,24 @@ Vary: Accept-Encoding, Cookie, User-Agent
 
    Lower port are reserved and require administrator privileges, so we use 8080 - `localhost:8080`
 
+3. one-shot server:
+
+   ```java
+   public static void main(String[] args) throws IOException {
+     ServerSocket server = new ServerSocket(8080); // remember to set a port number + throw an exception
+     Socket client = server.accept(); // remember to throw an exception
+     Scanner sc = new Scanner(client.getInputStream());
+     String firstLine = sc.nextLine();
+     String message = firstLine.split(" ")[1];
+     message = message.substring(1);
+     System.out.println(message);
+     client.close(); // remember to close the client and server
+     server.close();
+   }
+   ```
+
+   
+
 # 4 JavaScript
 
 JS can make web pages interactive, may be the most used programming language in the world.
@@ -453,7 +477,7 @@ There are two ways to declare a function:
 
 Q: Functions in Java vs. Javascript?
 
-- In Java, a function must be declared inside of a class. In JS, a function  can be an object.
+- In Java, a function must be declared inside a class. In JS, a function can be an object.
 - In JS, a function can be saved in a variable. In Java, it can't.
 - In Java, functions has access modifiers like `public`, `protected`, `default`, `private`. In JS, they don't. 
 
@@ -614,14 +638,12 @@ document is the root of DOM.
    node.removeChild(element);
    ```
 
-   
-
 3. set styles
 
    ```java
    myP.style.background = "red";
    myP.style.fontWeight = "bold";
-   myP.innerText = "Hello World";
+   myP.textContent = "Hello World";
    myP.innerHTML = "To <a src='www.google.com'>Google</a>"
    ```
 
@@ -684,7 +706,7 @@ requenst.send(); // send the request
 
 Note:
 
-- In `handleAjaxSuccessCb()`, we can get the requested data by accessing the filed `request.reponseText`.
+- In `handleAjaxSuccessCb()`, we can get the requested data by accessing the field `this.reponseText`.
 
 ### Other useful methods
 
@@ -727,7 +749,7 @@ two ways to draw with JS:
 
 # 7 Web Sockets
 
-## Imeplemntation
+## Imeplentation
 
 ```javascript
 let ws = new WebSocket(url); // e.g. ws://localhost:8080/
@@ -738,7 +760,7 @@ ws.onmessage = handleMessageCB;
 ws.send("<message>");
 ws.close();
 
-wsOpen = false;
+let wsOpen = false;
 function handleConnectCB() {
   wsOpen = true;
   // other actions
