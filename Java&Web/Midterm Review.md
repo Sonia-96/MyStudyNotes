@@ -47,6 +47,8 @@ i = 9, the user guesses the wrong number. Q: what's the value of i when the prog
 
 ## Approach #2: HashMap (recommended)
 
+Acutally HashSet is better. 
+
 ```java
 Random random = new Random();
 int answer = random.nextInt(100) + 1;
@@ -77,6 +79,46 @@ if (i == 10) {
   System.out.println("You win!");
 }
 ```
+
+## Approach #3: boolean array (recommended)
+
+```java
+public class GuessGame {
+    public static void main(String[] args) {
+        Random rand = new Random();
+        int answer = rand.nextInt(100) + 1;
+        boolean[] numOccur = new boolean[100];
+        Arrays.fill(numOccur, false);
+        int i = 0;
+        while (i < 10) {
+            Scanner sc = new Scanner(System.in);
+            System.out.print("Guess a number: ");
+            int guess = sc.nextInt();
+            if (numOccur[guess - 1]) {
+                System.out.println("You already guessed the number!");
+                continue;
+            }
+            if (guess < answer) {
+                System.out.println("Your guess is too low");
+            } else if (guess > answer) {
+                System.out.println("Your guess is too high");
+            } else {
+                System.out.println("Your guess is correct!");
+                break;
+            }
+            numOccur[guess - 1] = true;
+            i++;
+        }
+        if (i == 10) {
+            System.out.println("You lose.");
+        } else {
+          	Syste.out.prinln("You win.")
+        }
+    }
+}
+```
+
+
 
 # Q3
 

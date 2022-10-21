@@ -286,7 +286,15 @@ public class Main {
 
 Exceptions are a way of handling unexpected errors.
 
-- throws an exception: // TODO 
+- `throws`: When a function is annotated with throws, it tells callers of that function that they should catch that particular exception. For example: 
+
+  ```java
+  public void func(int i) throws IOException {
+    ...
+  }
+  ```
+
+  
 
 - thow an exception: when we encounter an exception, the program will stop
 
@@ -299,13 +307,17 @@ Exceptions are a way of handling unexpected errors.
   }
   ```
 
-- catch an exception: when we encounter an exception, the program will output the error information but not stop
+- `try-catch-finally`: when we encounter an exception, the program will output the error information but not stop
 
+  `try` lets you attempt execution of a piece of code, `catch` lets you catch any exceptions thrown during that execution, `finally` always executes after try and catch and is often used for cleanup (close streams/sockets etc).
+  
   ```java
   try {
       // something that may throw an exception
   } catch (Exception e) {
-      // Do something about it 
+      // handle the error
+  } finally {
+    // executes regarless of the result of try 
   }
   ```
 
@@ -314,10 +326,15 @@ Note: only throw an exception when you can handle it!
 ## Exception types
 
 - `IoException`
-- `FileNotFoundException`
-- `ArithmeticException`
-- `ClassNotFoundException`
-- `ArrayIndexOutOfBoundsException`
+  - `FileNotFoundException`
+
+- `RunTimeException`
+  - `ArithmeticException`
+  - `ArrayIndexOutOfBoundsException`
+
+- ...
+
+![java-exceptions-hierarchy-example](./assets/java-exceptions-hierarchy-example.png)
 
 ## Useful methods for exceptions
 
@@ -363,14 +380,11 @@ Note, a subclass and its parent class should be "is-a" relationship. For example
 
 If you want to implement a method in a Interface, the method should be `default`。
 
-// TODO: add an example
-
 ### Implements
 
 When you initialize a subclass, the type can be either superclass or subclass. If it is superclass, the object can only use the methods of superclass. If it's subclass, the object can only use the methods of subclass.
 
 ```java
-// TODO not a good example
 Interface Drawable {
   void draw();
 }
@@ -384,12 +398,12 @@ class Bird implements Drawable {
   public void fly() {System.out.println("A bird can fly")};
   
   public static void main(String[] args) {
-    Drawable b1 = Bird();
+    Drawable b1 = new Bird();
     b1.draw();
     // b1.fly(); // b1 cannot fly, because it's not Bird!!
     
-    Bird b2 = Bird();
-    b2.fly(); // b2 cannot 
+    Bird b2 = new Bird();
+    b2.fly(); // b2 can fly
   }
 }
 ```
@@ -398,8 +412,8 @@ class Bird implements Drawable {
 
 Overriding vs. Overloading:
 
-- Overriding（方法重写）: two functions have same name and same signatures. Overriding is usually happened when a subclass inherits a baseclass, and we should add `@Override` annotation in front of the method in the subclass.
-- Overloading（方法重载）: two functions have same name but different signatures
+- Overriding（方法重写）: two functions have the same name and same signatures. Overriding is usually happened when a subclass inherits a baseclass, and we should add `@Override` annotation in front of the method in the subclass.
+- Overloading（方法重载）: two functions have the same name but different signatures
 
 ### Dynamic method selection
 
@@ -416,7 +430,7 @@ Person employee = new Employee();
 
 for the object `employee`, its static type is `Person`, and dynamic type is `Employee`. 
 
-When java runs a overriden method, it will first choose the method in the dynamic type. This principle is called ”dynamic method selection“.
+When java runs an overriden method, it will first choose the method in the dynamic type. This principle is called ”dynamic method selection“.
 
 Note, this princinple does not apply to overloaded methods. For overloaded methods, java only matches the methods in its static type.
 
@@ -427,26 +441,31 @@ https://cs61b.bencuan.me/oop/dynamic-method-selection
 If a subclass `extends` a base class, the subclass can inherite the following things from the base class:
 
 - all static variables and instance variables
-- all non-private methods
+- all **non-private** methods
 - all non-private inner classes
 
 ### keyword super
 
 A subclass can use `super` to use the variables and methods from its base class.
 
-- use constructor: `super(parameters required in base class)`
+- use constructor: `super(parameters)`
 - use methods: `super.methodName(parameters)`
 - use variables: `super.variableName`
 
 ### extends vs. implements
 
-
+| implements                                                 | Extends                                                      |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
+| a class can implements an Interface                        | a class can extends another class, and an interface can extends another interface |
+| subclasses have to implements all methods in the interface | subclasses don't have to implements all methods in the base class |
+| a class can implements multiple interfaces                 | a class can only extends one class                           |
+| an interface cannot `implements` another interface         | an interface can `extends` another interface                 |
 
 ## Abstraction
 
 ## Polymorphism
 
-Polymorphism provides a single interface to entities of different types
+Polymorphism means "many forms". In Java, polymorphism refers to the ability of a class to ptovide different implementations of a method. To achieve this, we provide a single interface to different classes.
 
 ### Interface Comparable
 
