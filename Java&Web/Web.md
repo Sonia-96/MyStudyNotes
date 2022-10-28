@@ -534,7 +534,7 @@ mouse.draw = function(a, b) {...};
 
 JSON (JavaScript Object Notation), a way of serializing data. JSON is used to represent objects and pass them (their data) around in many different applications.
 
-An example:
+An JSON example:
 
 ```json
 {  
@@ -552,6 +552,9 @@ An example:
     ]
 }  
 ```
+
+- JSON → JS：`JSON.parse(json)`
+- JS → JSON：`JSON.stringify(js)`
 
 ## DOM
 
@@ -747,12 +750,88 @@ two ways to draw with JS:
 
 - \<svg>
 
-# 7 Web Sockets
+Q: difference between AJAX and web sockets?
 
-## Imeplentation
+- AJAX is a client-side approach, web sockets is a bi-direction communication
+- AJAX is a single request, web sockets will keep opening.
+
+# 7 Threads
+
+CORS Error (Cross-Origin Resource Sharing): If the browser already get js file from a server, then send request to another server, then you'll encounter this error.
+
+## Processes vs. Threads
+
+1. A **process** is a running program: 
+   - `ps -def | more`
+   - `ps -def | grep ssh`
+2. A single program, in order to do multiple things at the same time, can use multiple **threads**
+3. **Concurrency**: running multiple threads at the same time (also called Parallelism)
+   - e.g., while a program is running, we can still deal with UI
+   - threads allow a single program to use multiple cores at the same time
+
+## Threads
+
+1. resources to run a function:
+
+   - memory - call stack
+   - CPU Time
+
+2. Threads in Java:
+
+   - `Thread` class - create a thread
+   - Threads use `Runnable` ( an Interface contains `void run()` )object to work
+   - important methods:
+
+3. Create a thread
+
+   - Lambda function:
+
+     ```java
+     Thread t = new Thread(() -> {
+       // usually has a while loop
+     });
+     t.start(); // get the thread running
+     t.join(); // Main waits for t to finish (Main is blocked)
+     ```
+
+4. How do threads talk to each other?
+
+   - messages
+   - shared memory
+     - common variables
+     - critical section: do something without being interrupted
+       - use Mutexes / locks
+       - Java uses keyword `synchronized`
+
+5. Syncrhonization
+
+   threads are running at the same time and in a nondeterministic order. If a variabl is read by one thread and written by another, this can cause potential problems. 
+
+   - Syncrhonized method
+
+     ```java
+     public class MyClass {
+       public synchronized void doit() {...};
+     }
+     ```
+
+     any thread that calls `doit()` on the same object will check to see if any other thread is currently running this method. If so, they'll wait until that is finished.
+
+     However, threads using different objects can access the same function simultaneously.
+
+   
+
+6. General rules for threads:
+
+   - threads don't share data
+   - all the sahred data is read-only
+
+# 8 Web Socket
+
+## Client Side
 
 ```javascript
-let ws = new WebSocket(url); // e.g. ws://localhost:8080/
+let ws = new WebSocket(url); // e.g. ws://localhost:8080/chat
 ws.onOpen = handleConnectCB;
 ws.onError = handleErrorCB;
 ws.onClose = handleCloseCB;
@@ -771,3 +850,154 @@ Q: difference between AJAX and web sockets?
 
 - AJAX is a client-side approach, web sockets is a bi-direction communication
 - AJAX is a single request, web sockets will keep opening.
+
+## Handshake
+
+readings:
+
+- https://datatracker.ietf.org/doc/html/rfc6455#section-5.7
+- https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
+
+The handshake is the "Web" in the WebSockets. It's the bridge from HTTP to WebSockets. 
+
+### Client handshake request
+
+```bash
+GET /chat HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ== // important
+Origin: http://example.com
+Sec-WebSocket-Protocol: chat, superchat
+Sec-WebSocket-Version: 13
+```
+
+### Server handshake response
+
+```
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo= // important
+```
+
+1. generate accept code: SHA-1 Hash + Base64 encoding
+
+   - concacanate `Sec-WebSocket-Key` with "`258EAFA5-E914-47DA-95CA-C5AB0DC85B11`" (magic String)
+   - SHA-1 hash the string (in Java, use `MessageDigest` class)
+   - Base64 the string (in Java, use `Base64` class)
+
+   ```java
+   public static String generateAcceptString(String key) throws NoSuchAlgorithmException {
+     String key2 = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+     MessageDigest md = MessageDigest.getInstance("SHA-1");
+     md.update(key2.getBytes()); // SHA-1 hashing
+     String sha1 = Base64.getEncoder().encodeToString(md.digest()); // Base64 encoding
+     return sha1;
+   }
+   ```
+
+## Messages
+
+When a client send a message to the server, they just need to do this:`ws.send(<message>)` (the message is in binary format). But in the server side, it's much more complicated to parse the message.
+
+### Data Frame
+
+The messages are sent through data frames. The format of data frame is as following:
+
+```bash
+
+      0                   1                   2                   3
+      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+     +-+-+-+-+-------+-+-------------+-------------------------------+
+     |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+     |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+     |N|V|V|V|       |S|             |   (if payload len==126/127)   |
+     | |1|2|3|       |K|             |                               |
+     +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+     |     Extended payload length continued, if payload len == 127  |
+     + - - - - - - - - - - - - - - - +-------------------------------+
+     |                               |Masking-key, if MASK set to 1  |
+     +-------------------------------+-------------------------------+
+     | Masking-key (continued)       |          Payload Data         |
+     +-------------------------------- - - - - - - - - - - - - - - - +
+     :                     Payload Data continued ...                :
+     + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+     |                     Payload Data continued ...                |
+     +---------------------------------------------------------------+
+
+```
+
+### Decoding 
+
+1. Byte 0:
+
+   - `FIN` bit:  if Fin is 1, this is the last message in a series
+   - `RSV1` ~ `RSV3`: reservered bits for future use if the standard is updated
+   - `opcode` bit: how to interprete the payload, `0x0` for continuation, `0x1` for text (which is always encoded in UTF-8), `0x2` for binary, `0x8` for close the connection
+     - opcode = `b0 & 0x0F` 
+
+2. Byte 1:
+
+   - `MASK`: tells whether the message is encoded
+
+     - > Messages from the client must be masked, so your server must expect this to be 1. (In fact, [section 5.1 of the spec](https://datatracker.ietf.org/doc/html/rfc6455#section-5.1) says that your server must disconnect from a client if that client sends an unmasked message.) When sending a frame back to the client, do not mask it and do not set the mask bit.
+
+     - `boolean masked = ( b1 & 0x80) != 0`;
+
+   - `Payload len`: the length of the payload (in bytes)
+
+     - a. Read bits 9 - 15, if the number is 125 or less, then that's the length; if it's 126, go to step b; if it's 127, go to step c.
+
+     - b. Read next 2 bytes, and interpret these 2 bytes as an unsigned short. This is the payload length.
+     - c. Read next 8 bytes, and interpret these 8 bytes as an unsigned long (The most significant bit *must* be 0). This is the payload length.
+
+     ```java
+     lenGuess = (b1 & 0x7F);
+     if (lenGuess == 126) {
+       // unsigned short (b2 - b3)
+     } else if (lenGuess == 127) {
+       // long (b2 - b9)
+     }
+     ```
+
+3. Masking-key: if `MASK` bit is set, read the next 4 bytes; this is the masking key.
+
+4. Unmasking the data
+
+   ```java
+   const MASK = [1, 2, 3, 4]; // 4-byte mask
+   const ENCODED = [105, 103, 111, 104, 110]; // encoded string "hello"
+   
+   var DECODED = "";
+   for (int i = 0; i < ENCODED.length(); i++) {
+     DECODED[i] = ENCODED[i] ^ MASK[i % 4];
+   }
+   ```
+
+5. read the package: use DataInputStream: readShort(), readLong(), ...
+
+   ```java
+   if (request.isWsRequest()) {
+     // handshake
+     while (true) {
+       // read message
+       // response to the message
+       
+       // if exception happends here, just throw an exception and close the client
+     }
+   }
+   ```
+
+## Response
+
+1. server to client: no need to mask the message
+2. send messages to every connected client
+3. There are 2 types of connections in out server: websocket connection, normal http connection
+4. `\r\n`: carriage return -- end of line
+
+
+
+
+
