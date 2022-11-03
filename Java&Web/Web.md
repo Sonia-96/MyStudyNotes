@@ -757,13 +757,14 @@ Q: difference between AJAX and web sockets?
 
 # 7 Threads
 
-CORS Error (Cross-Origin Resource Sharing): If the browser already get js file from a server, then send request to another server, then you'll encounter this error.
+CORS Error (Cross-Origin Resource Sharing): If the browser already gets .js file from a server, then send request to another server, then you'll encounter this error.
 
 ## Processes vs. Threads
 
 1. A **process** is a running program: 
    - `ps -def | more`
    - `ps -def | grep ssh`
+   - kill the program: `kill <processId>`
 2. A single program, in order to do multiple things at the same time, can use multiple **threads**
 3. **Concurrency**: running multiple threads at the same time (also called Parallelism)
    - e.g., while a program is running, we can still deal with UI
@@ -827,29 +828,6 @@ CORS Error (Cross-Origin Resource Sharing): If the browser already get js file f
    - all the sahred data is read-only
 
 # 8 Web Socket
-
-## Client Side
-
-```javascript
-let ws = new WebSocket(url); // e.g. ws://localhost:8080/chat
-ws.onOpen = handleConnectCB;
-ws.onError = handleErrorCB;
-ws.onClose = handleCloseCB;
-ws.onmessage = handleMessageCB;
-ws.send("<message>");
-ws.close();
-
-let wsOpen = false;
-function handleConnectCB() {
-  wsOpen = true;
-  // other actions
-}
-```
-
-Q: difference between AJAX and web sockets?
-
-- AJAX is a client-side approach, web sockets is a bi-direction communication
-- AJAX is a single request, web sockets will keep opening.
 
 ## Handshake
 
@@ -997,7 +975,224 @@ The messages are sent through data frames. The format of data frame is as follow
 3. There are 2 types of connections in out server: websocket connection, normal http connection
 4. `\r\n`: carriage return -- end of line
 
+## Client Side Implementation
 
+### Javascript
+
+```javascript
+let ws = new WebSocket(url); // e.g. ws://localhost:8080/chat
+ws.onOpen = handleConnectCB;
+ws.onError = handleErrorCB;
+ws.onClose = handleCloseCB;
+ws.onmessage = handleMessageCB;
+ws.send("<message>");
+ws.close();
+
+let wsOpen = false;
+function handleConnectCB() {
+  wsOpen = true;
+  // other actions
+}
+```
+
+Q: difference between AJAX and web sockets?
+
+- AJAX is a client-side approach, web sockets is a bi-direction communication
+- AJAX is a single request, web sockets will keep opening.
+
+### Java
+
+We use `nv-WebSocket` library to implement WebSocket in Java: https://github.com/TakahikoKawasaki/nv-websocket-client
+
+1. `WebSocketListener` Interface: specifies 20+ methods. The methods that we care the most:
+   - `onConnected(WebSocket websocket, Map<String, List<String>> headers) `: onOpen in JavaScript
+   - `onError(WebSocket webSocket, WebSocketException cause)`: onError in JavaScript
+   - `onTextMessage(WebSocket webSocket, String message)`: onMessage in JavaScript
+   - Q: what is method corresponding to `onClose`?
+2. `WebSocketAdapter` class: implements  `WebSocketListener` with stub methods
+3. `MyWebsocket extends WebSocketAdapter`: our own web socket client which extends `WebSocketAdapter` and implements the above handlers
+
+Relationship between Listener, adapter, and our own handlers: adapter `implements` listener, our own handlers `extends` listener
+
+#### Code snipets
+
+1. create web socket:
+
+   ```java
+   // in onCreate() method
+   try {
+     WebSocket ws = new WebSocketFactory().createSocket("ws://10.0.2.2:8080/endpoint", 1000);
+   } catch (IOException e) {
+     Log.d("CC:", "WS Error!");
+   }
+   ws_.addListener( new MyWebSocket() );
+   ws_.connectAsynchronously();
+   ```
+
+2. write your own handlers:
+
+   ```java
+   public class MyWebSocket extends WebSocketAdapter {
+     @Override
+     public void onConnected(WebSocket websocket, Map<String, List<String>> headers) {
+       Log.d("CC:MyWebSocket", "Web Socket Connected!");
+     }
+   
+     @Override
+     public void onError(WebSocket webSocket, WebSocketException cause) {
+       Log.d("CC:MyWebSocket", "An error occurred");
+     }
+   
+     @Override
+     public void onTextMessage(WebSocket webSocket, String message) {
+     }
+   }
+   ```
+
+# 9 Android
+
+## Activities
+
+An android app is orgnized into activities. One activity is one page/ screen.
+
+An activity contains two things:
+
+- XML layouts: constraint layout
+- Java/Kotlin class: implement the functionality of the page (mainly callbacks)
+
+## Intent
+
+Intent is used to switch and pass data between different activities & apps.
+
+### Explicit Intent
+
+1. use `Itent` to switch activity & pass data
+
+   ```java
+   String value = "my data ...";
+   Intent intent = new Intent(<CurrentActivity>.this, <NewActivity>.class);// switch from current activity to new actiity
+   intent.putExtra("my key", value);
+   startActivity(intent);
+   ```
+
+2. get the data in the new activity
+
+   ```java
+   Bundle extras = getIntent.getExtras();
+   String vallue = extras.getString("my key");
+   ```
+
+### Implicity Intent
+
+Using implicit Intent, components can’t be specified. An action to be performed is declared by implicit intent. Then android operating system will filter out components that will respond to the action. 
+
+```java
+// example 1: send data to other apps
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, "This is the message I'm sending.");
+sendIntent.setType("text/plain");
+startActivity(Intent.createChooser(sendIntent, getResources().getText( R.string.send_to))); // parameters: target, title
+
+// example 2: open a webpage
+Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+startActivity(intent);
+```
+
+## R variable
+
+"R" stands for "resources", which contains a list of IDs for all GUI elements. `R` variable in android app is like `document` in javascript, which is to manipulate layout elements. e.g., 
+
+```java
+EditText editText = findViewById(R.id.<elementId>);
+```
+
+## Manifest - Permissions
+
+Edit `AndroidManifest.xml` to add permissions: location, bluetooth, internet, camera, ...
+
+- Network permission: `<uses-permission android:name="android.permission.INTERNET" />`
+
+Note, If you add a permission after “installing” the app on the emulator, you must **uninstall it and then run again** (from Android Studio) in order for the resource to be allowed to be used.
+
+## Localhost
+
+`ws://10.0.2.2:8080/endpoint`
+
+## Output / Debugging
+
+Usually we use`logcat` panel to see the output messages.
+
+- `Log.i("information")`: post useful information
+- `Log.d("tag", "message")`: send your own debug messages.  `tag` is used to filter messages, e.g. `CC:mainActivity`. "CC" is to get only my message, "mainActivity" is to get only messages from main activity
+
+Warning, when you filter based on a “tag”, you will not see system exception messages.
+
+## UI and Worker Threads
+
+1. UI thread: anything deals with UI should be ran on UI thread, so that the  UI will not freeze
+
+   - `onCreate()`: onCreate method for an activity is like a constructor, which is to build UI for that activity. 
+
+     ```java
+     	@Override
+       protected void onCreate(Bundle savedInstanceState) { // UI thread
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_login);
+         try {
+           ws_ = new WebSocketFactory().createSocket("ws://10.0.2.2:8080/endpoint", 1000 );
+         } catch( IOException e ) {
+           Log.e( "Dd:","WS error" );
+         }
+         ws_.addListener( new MyWebSocket() );
+         ws_.connectAsynchronously();// runs the handshake stuff in a different thread
+       }
+     ```
+
+   - please run UI related code on UI thread, or it will be delayed or won't happen!!!
+
+2. Other threads (Worker threads): doing things that take more than a split second (i.e. could cause the UI to freeze up)
+
+     - Network: connect asynchronously ( Google doesn't allow you do network thing in UI thread)
+
+       ```java
+       // in the method onCreate
+       ws_ = new WebSocket();
+       ws_.connecrAsyncrhonously();
+       ```
+
+     - `ws.onTextMessage()`: afteer we receive the message, we want to update the UI with messages. There are two ways to do this:
+
+       - `runOnUIThread(runnable)`
+  - `<listView>.post(runnable)`
+
+### ListView
+
+Use `ListView` widget to display the messages in the chat room.
+
+```java
+ArrayList<String> messages = new ArrayList<>();
+ListView lv = findViewById("myListView");
+ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, messages);
+lv.setAdapter(adapter);
+```
+
+Every time the client receives a `message`:
+
+```java
+messages.add(message);
+lv.post(new Runnable() {
+  @Override
+  public void run() {
+    adapter.notifyDataSetChanged();
+    lv.smoothScrollToPosition(adapter.getCount());
+  }
+})
+```
+
+### RecyclerView
+
+`RecyclerView`: endless lists. The thing go outside the screen will be got rid of.
 
 
 
