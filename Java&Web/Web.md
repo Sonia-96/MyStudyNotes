@@ -1161,6 +1161,24 @@ Relationship between Listener, adapter, and our own handlers: adapter `implement
    }
    ```
 
+5. `Room`: for chat room
+
+   - `getRoom()`: factory function (a function that  returns a object, which is similar to a constructor).
+
+     ```java
+     private final static Map<String, Room> rooms_ = new HashMap<>(); 
+     public synchronized static Room getRoom(String name) throws IOException {
+        if (rooms_.containsKey(name)) {
+          return rooms_.get(name);
+        }
+        Room room = new Room(name);
+        rooms_.put(name, room);
+        return  room;
+      }
+     ```
+
+     
+
 # 9 Android
 
 ## Activities
