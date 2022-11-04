@@ -69,7 +69,7 @@ List<Integer> list = new ArrayList<>();
 
 ## String
 
-String is a reference type, and is immutable in Java -- even if appending a char to a String, we need to rebuild the whole String.
+String is a reference type, and is immutable in Java -- even only appending a char to a String, we still need to rebuild the whole String.
 
 ### String literals & String Objects
 
@@ -280,7 +280,7 @@ public class Main {
 
 #### Variable
 
-- static variable belongs to the whole class, all instances of the class share the same static variable. Static variables already exist before an object is created.
+- static variable belongs to the whole class; all instances of the class share the same static variable. Static variables already exist before an object is created.
 - non-static variable only belongs to an object
 
 # Exception
@@ -511,3 +511,24 @@ We can use lamda function to create a comparator directly, instead of first defi
 Arrays.sort(dogs, (c1, c2) -> (c1.size - c2.size));
 ```
 
+# Miscelaneous
+
+## Enumerated Types
+
+Enumerated types are named constants that can increase the readability and the correctness of your code. 
+
+```c
+enum days_of_week {
+  MON=1, TUE, WED, THU, FRI, SAT, SUN
+};
+```
+
+- In a enumerated type, the default value of the first member is 0. The subsequent members are incremented by 1 over its previous member.
+
+- The enumerated names cannot change throughout the program. 
+
+Note, the convention for indicating that a name denotes a constant is to write the name in **all uppercase**. 
+
+## switch statement
+
+alternative syntax

@@ -413,7 +413,9 @@ Vary: Accept-Encoding, Cookie, User-Agent
    }
    ```
 
-   
+4. **CORS Error** (Cross-Origin Resource Sharing): Browser only allows the javascript file to talk to the host the file was loaded from. if the js file sends a request to another server, you'll get this error.
+
+   For example, the browser gets your js file from the localhost server. Then your js file tries to connect to the `google.com`, you'll get this error.
 
 # 4 JavaScript
 
@@ -757,75 +759,108 @@ Q: difference between AJAX and web sockets?
 
 # 7 Threads
 
-CORS Error (Cross-Origin Resource Sharing): If the browser already gets .js file from a server, then send request to another server, then you'll encounter this error.
-
 ## Processes vs. Threads
 
 1. A **process** is a running program: 
    - `ps -def | more`
    - `ps -def | grep ssh`
    - kill the program: `kill <processId>`
-2. A single program, in order to do multiple things at the same time, can use multiple **threads**
-3. **Concurrency**: running multiple threads at the same time (also called Parallelism)
-   - e.g., while a program is running, we can still deal with UI
+
+2. A **thread** is a mechanism that allows a program to divide itself into two or more simultaneously running tasks.(then a program can do multiple things concurrently)
+
    - threads allow a single program to use multiple cores at the same time
 
-## Threads
+   - resources to run a function:
 
-1. resources to run a function:
+     - memory - call stack
+     - CPU Time (the exact amount of time that CPU has spent in processing the data for a specific program)
 
-   - memory - call stack
-   - CPU Time
+   - Threads can run in the same heap memory. If you don't pay attention, one thread can alter the same variable that another thread is using.
 
-2. Threads in Java:
+3. **Concurrency** (Parallelism): running multiple threads at the same time (also called Parallelism)
 
-   - `Thread` class - create a thread
-   - Threads use `Runnable` ( an Interface contains `void run()` )object to work
+   - e.g., while a program is running, we can still deal with UI
+
+Q: Difference between processes and threads? //TODO
+
+## Synchronization
+
+1. How do threads talk to each other?
+
+   - messages
+   - shared memory
+     - common variables
+
+2. Synchronization
+
+   Threads are running at the same time and in a nondeterministic order. If a variabl is read by one thread and written by another, this can cause potential problems. Synchronization is an approach to prevent different threads from accessing the same data at the same time.
+
+3. **critical section**: a region of code that can only be executed by one thread at a time. All the other threads have to wait to execute until the first thread has left the region.[ref](https://www.geeksforgeeks.org/g-fact-70/)
+
+   - use Mutexes / locks
+   - Java uses keyword `synchronized` to make a critial section
+
+4. General rules for threads:
+
+   - threads don't share data
+   - all the sahred data is read-only
+
+## Threads in Java
+
+1. Threads in Java:
+
+   - `Thread` class: create a thread
+   - `Runnable` object: has the code to run
+     - `Runnable` is an Interface contains the  `void run()` function
    - important methods:
+     - `<thread>.start()`: start a thread
+     - `<thread>.join()`: Main thread will wait for a thread to finish running (Main is blocked)
+     - `Thread.currentThread().getName()`: returns the name of the current thread
 
-3. Create a thread
+2. Create a thread
 
    - Lambda function:
 
      ```java
      Thread t = new Thread(() -> {
-       // usually has a while loop
+       // the actual code
+       // usually the code is within a while loop so that it continues doing work for us 
      });
-     t.start(); // get the thread running
-     t.join(); // Main waits for t to finish (Main is blocked)
      ```
 
-4. How do threads talk to each other?
-
-   - messages
-   - shared memory
-     - common variables
-     - critical section: do something without being interrupted
-       - use Mutexes / locks
-       - Java uses keyword `synchronized`
-
-5. Syncrhonization
-
-   threads are running at the same time and in a nondeterministic order. If a variabl is read by one thread and written by another, this can cause potential problems. 
-
-   - Syncrhonized method
+   - Lambda class
 
      ```java
-     public class MyClass {
-       public synchronized void doit() {...};
-     }
+     Thread t = new Thread(new Runnable() {
+       @Override
+       public void run() {
+         // the actual code
+       }
+     })
      ```
 
-     any thread that calls `doit()` on the same object will check to see if any other thread is currently running this method. If so, they'll wait until that is finished.
+   - Runnable class
 
-     However, threads using different objects can access the same function simultaneously.
+     ```java
+     public class MyRunnable {
+       @Override
+       public void run() {
+         // the actual code
+       }
+     }
+     
+     Thread t = new Thread(new MyRunnable());
+     ```
 
-   
+3. syncrhonized method
 
-6. General rules for threads:
+   ```java
+   public class MyClass {
+     public synchronized void doit() {...};
+   }
+   ```
 
-   - threads don't share data
-   - all the sahred data is read-only
+   Any thread that calls `doit()` on the same object will check to see if any other thread is currently running this method. If so, they'll wait until that is finished. However, different threads using different objects can access the same function simultaneously.
 
 # 8 Web Socket
 
@@ -1119,6 +1154,8 @@ Note, If you add a permission after “installing” the app on the emulator, yo
 
 `ws://10.0.2.2:8080/endpoint`
 
+// TODO: what is endpoint?
+
 ## Output / Debugging
 
 Usually we use`logcat` panel to see the output messages.
@@ -1127,6 +1164,8 @@ Usually we use`logcat` panel to see the output messages.
 - `Log.d("tag", "message")`: send your own debug messages.  `tag` is used to filter messages, e.g. `CC:mainActivity`. "CC" is to get only my message, "mainActivity" is to get only messages from main activity
 
 Warning, when you filter based on a “tag”, you will not see system exception messages.
+
+// TODO: difference between Log and sout? why we use log 
 
 ## UI and Worker Threads
 
@@ -1164,8 +1203,9 @@ Warning, when you filter based on a “tag”, you will not see system exception
      - `ws.onTextMessage()`: afteer we receive the message, we want to update the UI with messages. There are two ways to do this:
 
        - `runOnUIThread(runnable)`
-  - `<listView>.post(runnable)`
-
+       
+         - `<listView>.post(runnable)`
+       
 ### ListView
 
 Use `ListView` widget to display the messages in the chat room.
@@ -1192,7 +1232,7 @@ lv.post(new Runnable() {
 
 ### RecyclerView
 
-`RecyclerView`: endless lists. The thing go outside the screen will be got rid of.
+`RecyclerView`: endless lists. The things going outside the screen will be got rid of ( save memory).
 
 
 
