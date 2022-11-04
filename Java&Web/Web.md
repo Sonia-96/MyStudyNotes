@@ -762,9 +762,14 @@ Q: difference between AJAX and web sockets?
 ## Processes vs. Threads
 
 1. A **process** is a running program: 
-   - `ps -def | more`
-   - `ps -def | grep ssh`
-   - kill the program: `kill <processId>`
+
+   - `ps` (process status): shows the processes for the current shell
+
+     - `ps -def | more`: display the processes on this computer page by page
+
+     - `ps -def | grep ssh`: filter the processes using ssh
+
+   - kill the program: `kill <PId>`
 
 2. A **thread** is a mechanism that allows a program to divide itself into two or more simultaneously running tasks.(then a program can do multiple things concurrently)
 
@@ -817,7 +822,7 @@ Q: Difference between processes and threads? //TODO
      - `<thread>.join()`: Main thread will wait for a thread to finish running (Main is blocked)
      - `Thread.currentThread().getName()`: returns the name of the current thread
 
-2. Create a thread
+2. Three ways to create a thread
 
    - Lambda function:
 
@@ -886,6 +891,8 @@ Sec-WebSocket-Protocol: chat, superchat
 Sec-WebSocket-Version: 13
 ```
 
+We use "Sec-WebSocket-Key" and "Connection: Upgrade" to determine if a request is a web socket request or a normal HTTP request.
+
 ### Server handshake response
 
 ```
@@ -913,7 +920,7 @@ Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo= // important
 
 ## Messages
 
-When a client send a message to the server, they just need to do this:`ws.send(<message>)` (the message is in binary format). But in the server side, it's much more complicated to parse the message.
+After building the connection, the server and client switch to Web Socket Protocols for all future messages. When a client send a message to the server, they just need to do this:`ws.send(<message>)` (the message is in **binary** format). But in the server side, it's much more complicated to parse/send the message.
 
 ### Data Frame
 
@@ -949,13 +956,11 @@ The messages are sent through data frames. The format of data frame is as follow
    - `FIN` bit:  if Fin is 1, this is the last message in a series
    - `RSV1` ~ `RSV3`: reservered bits for future use if the standard is updated
    - `opcode` bit: how to interprete the payload, `0x0` for continuation, `0x1` for text (which is always encoded in UTF-8), `0x2` for binary, `0x8` for close the connection
-     - opcode = `b0 & 0x0F` 
+     - `byte opcode = b0 & 0x0F` 
 
 2. Byte 1:
 
-   - `MASK`: tells whether the message is encoded
-
-     - > Messages from the client must be masked, so your server must expect this to be 1. (In fact, [section 5.1 of the spec](https://datatracker.ietf.org/doc/html/rfc6455#section-5.1) says that your server must disconnect from a client if that client sends an unmasked message.) When sending a frame back to the client, do not mask it and do not set the mask bit.
+   - `MASK`: tells whether the message is encoded. Messages from the client to the server must be encoded. However, messages from the server to the client should not be encoded.
 
      - `boolean masked = ( b1 & 0x80) != 0`;
 
@@ -989,18 +994,67 @@ The messages are sent through data frames. The format of data frame is as follow
    }
    ```
 
-5. read the package: use DataInputStream: readShort(), readLong(), ...
+5. read/write the package: use `DataInputStream` and `DataoutputStream`, which make it easier to read/write group of bytes
+
+   - `DataInputStream`: readNBytes(n), readShort(), readLong(), readInt() ...
+   - `DataOutputStream`: 
+     - `write(int i)`: write the lowest 8 bits of `i`
+     - `writeShort(int i)`: write the lowest 16 bits of `i`
+     - `writeLong(long i)`: write a long as 8 bytes
+
+#### code snipets
+
+1. decode message received from the client:
 
    ```java
-   if (request.isWsRequest()) {
-     // handshake
-     while (true) {
-       // read message
-       // response to the message
-       
-       // if exception happends here, just throw an exception and close the client
-     }
-   }
+   	public static byte[] decodeMessage(InputStream in) throws IOException {
+           DataInputStream dataInputStream = new DataInputStream(in);
+           byte b0 = dataInputStream.readByte();
+           boolean fin = (b0 & 0x80) != 0; // TODO handle fin is false
+           byte opcode_ = (byte) (b0 & 0x0F);
+           byte b1 = dataInputStream.readByte();
+           boolean masked = (b1 & 0x80) != 0;
+           int len = b1 & 0x7F;
+           if (len == 126) {
+               len = dataInputStream.readShort(); // 2 bytes
+           } else if (len == 127) {
+               len =  (int) dataInputStream.readLong(); // 8 bytes
+           }
+           // unmask data
+           byte[] decoded;
+           if (masked) {
+               byte[] mask = dataInputStream.readNBytes(4);
+               byte[] encoded = dataInputStream.readNBytes(len);
+               decoded = new byte[encoded.length];
+               for (int i = 0; i < encoded.length; i++) {
+                   decoded[i] = (byte) (encoded[i] ^ mask[i % 4]);
+               }
+           } else {
+               decoded = dataInputStream.readNBytes(len);
+           }
+           return decoded;
+       }
+   ```
+
+2. send message from the server to the client: use `DataOutputStream`
+
+   ```java
+   	public static void sendMessage(String message, OutputStream client) throws IOException {
+           DataOutputStream out = new DataOutputStream(client);
+           int payloadLen = message.length();
+           out.writeByte(0x81);
+           if (payloadLen < 126) {
+               out.write(message.length());
+           } else if (payloadLen < Math.pow(2, 16)) {
+               out.write(126);
+               out.writeShort(payloadLen);
+           } else {
+               out.write(127);
+               out.writeLong(payloadLen);
+           }
+           out.writeBytes(message);
+           client.flush();
+       }
    ```
 
 ## Response
@@ -1081,6 +1135,29 @@ Relationship between Listener, adapter, and our own handlers: adapter `implement
      @Override
      public void onTextMessage(WebSocket webSocket, String message) {
      }
+   }
+   ```
+
+## Server Side Implementation
+
+1. `WebServer`: accept clients' connection and create a thread (connection handler) for each connection
+
+2. `ConnectionHandler` (extends `Runnable`): parse the request (`HTTPRequest`) and send the response (`HTTPResponse`)
+
+3. `HTTPRequest`: parse the header and store headers into a `HashMap<String, String>`
+
+4. `HTTPReponse`: handle the request
+
+   ```java
+   if (request.isWsRequest()) {
+     // handshake
+     while (true) {
+       // read message
+       // respond to the message
+       // if exception happens here, just throw an exception and close the client
+     }
+   } else {
+     // send normal HTTP response
    }
    ```
 
