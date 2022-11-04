@@ -771,7 +771,7 @@ Q: difference between AJAX and web sockets?
 
    - kill the program: `kill <PId>`
 
-2. A **thread** is a mechanism that allows a program to divide itself into two or more simultaneously running tasks.(then a program can do multiple things concurrently)
+2. A **thread** is a mechanism that allows a program to divide itself into multiple simultaneously running tasks.
 
    - threads allow a single program to use multiple cores at the same time
 
@@ -780,13 +780,18 @@ Q: difference between AJAX and web sockets?
      - memory - call stack
      - CPU Time (the exact amount of time that CPU has spent in processing the data for a specific program)
 
-   - Threads can run in the same heap memory. If you don't pay attention, one thread can alter the same variable that another thread is using.
+   - Threads shares the same heap memory. If you don't pay attention, one thread can alter the same variable that another thread is using. (Dangerous!!)
 
-3. **Concurrency** (Parallelism): running multiple threads at the same time (also called Parallelism)
+3. **Concurrency** (Parallelism): running multiple threads at the same time
 
    - e.g., while a program is running, we can still deal with UI
 
-Q: Difference between processes and threads? //TODO
+Q: Difference between a process and a thread? 
+
+- A process is a running program. A thread is a segment of a process. Threads allows a program to do multiple tasks concurrently.
+- Processes are indepent of each other; don't share memory or other resources. Threads are interdepended and share memory.
+- Processes are heavy weighted. Threads are light weighted.
+- A proper syncrhonization between processes is not required. In contrast, threads need to be properly synchronized to avoid unexpected problems.
 
 ## Synchronization
 
@@ -800,7 +805,7 @@ Q: Difference between processes and threads? //TODO
 
    Threads are running at the same time and in a nondeterministic order. If a variabl is read by one thread and written by another, this can cause potential problems. Synchronization is an approach to prevent different threads from accessing the same data at the same time.
 
-3. **critical section**: a region of code that can only be executed by one thread at a time. All the other threads have to wait to execute until the first thread has left the region.[ref](https://www.geeksforgeeks.org/g-fact-70/)
+3. **critical section**: a region of code that can only be executed by one thread at a time, such as accessing a resource. All the other threads have to wait to execute until the first thread has left the region.[ref](https://www.geeksforgeeks.org/g-fact-70/)
 
    - use Mutexes / locks
    - Java uses keyword `synchronized` to make a critial section
@@ -808,7 +813,7 @@ Q: Difference between processes and threads? //TODO
 4. General rules for threads:
 
    - threads don't share data
-   - all the sahred data is read-only
+   - all the shared data is read-only
 
 ## Threads in Java
 
@@ -1061,7 +1066,7 @@ The messages are sent through data frames. The format of data frame is as follow
 
 1. server to client: no need to mask the message
 2. send messages to every connected client
-3. There are 2 types of connections in out server: websocket connection, normal http connection
+3. There are 2 types of connections in the server: websocket connection, normal http connection
 4. `\r\n`: carriage return -- end of line
 
 ## Client Side Implementation
@@ -1253,14 +1258,16 @@ Note, If you add a permission after “installing” the app on the emulator, yo
 
 ## Output / Debugging
 
-Usually we use`logcat` panel to see the output messages.
+Usually we use`logcat` panel to see the output messages for android app.
 
 - `Log.i("information")`: post useful information
 - `Log.d("tag", "message")`: send your own debug messages.  `tag` is used to filter messages, e.g. `CC:mainActivity`. "CC" is to get only my message, "mainActivity" is to get only messages from main activity
 
 Warning, when you filter based on a “tag”, you will not see system exception messages.
 
-// TODO: difference between Log and sout? why we use log 
+Q: Why don't we use sout for android app? 
+
+A: Because there's no console for sout to send message. (though on the emulator and most devices, sout gets redirected to LogCat and printed using `Log.i()`. This may not be true on very old or custom Android versions.)
 
 ## UI and Worker Threads
 
@@ -1295,19 +1302,19 @@ Warning, when you filter based on a “tag”, you will not see system exception
        ws_.connecrAsyncrhonously();
        ```
 
-     - `ws.onTextMessage()`: afteer we receive the message, we want to update the UI with messages. There are two ways to do this:
+     - `ws.onTextMessage()`: after we receive the message, we want to update the UI with messages. There are two ways to do this:
 
        - `runOnUIThread(runnable)`
        
-         - `<listView>.post(runnable)`
+       - `<listView>.post(runnable)`
        
-### ListView
+## ListView
 
 Use `ListView` widget to display the messages in the chat room.
 
 ```java
 ArrayList<String> messages = new ArrayList<>();
-ListView lv = findViewById("myListView");
+ListView lv = findViewById(R.id.myListView);
 ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, messages);
 lv.setAdapter(adapter);
 ```
@@ -1325,7 +1332,7 @@ lv.post(new Runnable() {
 })
 ```
 
-### RecyclerView
+## RecyclerView
 
 `RecyclerView`: endless lists. The things going outside the screen will be got rid of ( save memory).
 
