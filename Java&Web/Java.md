@@ -487,7 +487,7 @@ After implementing the `Comparable<T>` interface, the objects of this class can 
 
 ### Interface Comparator
 
-`Comparator<T>` is also a built-in interface in Java. We need to import this interface before implementing if (`Comparable` doesn't need this).  To implement `Comparator`, we need to implement the method `public int compare(Object o1, Object o2)`.
+`Comparator<T>` is also a built-in interface in Java. We need to import this interface before implementing it (`Comparable` doesn't need this).  To implement `Comparator`, we need to implement the method `public int compare(Object o1, Object o2)`.
 
 ```java
 public class DogComparator implements Comparator<Dog> {
