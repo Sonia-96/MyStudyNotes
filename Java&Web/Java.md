@@ -46,7 +46,7 @@
 
 ## Primitive types
 
-Primitives are stored on stack. Anything other than primitive types are reference types (or objects). All reference types are 8 bytes, which holds the address of the real data. And the real data is stored on heap.
+Primitives are stored on stack. Anything other than primitive types are **reference types** (or objects). All reference types are 8 bytes, which holds the address of the real data. And the real data is stored on heap.
 
 [![reference_types](./assets/reference_types.png)](https://github.com/Sonia-96/UCB-CS61B-Data_Structures_Fall_2020/blob/master/notes/images/reference_types.png)
 
@@ -140,6 +140,75 @@ When we use `new` to create a `String`,  JVM will create a new String object in 
    ```java
    ArrayList<String> moreNamew = new ArrayList<>(names); // this is a shllow copy!!! 
    ```
+
+## Generics
+
+To make a class to be compatible with different data types, we can use generics.
+
+### Syntax
+
+1. In declaration: `className<T>`
+
+   ```java
+   class MyContainer<T> {
+     T data[];
+     int size, capacity;
+     
+     public void add(T item) {...};
+     public void remove(T item) {...};
+   }
+   ```
+
+   Note, you can only use reference types for generics, e.g.,  `Integer`, `Double`, `Character`, `Boolean`, `Short`, `Long`, `Byte`, `Float`.
+
+2. In instantiation: `MyContainer<T> container = new MyContainer<>()`
+
+3. comman type parameters:
+
+   - T - Type
+   - E - Element
+   - K - Key
+   - N - Number
+   - V - Value
+
+### Auto boxing/unboxing
+
+1. auto boxing: during compiling, the primitive types will be converted to corresponding reference types automatically. e.g., 
+
+   ```java
+   ArrayList<Integer> list = new ArrayList<>();
+   list.add(5);
+   ```
+
+2. auto unboxing: reference types - > primitive types
+
+   ```java
+   int num = list.get(0);
+   ```
+
+### Wildcard
+
+The **question mark (?)** is known as the **wildcard** in generic programming. It represents an unknown type. 
+
+- upper bounded wildcard: `<? extends E>` -- `E` or anyclass extends the class `E`
+- lower bounded wildcard: `<? super E>` -- `E` or anyclass that is a super-class of `E`
+
+### static generic method
+
+`static` methods can have their own generic types in their signatures.
+
+```java
+public static <T> boolean contains(T[] array, T item) {
+  for (T t : array) {
+    if (t.equals(item)) {
+      return true;
+    }
+  }
+  return false;
+}
+```
+
+
 
 # File I/O
 
