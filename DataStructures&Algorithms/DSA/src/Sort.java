@@ -1,3 +1,5 @@
+import java.lang.reflect.Array;
+
 public class Sort {
     private static void swap(int[] nums, int i, int j) {
         int temp = nums[i];
@@ -40,9 +42,7 @@ public class Sort {
         return j;
     }
 
-    /**
-     * sort nums[start : end)
-     */
+    // sort nums[start : end)
     private static void quickSort(int[] nums, int start, int end) {
         if (start >= end) return;
         int p = partition(nums, start, end);
@@ -52,5 +52,39 @@ public class Sort {
 
     public static void quickSort(int[] nums) {
         quickSort(nums, 0, nums.length);
+    }
+
+    private static void merge(int[] nums, int left, int mid, int right) {
+        int[] result = new int[right - left];
+        int l = left, r = mid, p = 0;
+        while (l < mid && r < right) {
+            if (nums[l] <= nums[r]) {
+                result[p++] = nums[l++];
+            } else {
+                result[p++] = nums[r++];
+            }
+        }
+        for (; l < mid; l++) {
+            result[p++] = nums[l];
+        }
+        for (; r < right; r++) {
+            result[p++] = nums[r];
+        }
+        System.arraycopy(result, 0, nums, left, right - left);
+    }
+
+    private static void sort(int[] nums, int start, int end) {
+        if (start + 1 == end) {
+            return;
+        }
+        // int mid = (start + end) / 2; // may cause overflow
+        int mid = start + (end - start) / 2;
+        sort(nums, start, mid);
+        sort(nums, mid, end);
+        merge(nums, start, mid, end);
+    }
+
+    public static void mergeSort(int[] nums) {
+        sort(nums, 0, nums.length);
     }
 }
