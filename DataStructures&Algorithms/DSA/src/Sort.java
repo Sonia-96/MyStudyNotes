@@ -7,8 +7,24 @@ public class Sort {
         nums[j] = temp;
     }
 
+    public static boolean binarySearch(int[] nums, int goal) {
+        int start = 0, end = nums.length;
+        while (start < end) {
+            int mid = start + (end - start) >> 1;
+            if (nums[mid] == goal) {
+                return true;
+            }
+            if (nums[mid] < goal) {
+                start = mid + 1;
+            } else {
+                end = mid;
+            }
+        }
+        return false;
+    }
+
     public static void selectionSort(int[] nums) {
-        for (int i = 0; i < nums.length; i++) {
+        for (int i = 0; i < nums.length - 1; i++) {
             int minIndex = i;
             for (int j = i + 1; j < nums.length; j++) {
                 if (nums[j] < nums[minIndex]) {
@@ -19,11 +35,52 @@ public class Sort {
         }
     }
 
+    public static void bubbleSort(int[] nums) {
+        for (int i = 0; i < nums.length; i++) {
+            boolean done = true;
+            for (int j = 0; j < nums.length - i - 1; j++) {
+                if (nums[j] > nums[j + 1]) {
+                    swap(nums, j, j + 1);
+                    done = false;
+                }
+            }
+            if (done) break;
+        }
+    }
+
+    public static void bubbleSort2(int[] nums) {
+        int unsortedEnd = nums.length;
+        while (unsortedEnd > 1) {
+            int lastSwap = 0;
+            for (int j = 0; j < unsortedEnd - 1; j++) {
+                if (nums[j] > nums[j + 1]) {
+                    swap(nums, j, j + 1);
+                    lastSwap = j;
+                }
+            }
+            unsortedEnd = lastSwap + 1;
+            // after this round, the unsorted part is [0, lastSwap]
+            // in the next round, we only need to compare adjacent elements in unsorted part
+        }
+    }
+
     public static void insertionSort(int[] nums) {
         for (int i = 1; i < nums.length; i++) {
             for (int j = i; j > 0 && nums[j] < nums[j - 1]; j--) {
                 swap(nums, j, j - 1);
             }
+        }
+    }
+
+    public static void shellSort(int[] nums) {
+        int gap = nums.length >> 1;
+        while (gap > 0) {
+            for (int i = gap; i < nums.length; i++) {
+                for (int j = i; j >= gap && nums[j] < nums[j - gap]; j -= gap) {
+                    swap(nums, j, j - gap);
+                }
+            }
+            gap >>= 1;
         }
     }
 
