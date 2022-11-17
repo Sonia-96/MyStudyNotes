@@ -2,6 +2,8 @@
 
 In this document, all sorting methods sort in ascending order.
 
+[0, N): half open range. I tend to use this convention in sorting algorithm.
+
 ## Simple Sorts
 
 Helper function:
@@ -96,7 +98,7 @@ public static void bubbleSort2(int[] nums) {
 
   - best case: O(n) for sorted array
 
-  - average: O(n<sup>2</sup>)
+  - average: O(n<sup>2</sup>) (accurately it's O(n<sup>2</sup>/4))
 
 - space complexity: O(1)
 - stable sorting algorithm
@@ -174,60 +176,160 @@ public static void shellSort(int[] nums) {
 
 
 
-## Comparison Sorts
+## Summary: Comparison Sorts
 
-3 elements array (x, y, z) has 3! = 6 possibilities
 
-Every comparison we make can reduce the possibilities by a factor of 2. (e.g., x < z make possibilities become 3)
 
-So we need to do log<sub>2</sub>n! comparisons to get only 1 possibility.
+An array wit n elements can have n! possibilities. Every comparison we make can reduce the possibilities by a factor of 2. For example, a 3-element array (x, y, z) has 3! = 6 possibilities. If we know x < z, then the possibilities reduce to 3. Therefore, we need to do log<sub>2</sub>n! comparisons to get only 1 possibility.
 
 logn! = log(n * (n - 1) * (n - 2) * ... * 1) = log n + log n-1 + ... 1 + 0 < nlogn = O(nlogn) (acutally log n! = Θ(nlogn))
 
-**Conclusion**: for any comparison sort, the worst case numbers of comparison is O(nlogn)
+(Actually log<sub>2</sub>n ≈ nlogn, [refer](https://mathworld.wolfram.com/StirlingsApproximation.html))
 
-Any sort algorithm has at least O(n) comparisons because it need to check if the array is already sorted.
+【option + x -> ≈】
+
+:star:**Conclusion**: 
+
+- For any sorting method based on comparison, the worst-case numbers of comparison is O(nlogn).
+- Any sort algorithm has at least O(n) comparisons because it need to check if the array is already sorted.
 
 ## Merge Sort
 
-## Quick Sort
-
-1. choose a random number in the array as a pivot
-2. iterate over the elements, put the elements smaller than pivot on its left, bigger elements on its right
-3. repeat step1 & 2 on subarrays besides the pivot, until the length of the array is 1
+1. Split the array from middle into 2 subarrays, then sort them (use recursion) -- sort()
+2. Merge 2 subarrays -- merge()
 
 ```java
-    private static int partition(int[] nums, int start, int end) {
-        int p = start + (int) (Math.random() * (end - start));
-        int pivot = nums[p];
-        int j = start; // right border of smaller elements
-        swap(nums, start, p);
-        for (int i = start + 1; i < end; i++) {
-            if (nums[i] < pivot) {
-                j++;
-                swap(nums, j, i);
-            }
-        }
-        swap(nums, j, start);
-        return j;
+private static void merge(int[] nums, int[] temp, int start, int mid, int end) { // sort happends in merge()
+  int left = start, right = mid, p = start;
+  for (; left < mid && right < end; p++) {
+    if (nums[left] <= nums[right]) {
+      temp[p] = nums[left++];
+    } else {
+      temp[p] = nums[right++];
     }
+  }
+  for (; left < mid; left++) {
+    temp[p++] = nums[left];
+  }
+  for (; right < end; right++) {
+    temp[p++] = nums[right];
+  }
+  System.arraycopy(temp, start, nums, start, end - start);
+}
 
-    /**
-     * sort nums[start : end)
-     */
-    private static void quickSort(int[] nums, int start, int end) {
-        if (start >= end) return;
-        int p = partition(nums, start, end);
-        partition(nums, start, p - 1);
-        partition(nums, p + 1, end);
-    }
+private static void mergeSort(int[] nums, int[] temp, int start, int end) {
+  if (end - start < 2) {
+    return;
+  }
+  int mid = start + (end - start) / 2;
+  mergeSort(nums, temp, start, mid);
+  mergeSort(nums, temp, mid, end); // half-open range
+  merge(nums, temp, start, mid, end);
+}
 
-    public static void quickSort(int[] nums) {
-        quickSort(nums, 0, nums.length);
-    }
+public static void mergeSort(int[] nums) {
+  int[] temp = new int[nums.length];
+  mergeSort(nums, temp, 0, nums.length);
+}
 ```
 
-Time complexity:
+- Time Complexity: O(NlogN) (average case, best-case, worst case are all O(NlogN))
+  - f(N) = N + 2f(N/2) = N +  2(N/2 + 2f(N/4)) = 2N + 2<sup>2</sup>f(N/4) = ... = Nlog<sub>2</sub>N+ 2<sup>log<sub>2</sub>N</sup>f(1) = Nlog<sub>2</sub>N+ log<sub>2</sub>N = (N + 1) log<sub>2</sub>N
+- Space Complexity: O(N)
+- Stable sorting algorithm
+- Non-inplace algorithm
+
+Tricks:
+
+- allocating a temp array for merging is costly. It's better to allocate the whole thing all at one in the driver method, then pass it to all recursive calls
+
+- When N is small, intertion sort is faster than merge sort. To exaplain, the time complexity of merge sort is O(NlogN), and insertion sort is O(n<sup>2</sup> / 4). If N = 10, merge sort costs 33 to sort the array, and insertion sort only costs 25. Therefore, in the recursive call, when `end - start < 10`, we can switch to insertion sort.
+
+  ```java
+  if (end - start < threshold) {
+    selectionSort(nums, start, end);
+  } else {
+    int mid = start + (end - start) / 2;
+    mergeSort(nums, start, mid);
+    mergeSort(nums, mid, end);
+    merge(nums, start, mid, end);
+  }
+  ```
+
+// TODO: [iterative merge sort](https://softwareengineering.stackexchange.com/questions/367544/in-merge-sort-why-not-just-split-to-individual-items-immediately-rather-than-re)
+
+## Quick Sort
+
+A disadvantage of Merge Sort is that it takes O(N) space to merge two subarrays. Quick Sort can improve this. It uses `partition()` to move elements to the right place in O(N) time, so we don't need to merge.
+
+1. `partition(nums)`: (trickest part in Quick Sort!!!)
+   - choose a `pivot` (there are three strategies to choose a pivot - random, middle, ?)
+
+   - iterate over the elements, put the elements smaller than the pivot on its left, bigger elements on its right
+
+   - return the index of the pivot
+2. repeat step1 on the left subarray and the right subarray, until the length of the array is smaller than 2
+
+### Recursion
+
+```java
+private static void quickSort(int[] nums, int start, int end) {
+  if (end - start > 2) return;
+  int p = partition(nums, start, end);
+  partition(nums, start, p); // half-open range
+  partition(nums, p + 1, end);
+}
+
+public static void quickSort(int[] nums) {
+  quickSort(nums, 0, nums.length);
+}
+```
+
+### Partition
+
+Partitions have many different implementations. 
+
+1.  two-sided version.
+
+   ```java
+   private static int partition(int[] nums, int start, int end) {
+     int p = start + (int) (Math.random() * (end - start));
+     int pivot = nums[p];
+     swap(nums, end - 1, p); // swap pivot with the last element
+     int left = start, right = end - 2;
+     while (left < right) {
+       while (nums[left] < pivot) { // left points to an element bigger than pivot
+         left++;
+       }
+       while (nums[right] > pivot) { // right points to an element smaller than pivot
+         right--;
+       }
+       swap(nums, left, right);
+     }
+     swap(nums, end - 1, right);
+   }
+   ```
+
+2. left-sided version
+
+   ```java
+   private static int partition(int[] nums, int start, int end) { // TODO 复习这种partition
+     int p = start + (int) (Math.random() * (end - start));
+     int pivot = nums[p];
+     int j = start; // right border of smaller elements
+     swap(nums, start, p);
+     for (int i = start + 1; i < end; i++) {
+       if (nums[i] < pivot) {
+         j++;
+         swap(nums, j, i);
+       }
+     }
+     swap(nums, j, start);
+     return j;
+   }
+   ```
+
+Time complexity of Quick Sort: 
 
 - worst case: O(n<sup>2</sup>), everytime we choose the smallest or biggest element as the pivot
   - T(n) = n + T(n-1) = n + (n - 1) + T(n - 2) = ... = n + (n - 1) + ... + 1 = O(n<sup>2</sup>)
@@ -237,6 +339,16 @@ Time complexity:
 
 - average: O(nlogn)
 
+##  3-way quick sort
+
+// TODO 有问题，如果array所有元素都一样，会陷入死循环
+
+How to choose the pivot? // 重温这段zoom
+
+- random
+- middle value: if the array is close to be completely sorted, the middle value would be close the median -> median-ish pivot (pretty good!)
+  - but you might still get O(n<sup>2</sup>) when you are un lucky. e.g., every time you pick a smallest number 
+
 ## Count Sort
 
 ## Heap Sort
@@ -245,22 +357,87 @@ Time complexity:
 
 ## Binary Search
 
+Time complexity: O(logN)
+
+1. Check if an array contains this element:
+
+   ```java
+   public static boolean binarySearch(int[] nums, int goal) {
+     int start = 0, end = nums.length;
+     while (start < end) {
+       int mid = start + (end - start) / 2; 
+       if (nums[mid] == goal) {
+         return true;
+       }
+       if (nums[mid] < goal) {
+         start = mid + 1;
+       } else {
+         end = mid;
+       }
+     }
+     return false;
+   }
+   ```
+   or:
+
+   ```java
+   public static boolean binarySearch(int[] nums, int goal) {
+     int start = 0, end = nums.length - 1;
+     while (start <= end) {
+       int mid = start + (end - start) / 2; 
+       if (nums[mid] == goal) {
+         return true;
+       }
+       if (nums[mid] < goal) {
+         start = mid + 1;
+       } else {
+         end = mid - 1;
+       }
+     }
+     return false;
+   }
+   ```
+
+   
+
+2. Insert an element:
+
+   ```java
+   public static boolean binarySearch(int[] nums, int element) {
+     int start = 0, end = nums.length;
+     while (start < end) {
+       int mid = start + (end - start) / 2;
+       if (nums[mid] <= element) {
+         start = mid + 1;
+       } else {
+         end = mid;
+       }
+     }
+     return start;
+   }
+   ```
+
+   or:
+
+   ```java
+   public static boolean binarySearch(int[] nums, int element) {
+     int start = 0, end = nums.length - 1;
+     while (start <= end) {
+       int mid = start + (end - start) / 2;
+       if (nums[mid] <= element) {
+         start = mid + 1;
+       } else {
+         end = mid - 1;
+       }
+     }
+     return start;
+   }
+   ```
+
+   
+
+### Quick Select
+
 ```java
-public static boolean binarySearch(int[] nums, int goal) {
-  int start = 0, end = nums.length;
-  while (start < end) {
-    int mid = start + (end - start) >> 1;
-    if (nums[mid] == goal) {
-      return true;
-    }
-    if (nums[mid] < goal) {
-      start = mid + 1;
-    } else {
-      end = mid;
-    }
-  }
-  return false;
-}
 ```
 
-Time complexity: O(logN)
