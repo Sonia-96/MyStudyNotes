@@ -8,6 +8,17 @@ Hierarchy of Collection Framework:
 
 <img src="./assets/java-collection-hierarchy.png" alt="Hierarchy of Java Collection framework" style="zoom:80%;" />
 
+Ended data structures: the data structures that can only be accessed from its ends
+
+- Stack: one ended
+- Queue: two ended
+- Deque: two ended
+
+Sequence Containers:
+
+- array
+- linked list
+
 # Iteration
 
 ## Iterator Interface
@@ -63,9 +74,9 @@ Hierarchy of Collection Framework:
      ```
    
    
-## List
+# Sequence Containers
 
-### ArrayList
+## ArrayList
 
 Time complexity for `ArrayList` on different methods:
 
@@ -74,7 +85,7 @@ Time complexity for `ArrayList` on different methods:
 - `add(i)`: O(N)
 - `remove(i)`: O(N)
 
-### LinkedList
+## LinkedList
 
 Time complexity for `LinkedList` on different methods:
 
@@ -88,3 +99,228 @@ Time complexity for `LinkedList` on different methods:
 Situations that don't use a linked list!! -> Bad cache performance (**TODO**: review this part in video)
 
 Because the memory of LinkedList is not consequtive, so it's more costly than an array to find the next node. ()
+
+# Stack & Queue
+
+ADT - Abstract Data Type. An ADT is defined only by its operations, not implementations.
+
+## Stack
+
+Stack: Last in first out (LIFO)
+
+### Operations
+
+- `void push(T x)`: add an element to the top - O(1)
+- `T pop()`: remove the element at the top - O(1)
+- `T peek()`: return the element at the top - O(1)
+
+### Possible implementations
+
+1. `Stack` class which extends `Vector`
+
+   ```java
+   Stack<Integer> stack = new Stack<>();
+   stack.push(1);
+   stack.push(2);
+   stack.peek(); // return the top element - 2
+   stack.pop(); // remove the top element - 2
+   ```
+
+2. `ArrayList`: store the top element at the end of the array
+
+   - `ArrayList<T> stack = new ArrayList<>()`;
+
+   - `void push(T x)`: `stack.add(x)`
+
+   - `T pop()`: 
+
+     ```java
+     T res = stack.get(stack.size() - 1);
+     stack.remove(stack.size() - 1);
+     return res;
+     ```
+
+   - ` T peek()`: `return stack.get(stack.size() - 1)`
+
+3. `LinkedList`: store the top element as the head
+
+   ```java
+   public class StackSLL<T> {
+       private class Node {
+           T data;
+           Node next;
+   
+           Node(T x, Node n) {
+               data = x;
+               next = n;
+           }
+       }
+   
+       Node dummy; // the head is dummy.next
+       int size;
+   
+       public StackSLL() {
+           dummy = new Node(null, null);
+           size = 0;
+       }
+   
+       public void push(T x) {
+           dummy.next = new Node(x, dummy.next);
+           size++;
+       }
+   
+       public T peek() {
+           if (size == 0) {
+               throw new EmptyStackException();
+           }
+           return dummy.next.data;
+       }
+   
+       public T pop() {
+           if (size == 0) {
+               throw new EmptyStackException();
+           }
+           T res = dummy.next.data;
+           dummy.next = dummy.next.next;
+           size--;
+           return res;
+       }
+   }
+   ```
+
+### Applications
+
+#### parenthesis validation
+
+[LeetCode 20. Valid Parentheses](https://leetcode.com/problems/valid-parentheses/)
+
+```java
+class Solution {
+    public boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '[' || c == '{' || c == '(') {
+                stack.push(c);
+            } else {
+                if (stack.empty()) {
+                    return false;
+                }
+                char top = stack.pop();
+                if ((c == ']' && top != '[' )|| (c == '}' && top != '{') || (c == ')' && top != '(')) {
+                    return false;
+                }
+            }
+        }
+        return stack.isEmpty();
+    }
+}
+```
+
+### Q2: inflix expressions //TODO (review slides)
+
+Influx: an operator between a left and right operator
+
+## Queue
+
+First in first out
+
+Operations: all the following operations has O(1) time complexity
+
+- `enqueue(T x)`: add an element to to the end of the queue
+- `dequeue()`: remove the element at the head of the queue
+- `peek()`: return the head of the queue
+
+Possible implementations:
+
+- Circular array
+
+  - Enqueue: `back = (back + 1) % capacity`
+
+  - Dequeue: `front = (front + 1) % capacity`
+
+  - Print:
+
+    ```java
+    for (int i = 0; i < size; i++) {
+      System.out.println(nums[(front + i) % capacity]);
+    }
+    ```
+
+- LinkedList
+
+  - enqueue: `addLast()`
+  - Dequeue: `removeFirst()`
+  
+  ```java
+  public class QueueSLL<T> {
+      private class Node {
+          T item;
+          Node next;
+  
+          public Node(T x, Node n) {
+              item = x;
+              next = n;
+          }
+      }
+  
+      Node head;
+  
+      void push(T x) {
+          head = new Node(x, head);
+      }
+  
+      public T pop() {
+          if (head == null) {
+              throw new NoSuchElementException("The stack is empty!");
+          }
+          T x = head.item;
+          head = head.next;
+          return x;
+      }
+  
+      public T peek() {
+          if (head == null) {
+              throw new NoSuchElementException("The stack is empty!");
+          }
+          return head.item;
+      }
+  }
+  ```
+  
+  
+
+# Set & Map
+
+## Set
+
+Set - no duplicate elements
+
+- `bool add(E element)`: 
+- `bool remove(E element)`
+- `bool contains(E element)`: 
+- `iterator()`: usually iterable
+
+Set implementations:
+
+- sorted array
+- unsorted array
+  - remove: search the element - O(N); put the last element to the position where the element should be removed - O(1)
+- binary search tree
+
+|                    | add  | remove | Contains |
+| ------------------ | ---- | ------ | -------- |
+| sorted array       | O(N) | O(N)   | O(NlogN) |
+| unsorted array     | O(1) | O(N)   | O(N)     |
+| binary search tree |      |        |          |
+|                    |      |        |          |
+
+## Map
+
+- `V get(K key)`
+- `void set(K key, V value)`
+- `void remove(K key)`
+
+Note: 
+
+- `K` must be `Comparable<K>` or we provide a `comparator<K>`
