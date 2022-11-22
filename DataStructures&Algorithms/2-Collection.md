@@ -81,7 +81,7 @@ Sequence Containers:
 Time complexity for `ArrayList` on different methods:
 
 - `get(i)`: O(1)
-  - to get i-th element, we compute the address of the element: `first_element + (i - 1) * size_of_each_element`
+  - to get the i-th element, we compute the address of the element: `first_element + (i - 1) * size_of_each_element`. There's a special hardware to do this, so it's really fast
 - `add(i)`: O(N)
 - `remove(i)`: O(N)
 
@@ -89,16 +89,137 @@ Time complexity for `ArrayList` on different methods:
 
 Time complexity for `LinkedList` on different methods:
 
-- `get(i)`: O(N)
-- `add(i)`: O(1)
-- `remove(i)`: O(1)
+- `T get(int i)`: O(N)
+- `voi add(Node n)`: O(1)
+- `void remove(Node n)`: O(1)
   - for `add()` and `remove()`, the elements will never move; they will always stay in the same address.
 
+### Singly Linked List (Forward List)
 
+```java
+public class SinglyLinkedList<T> {
 
-Situations that don't use a linked list!! -> Bad cache performance (**TODO**: review this part in video)
+    /**
+     * usually an inner class needs a pointer to the outer class,
+     * but a static inner class doesn't need that
+     */
+    private static class Node<T> {
+        T data;
+        Node<T> next;
+        Node(T x, Node<T> n) {
+            data = x;
+            next = n;
+        }
+    }
 
-Because the memory of LinkedList is not consequtive, so it's more costly than an array to find the next node. ()
+    Node<T> dummy; // head is dummy.next
+
+    public SinglyLinkedList () {
+        dummy = new Node<>(null, null);
+    }
+
+    /**
+     * add a node before head or after dummy
+     * @param x the element to be prepended
+     */
+    public void prepend(T x) {
+        dummy.next = new Node<>(x, dummy.next);
+    }
+
+    /**
+     * delete first occurrence of x in the list
+     * @param x the value for the element to be removed
+     */
+    public void removeFirst(T x) {
+        Node<T> n = dummy;
+        while (!n.next.data.equals(x)) {
+            n = n.next;
+        }
+        n.next = n.next.next;
+    }
+
+    public void print() {
+        Node<T> n = dummy.next;
+        while (n != null) {
+            System.out.print(n.data);
+            System.out.print(" ");
+            n = n.next;
+        }
+        System.out.println();
+    }
+}
+```
+
+### Doubly Linked List
+
+Doubly Linked List use two pointers to maintain the order -- `prev` and `next`. In the following implementation, I use a dummy head to better handle the cases when the list is empty. In addition,  `dummy.next` is the head, `dummy.prev` is the tail.
+
+```java
+public class DoublyLinkedList<T> {
+    private Node<T> dummy;
+
+    private static class Node<T> {
+        T item;
+        Node<T> next;
+        Node<T> prev;
+
+        public Node(T i, Node<T> p, Node<T> n) {
+            item = i;
+            prev = p;
+            next = n;
+        }
+    }
+
+    DoublyLinkedList() {
+        dummy = new Node<>(null, null, null);
+        dummy.next = dummy;
+        dummy.prev = dummy;
+    }
+
+    public void prepend(T x) {
+        Node<T> node = new Node<>(x, dummy, dummy.next);
+        dummy.next = node;
+        node.next.prev = node;
+    }
+
+  	// insert a new node after the Node n
+    public void splice(Node<T> n, T x) {
+        Node<T> node = new Node<>(x, n, n.next);
+        n.next = node;
+        node.next.prev = node;
+    }
+
+    public void remove(Node<T> n) {
+       n.prev.next = n.next;
+       n.next.prev = n.prev;
+    }
+
+    public int length(Node<T> n) {
+        int count = 0;
+        for (Node<T> curr = n; curr != null; curr = curr.next) {
+            count++;
+        }
+        return count;
+    }
+
+    public int lengthRecursion(Node<T> n) {
+        // ? is ternary operator
+        return n == null ? 0 : 1 + lengthRecursion(n.next);
+    }
+}
+```
+
+### ArrayList vs. LinkedList
+
+| Operations                 | ArrayList | LinkedList |
+| -------------------------- | --------- | ---------- |
+| random access              | O(1)      | O(N)       |
+| Add an element to the head | O(N)      | O(1)       |
+| Add an element to the end  | O(1)      | O(1)       |
+| Remove the first element   | O(N)      | O(1)       |
+| Remove the last element    | O(1)      | O(1)       |
+
+**CPU caches** are designed to read data from the memory **in order**. To be specific, following a pointer can take 100s of CPU cycles. Therefore, although `arr.get(i)` and `node.next` both has the time complexity O(1), the former one is 100 times faster than the latter! So, if we don't need to add or remove an element to or from an array, it is always faster to use array-based data structures.
 
 # Stack & Queue
 
