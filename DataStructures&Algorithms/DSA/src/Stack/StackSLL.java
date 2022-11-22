@@ -1,8 +1,7 @@
-package Queue;
+package Stack;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.EmptyStackException;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

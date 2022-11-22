@@ -175,3 +175,32 @@ applicatioin: in-order traversal is used in binary search tree to get an ascendi
 
 ## Binary-Search Tree (BST)
 
+For each node, the nodes in its left subtree should be smaller than the node, and the nodes in the right subtree should be bigger than the node.
+
+### Binary Search Set
+
+- `boolean contains(T val)`
+- `boolean add(T val)`
+- `boolean remove(T val)`
+
+#### remove
+
+4 cases:
+* no such element: return false
+* leaf node: set the parent point to null
+* one child: update the parent as the child
+* two children: choose the biggest node from the left subtree (the rightmost leaf-node) [predecessor] or the smallest node from the right subtree (the leftmost leaf-node) [successor] //review the video
+
+#### Time complexity
+
+- contains: O(height of tree)
+- add: O(height of tree)
+- remove: O(height of tree)
+
+The height of tree:
+
+- worst case: If the tree is extremely unbalanced, the heigh will be O(N). 
+
+- Best case: If the tree is well balanced, the height will be O(logN) 
+
+The shape of the tree depends on the insert order. If we insert sorted elements, the tree will be extremely unbalanced. 

@@ -1,14 +1,21 @@
 package Queue;
 
-import java.util.NoSuchElementException;
+import org.junit.jupiter.api.Test;
 
-public class Queue_LinkedList<T> {
+import java.util.ArrayDeque;
+import java.util.NoSuchElementException;
+import java.util.Queue;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class QueueSLL<T> {
     private class Node {
-        T item;
+        T data;
         Node next;
 
         public Node(T x, Node n) {
-            item = x;
+            data = x;
             next = n;
         }
     }
@@ -17,7 +24,7 @@ public class Queue_LinkedList<T> {
     private Node tail;
     int size;
 
-    public Queue_LinkedList() {
+    public QueueSLL() {
         head = null;
         tail = null;
         size = 0;
@@ -31,7 +38,7 @@ public class Queue_LinkedList<T> {
         if (head == null) {
             throw new NoSuchElementException("The queue is empty!");
         }
-        T x = head.item;
+        T x = head.data;
         head = head.next;
         size--;
         return x;
@@ -45,5 +52,30 @@ public class Queue_LinkedList<T> {
             tail.next = node;
         }
         tail = node;
+        size++;
+    }
+
+    public T peek() {
+        if (head == null) {
+            throw new NoSuchElementException("The queue is empty!");
+        }
+        return head.data;
+    }
+
+    @Test
+    public void test() {
+        Queue<Integer> expectedQueue = new ArrayDeque<>();
+        QueueSLL<Integer> myQueue = new QueueSLL<Integer>();
+        Random rand = new Random(1);
+        int size = 1000;
+        for (int i = 0; i < size; i++) {
+            int num  = rand.nextInt();
+            expectedQueue.add(num);
+            myQueue.enqueue(num);
+        }
+        for (int i = 0; i < size; i++) {
+            assertEquals(expectedQueue.peek(), myQueue.peek());
+            assertEquals(expectedQueue.poll(), myQueue.dequeue());
+        }
     }
 }
