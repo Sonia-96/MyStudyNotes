@@ -1,13 +1,8 @@
 package Queue;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayDeque;
 import java.util.NoSuchElementException;
-import java.util.Stack;
 
-public class QueueSLL<T> {
+public class Queue_LinkedList<T> {
     private class Node {
         T item;
         Node next;
@@ -18,47 +13,37 @@ public class QueueSLL<T> {
         }
     }
 
-    Node head;
+    private Node head;
+    private Node tail;
+    int size;
 
-    void push(T x) {
-        head = new Node(x, head);
+    public Queue_LinkedList() {
+        head = null;
+        tail = null;
+        size = 0;
     }
 
-    public T pop() {
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    public T dequeue() {
         if (head == null) {
-            throw new NoSuchElementException("The stack is empty!");
+            throw new NoSuchElementException("The queue is empty!");
         }
         T x = head.item;
         head = head.next;
+        size--;
         return x;
     }
 
-    public T peek() {
-        if (head == null) {
-            throw new NoSuchElementException("The stack is empty!");
+    public void enqueue(T x) {
+        Node node = new Node(x, null);
+        if (isEmpty()) {
+            head = node;
+        } else {
+            tail.next = node;
         }
-        return head.item;
-    }
-
-    public boolean parenthesisValidation(String s) {
-        Stack<Character> stack = new Stack<>();
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (c == '(' || c == '[' || c == '{') {
-                stack.push(c);
-            } else {
-                char top = stack.pop();
-                if (c == ')' && top != '(' || c == ']' && top != '[' || c == '}' && top != '}') {
-                    return false;
-                }
-            }
-        }
-        return stack.isEmpty();
-    }
-
-    @Test
-    public void test() {
-        String s1 = "[(()){[}]";
-        Assertions.assertFalse(parenthesisValidation(s1));
+        tail = node;
     }
 }

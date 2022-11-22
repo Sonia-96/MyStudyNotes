@@ -1,48 +1,44 @@
-package Stack;
+package Queue;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.EmptyStackException;
+import java.util.NoSuchElementException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StackSLL<T> {
     private class Node {
-        T data;
+        T item;
         Node next;
 
-        Node(T x, Node n) {
-            data = x;
+        public Node(T x, Node n) {
+            item = x;
             next = n;
         }
     }
 
-    Node dummy;
-    int size;
+    Node head;
 
-    public StackSLL() {
-        dummy = new Node(null, null);
-        size = 0;
-    }
-
-    public void push(T x) {
-        dummy.next = new Node(x, dummy.next);
-        size++;
-    }
-
-    public T peek() {
-        if (size == 0) {
-            throw new EmptyStackException();
-        }
-        return dummy.next.data;
+    void push(T x) {
+        head = new Node(x, head);
     }
 
     public T pop() {
-        if (size == 0) {
-            throw new EmptyStackException();
+        if (head == null) {
+            throw new NoSuchElementException("The stack is empty!");
         }
-        T res = dummy.next.data;
-        dummy.next = dummy.next.next;
-        size--;
-        return res;
+        T x = head.item;
+        head = head.next;
+        return x;
+    }
+
+    public T peek() {
+        if (head == null) {
+            throw new NoSuchElementException("The stack is empty!");
+        }
+        return head.item;
     }
 
     @Test
@@ -57,7 +53,7 @@ public class StackSLL<T> {
         assertEquals(2, stack.pop());
         assertEquals(1, stack.peek());
         assertEquals(1, stack.pop());
-        assertThrows(EmptyStackException.class, stack::peek);
-        assertThrows(EmptyStackException.class, stack::pop);
+        assertThrows(NoSuchElementException.class, stack::peek);
+        assertThrows(NoSuchElementException.class, stack::pop);
     }
 }

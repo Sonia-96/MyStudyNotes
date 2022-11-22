@@ -149,43 +149,35 @@ All the following operations should have O(1) time complexity:
    ```java
    public class StackSLL<T> {
        private class Node {
-           T data;
+           T item;
            Node next;
    
-           Node(T x, Node n) {
-               data = x;
+           public Node(T x, Node n) {
+               item = x;
                next = n;
            }
        }
    
-       Node dummy; // the head is dummy.next
-       int size;
+       Node head;
    
-       public StackSLL() {
-           dummy = new Node(null, null);
-           size = 0;
-       }
-   
-       public void push(T x) {
-           dummy.next = new Node(x, dummy.next);
-           size++;
-       }
-   
-       public T peek() {
-           if (size == 0) {
-               throw new EmptyStackException();
-           }
-           return dummy.next.data;
+       void push(T x) {
+           head = new Node(x, head);
        }
    
        public T pop() {
-           if (size == 0) {
-               throw new EmptyStackException();
+           if (head == null) {
+               throw new NoSuchElementException("The stack is empty!");
            }
-           T res = dummy.next.data;
-           dummy.next = dummy.next.next;
-           size--;
-           return res;
+           T x = head.item;
+           head = head.next;
+           return x;
+       }
+   
+       public T peek() {
+           if (head == null) {
+               throw new NoSuchElementException("The stack is empty!");
+           }
+           return head.item;
        }
    }
    ```
@@ -281,46 +273,11 @@ All the following operations should have O(1) time complexity:
 
 2. LinkedList
 
-  - enqueue: `addLast()`
-  - Dequeue: `removeFirst()`
+     - enqueue: `addLast(T x)`
 
-  ```java
-  public class QueueSLL<T> {
-      private class Node {
-          T item;
-          Node next;
-  
-          public Node(T x, Node n) {
-              item = x;
-              next = n;
-          }
-      }
-  
-      Node head;
-  
-      void push(T x) {
-          head = new Node(x, head);
-      }
-  
-      public T pop() {
-          if (head == null) {
-              throw new NoSuchElementException("The stack is empty!");
-          }
-          T x = head.item;
-          head = head.next;
-          return x;
-      }
-  
-      public T peek() {
-          if (head == null) {
-              throw new NoSuchElementException("The stack is empty!");
-          }
-          return head.item;
-      }
-  }
-  ```
+     - Dequeue: `removeFirst()`
+     - peek: `getFirst()`
 
-  
 
 # Set & Map
 
