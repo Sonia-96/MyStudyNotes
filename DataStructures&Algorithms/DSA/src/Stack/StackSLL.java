@@ -1,9 +1,7 @@
 package Stack;
 
-import LinkedList.SinglyLinkedList;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.EmptyStackException;
 
 public class StackSLL<T> {

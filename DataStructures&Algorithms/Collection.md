@@ -190,13 +190,12 @@ Stack: Last in first out (LIFO)
 
 ### Applications
 
-#### parenthesis validation
+#### Parenthesis Validation
 
 [LeetCode 20. Valid Parentheses](https://leetcode.com/problems/valid-parentheses/)
 
 ```java
-class Solution {
-    public boolean isValid(String s) {
+		public boolean isValid(String s) {
         Stack<Character> stack = new Stack<>();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -214,12 +213,42 @@ class Solution {
         }
         return stack.isEmpty();
     }
-}
 ```
 
-### Q2: inflix expressions //TODO (review slides)
+#### Reverse Polish Notation 
 
-Influx: an operator between a left and right operator
+- infix expressions: an operator is written between operands. This form is what we generally use in daily life. e.g. 1 + 2 * 3 = 7
+- prefix expression (polish notation): an operator is written before its operands
+- post expression (reverse polish notation): an operator is written after its operands. e.g., 123*+ = 1 + 2 * 3 = 7
+
+[LeetCode 150. Evaluate Reverse Polish Notation](https://leetcode.com/problems/evaluate-reverse-polish-notation/)
+
+```java
+		public int evalRPN(String[] tokens) {
+        Set<String> operators = new HashSet<>(List.of("+", "-", "*", "/"));
+
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < tokens.length; i++) {
+            String s = tokens[i];
+            if (!operators.contains(s)) {
+                stack.push(Integer.parseInt(s));
+            } else {
+                int right = stack.pop(), left = stack.pop();
+                int res = switch(s) {
+                    case "+" -> left + right;
+                    case "-" -> left - right;
+                    case "*" -> left * right;
+                    case "/" -> left / right;
+                    default -> throw new UnsupportedOperationException();
+                };
+                stack.push(res);
+            }
+        }
+        return stack.pop();
+    }
+```
+
+
 
 ## Queue
 
