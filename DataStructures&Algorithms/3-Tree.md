@@ -34,7 +34,7 @@ public class Tree<T> {
 }
 ```
 
-## Binary Tree
+# Binary Tree
 
 Binary tree is a type of tree that has at most 2 children.
 
@@ -42,9 +42,9 @@ Binary tree is a type of tree that has at most 2 children.
 
 - Complete binary tree: every level is full except for the lowest level, and the lowest level should be filled in from the left 
 
-### Implementation
+## Implementation
 
-#### Linked List
+### Linked List
 
 ```java
 public class BinaryTree<T> {
@@ -68,71 +68,107 @@ If the array is 0-based, then for Node `i`:
 - left child: `2 * i + `
 - right child: `2 * i + 2`
 
-### Tree Traversal
+## Tree Traversal
 
-#### Pre-order
+### Pre-order
 
 root -> left -> right
 
 1. recursion
 
    ```java
-   private List<T> preTraverse(Node root) {
+   public List<T> preOrderTraversal() {
      List<T> result = new ArrayList<>();
-     pretraverse(root, result);
+     preOrderTraversal(root, result);
      return result;
    }
    
-   private void preTraverse(Node root, List<T> result) {
-     if (root == null) return;
+   private void preOrderTraversal(Node node, List<T> result) {
+     if (node == null) return;
+     result.add(node.value);
+     preOrderTraversal(node.left, result);
+     preOrderTraversal(node.right, result);
+   }
+   ```
+   
+2. Iteration
+
+   ```java
+   public List<T> preOrderTraversalIter() {
      List<T> result = new ArrayList<>();
-     result.add(root.item);
-     preTraverse(root.left, result);
-     preTraverse(root.right, result);
+     Stack<Node> stack = new Stack<>();
+     Node p = root;
+     while (!stack.isEmpty() || p != null) {
+       while (p != null) {
+         result.add(p.value);
+         stack.add(p);
+         p = p.left;
+       }
+       p = stack.pop().right;
+     }
+     return result;
    }
    ```
 
-2. Iteration
-
-   // TODO
-
-#### Post-order
+### Post-order
 
 left -> right -> root
 
 1. recursion
 
    ```java
-   public List<T> postTraverse(Node root) {
+   public List<T> postOrderTraversal() {
      List<T> result = new ArrayList<>();
-     postTraverse(node, result);
+     postOrderTraversal(root, result);
      return result;
    }
    
-   private void postTraverse(Node node, List<T> result) {
+   private void postOrderTraversal(Node node, List<T> result) {
      if (node == null) return;
-     postTraverse(node.left);
-     postTraverse(node.right);
-     result.add(node.item);
+     postOrderTraversal(node.left, result);
+     postOrderTraversal(node.right, result);
+     result.add(node.value);
    }
    ```
 
 2. iteration
 
-   // TODO 
+   ```java
+   public List<T> postOrderTraversalIter() {
+     List<T> result = new ArrayList<>();
+     Stack<Node> stack = new Stack<>();
+     Node curr = root, prev = null;
+     while (!stack.isEmpty() || curr != null) {
+       while (curr != null) {
+         stack.add(curr);
+         curr = curr.left;
+       }
+       curr = stack.pop();
+       if (curr.right == null || prev == curr.right) {
+         result.add(curr.value);
+         prev = curr;
+         curr = null;
+       } else {
+         stack.add(curr);
+         curr = curr.right;
+       }
+     }
+     return result;
+   }
+   ```
 
-##### Applications
+#### Applications
 
 1. compute the depth of a tree:
 
-```java
-public static int depth(Node root) {
-  if (root == null) {
-    return 0;
-  }
-  return Math.max(depth(root.left), depth(root.right)) + 1;
-}
-```
+   ```java
+   public static int depth(Node root) {
+     if (root == null) {
+       return 0;
+     }
+     return Math.max(depth(root.left), depth(root.right)) + 1;
+   }
+   ```
 
 2. expression tree: 
 
@@ -152,46 +188,275 @@ public static int depth(Node root) {
    }
    ```
 
-#### In-order
+### In-order
 
 left -> root -> right
 
-```java
-public List<T> inTraverse(Node root) {
-  List<T> result = new ArrayList<>();
-  inTraverse(node, result);
-  return result;
-}
+1. Recursion
 
-private void inTraverse(Node node, List<T> result) {
-  if (node == null) return;
-  inTraverse(node.left);
-  result.add(node.item);
-  inTraverse(node.right);
-}
-```
+   ```java
+   public List<T> inOrderTraversal() {
+     List<T> result = new ArrayList<>();
+     inOrderTraversal(root, result);
+     return result;
+   }
+   
+   public void inOrderTraversal(Node node, List<T> result) {
+     if (node == null) return;
+     inOrderTraversal(node.left, result);
+     result.add(node.value);
+     inOrderTraversal(node.right, result);
+   }
+   ```
+
+2. Iteration
+
+   ```java
+   public List<T> inOrderTraversalIter() {
+     List<T> result = new ArrayList<>();
+     Stack<Node> stack = new Stack<>();
+     Node p = root;
+     while (!stack.isEmpty() || p != null) {
+       while(p != null) {
+         stack.add(p);
+         p = p.left;
+       }
+       p = stack.pop();
+       result.add(p.value);
+       p = p.right;
+     }
+     return result;
+   }
+   ```
 
 applicatioin: in-order traversal is used in binary search tree to get an ascending order list.
 
-## Binary-Search Tree (BST)
+# Binary-Search Tree (BST)
 
 For each node, the nodes in its left subtree should be smaller than the node, and the nodes in the right subtree should be bigger than the node.
 
-### Binary Search Set
+## Binary Search Set
 
 - `boolean contains(T val)`
 - `boolean add(T val)`
 - `boolean remove(T val)`
 
-#### remove
+### contains
+
+1. recursion
+
+   ```java
+   public boolean contains(T item) {
+     if (item == null) {
+       throw new NullPointerException();
+     }
+     return contains(root, item);
+   }
+   
+   private boolean contains(Node node, T item) {
+     if (node == null) return false;
+     int cmp = node.value.compareTo(item);
+     if (cmp == 0) {
+       return true;
+     }
+     if (cmp < 0) {
+       return contains(node.right, item);
+     }
+     return contains(node.left, item);
+   }
+   ```
+
+2. iteration
+
+   ```java
+   public boolean containsIter(T item) {
+     Node curr = root;
+     while (curr != null) {
+       int cmp = curr.value.compareTo(item);
+       if (cmp == 0) {
+         return true;
+       }
+       if (cmp < 0) {
+         curr = curr.right;
+       } else {
+         curr = curr.left;
+       }
+     }
+     return false;
+   }
+   ```
+
+### add
+
+1. recursion
+
+   ```java
+   public boolean add(T item) {
+     if (item == null) {
+       throw new NullPointerException();
+     }
+     int oldSize = size();
+     root = add(root, item);
+     return size() > oldSize;
+   }
+   
+   private Node add(Node node, T item) {
+     if (node == null) {
+       return new Node(item);
+     }
+     int cmp = node.value.compareTo(item);
+     if (cmp == 0) {
+       return node;
+     }
+     if (cmp < 0) {
+       node.right = add(node.right, item);
+     } else {
+       node.left = add(node.left, item);
+     }
+     node.size = 1 + size(node.left) + size(node.right);
+     return node;
+   }
+   ```
+
+2. iteration
+
+   ```java
+   public boolean addIter(T item) {
+     Node prev = null, curr = root;
+     int cmp = 0;
+     while (curr != null) {
+       cmp = curr.value.compareTo(item);
+       if (cmp == 0) {
+         return false;
+       }
+       prev = curr;
+       if (cmp < 0) {
+         curr = curr.right;
+       } else {
+         curr = curr.left;
+       }
+     }
+     if (prev == null) {
+       root = new Node(item);
+     } else {
+       if (cmp < 0) {
+         prev.right = new Node(item);
+       } else {
+         prev.left = new Node(item);
+       }
+     }
+     updateSize(root);
+     return true;
+   }
+   ```
+
+### remove
 
 4 cases:
+
 * no such element: return false
-* leaf node: set the parent point to null
+* no children: set the parent point to null
 * one child: update the parent as the child
 * two children: choose the biggest node from the left subtree (the rightmost leaf-node) [predecessor] or the smallest node from the right subtree (the leftmost leaf-node) [successor] //review the video
 
-#### Time complexity
+1. recursion
+
+   ```java
+   boolean remove(T item) {
+     if (item == null) {
+       throw new NullPointerException();
+     }
+     int oldSize = size();
+     root = remove(root, item);
+     return oldSize > size();
+   }
+   
+   private Node remove(Node node, T item) {
+     if (node == null) {
+       return null;
+     }
+     int cmp = node.value.compareTo(item);
+     if (cmp < 0) {
+       node.right = remove(node.right, item);
+     } else if (cmp > 0) {
+       node.left = remove(node.left, item);
+     } else {
+       if (node.left == null) {
+         return node.right;
+       }
+       if (node.right == null) {
+         return node.left;
+       }
+       node.value = getMin(node.right).value;
+       node.right = remove(node.right, node.value);
+     }
+     node.size = 1 + size(node.left) + size(node.right);
+     return node;
+   }
+   ```
+
+2. iteration
+
+   ```java
+   boolean removeIter(T item) {
+     if (item == null) {
+       throw new NullPointerException();
+     }
+     Node prev = null, curr = root;
+     while (curr != null && curr.value.compareTo(item) != 0) {
+       prev = curr;
+       int cmp = item.compareTo(curr.value);
+       if (cmp < 0) {
+         curr = curr.left;
+       } else {
+         curr = curr.right;
+       }
+     }
+     if (curr == null) { // no such item
+       return false;
+     }
+     if (curr.right != null && curr.left != null) {
+       // find the smallest node in the right subtree (in-order successor)
+       Node successor = curr.right, p = null;
+       while (successor.left != null) {
+         p = successor;
+         successor = successor.left;
+       }
+       if (p == null) { // the smallest node is the root of the right subtree
+         curr.right = successor.right;
+       } else {
+         p.left = successor.right;
+       }
+       curr.value = successor.value;
+     } else {
+       Node newCurr = null;
+       if (curr.left != null) {
+         newCurr = curr.left;
+       } else if (curr.right != null) {
+         newCurr = curr.right;
+       }
+       if (prev == null) { // the node to be deleted is the root
+         root = newCurr;
+       } else {
+         if (prev.right == curr) {
+           prev.right = newCurr;
+         } else {
+           prev.left = newCurr;
+         }
+       }
+     }
+     updateSize(root);
+     return true;
+   }
+   
+   public int updateSize(Node node) {
+     if (node == null) return 0;
+     node.size = updateSize(node.left) + updateSize(node.right) + 1;
+     return node.size;
+   }
+   ```
+
+### Time complexity
 
 - contains: O(height of tree)
 - add: O(height of tree)

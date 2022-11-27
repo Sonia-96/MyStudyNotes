@@ -2,7 +2,7 @@ package Tree;
 
 import java.util.ArrayList;
 
-public class Tree<T> {
+public class Tree<T extends Comparable<? super T>> {
     private class Node {
         T item;
         ArrayList<Node> children;

@@ -1,5 +1,7 @@
 package Sort;
 
+import org.w3c.dom.Node;
+
 public class BinarySearch {
     // check if an array contains an element
     public static boolean binarySearch(int[] nums, int goal) {
