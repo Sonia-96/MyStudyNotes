@@ -1,31 +1,42 @@
 package Graph;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 public class Graph<T> {
     private class Node {
         T data;
         boolean visited;
         Set<Node> neighbors;
+
+        Node() {
+
+        }
     }
+
     public Set<Node> nodes;
 
-    void findPath(Node start, Node end) {
-
+    public void add(Node node) {
+        nodes.add(node);
     }
 
-    void DFS(Node node, Node end) {
-//        if (node == end) return
+    List<Node> findPath(Node start, Node end) {
+        List<Node> path = new ArrayList<>();
+        DFS(start, end, path);
+        return path;
+    }
+
+    void DFS(Node node, Node end, List<Node> path) {
+        if (node == end) {
+            path.add(node);
+            return;
+        }
         node.visited = true;
         for (Node neighbor : node.neighbors) {
             if (!neighbor.visited) {
-                DFS(neighbor, end);
-                // TODO prepend node to the path
+                DFS(neighbor, end, path);
+                path.add(node);
             }
         }
-        // return null;
     }
 
     void BFS(Node start, Node end) {

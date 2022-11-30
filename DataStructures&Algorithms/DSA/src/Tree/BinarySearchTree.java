@@ -1,11 +1,10 @@
 package Tree;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-public class BinarySearchTree <T extends Comparable<? super T>> {
+public class BinarySearchTree<T extends Comparable<? super T>> {
     private class Node {
         T value;
         Node left, right;
