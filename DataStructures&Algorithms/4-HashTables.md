@@ -8,6 +8,13 @@
    - `insert(T E)`: O(1)
    - `search(T E)`: O(1)
    - `delete(T E)`: O(1)
+1. load factor (λ) 
+
+   - λ = n / m
+
+     - n: the number of elements
+     - m: the length of the hash table
+   - average number of cells examined on an `insert` operation is `1/(1-λ)`
 
 ## Hash Function
 
@@ -17,17 +24,25 @@
 
 2. Good hash function
 
-   - the same hash code for equal objects
+   - generates the same hash code for equal objects
    - Hash code should be evenly distributed for all possible input items
-   - computes fast
+   - fast to compute
 
-3. load factor (λ) 
+3. Hashing Strings -- Polynominal Hashing
 
-   - λ = n / m
+   ```java
+   int polyHash(String s, int prime, int x) {
+     int hash = 0;
+     for (int i = 0; i < s.length(); i++) {
+       hash += (hash * x + s.charAt(i) ) % prime;
+     }
+     return hash;
+   }
+   ```
 
-     - n: the number of elements
-     - m: the length of the hash table
-- average number of cells examined on an `insert` operation is `1/(1-λ)`
+   
+
+   
 
 ## Resolving Collisions
 
