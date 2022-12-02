@@ -64,8 +64,8 @@ Use an arraylist to store all the nodes from left to right and from top to botto
 
 If the array is 0-based, then for Node `i`:
 
-- Parent node: `i`
-- left child: `2 * i + `
+- Parent node: `(i - 1) / 2`
+- left child: `2 * i + 1`
 - right child: `2 * i + 2`
 
 ## Tree Traversal
