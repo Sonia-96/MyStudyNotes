@@ -143,17 +143,5 @@ We need to use disjoint set in this algorithm
 - Sort edges by cost - O(ElogE)
 - for each edge, if its end points are in different trees, merge two them and add edge
 
-## Graph Traversal
-
-### Depth First Search (DFS)
-
-```java
-```
-
-### Breadth First Search (BFS)
-
-```java
-```
-
 
 
