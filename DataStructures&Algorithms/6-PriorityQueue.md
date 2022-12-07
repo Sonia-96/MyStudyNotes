@@ -4,7 +4,7 @@ A Priority Queue is an ADT in which each element has a priority associate to it.
 
 ## Binary Heap
 
-1. Binary Heap is an implementation of Priority Queue. And it should be a **complete tree**.
+1. Binary Heap is an implementation of Priority Queue. And bianry heap should be a **complete tree**.
 
    - Min Heap: any node is smaller than its children
    - Max Heap: any node is bigger than its children
@@ -13,16 +13,18 @@ A Priority Queue is an ADT in which each element has a priority associate to it.
 
    - main operations:
 
-     - `void add(i)`: O(logN) in worst case, O(1) in average and best cases
+     - `void add(T item, int priority)`: O(logN) in worst case, O(1) in average and best cases
 
-     - `T findMin()`: O(logN)
+     - `T getMin()`: O(1)
 
      - `T deleteMin()`: O(logN)
 
+     - `void changePriority(T item, int priority)`: change the priority of the item, O(logN)
+
    - helper functions:
 
-     - `swim(index)`: **percolate up**. If the element is bigger than its parent, swap it with the parent. Keep swaping until the node is smaller than the parent.
-     - `sink(index):` **percolate down**. If the element is smaller than one of its children, swap it with the smaller child. Keep swaping until the node is bigger than its children.
+     - `siftUp(index)` (or percolateUp): If the element is bigger than its parent, swap it with the parent. Keep swaping until the node is smaller than the parent.
+     - `siftDown(index)` (or percolateDown): If the element is smaller than one of its children, swap it with the smaller child. Keep swaping until the node is bigger than its children.
 
 3. Representation: use an array to store the elements. For the element at the index `i`
 
@@ -42,24 +44,105 @@ A Priority Queue is an ADT in which each element has a priority associate to it.
 
 ### Implementations
 
-Take Min Heap as an example:
+Take Min Heap as an example (0-based):
 
-1. `add`: put the element to the last of the array, then `swim(size)`
+#### Initialization
 
-   ```java
-   
-   ```
+```java
+public class MinHeap<T> { // no duplicates are allowed
+  static class Node<T> {
+    T data;
+    int priority;
 
-   Time coplexity: O(logN) in worst case, O(1) in average
+    public Node(T x, int p) {
+      data = x;
+      priority = p;
+    }
+  }
 
-2. `deleteMin()`: swap the first element with the last element, size -= 1, then `sink(1)`
+  private final ArrayList<Node<T>> heap;
+  private final HashMap<T, Integer> indices;
+  private int size;
 
-   ```java
-   ```
+  public MinHeap() {
+    heap = new ArrayList<>();
+    indices = new HashMap<>();
+    size = 0;
+  }
+}
+```
 
-   Time complexity: O(logN)
+#### add
 
-3. `findMin()`: return the first element
+put the element to the last of the array, then `siftUp(size - 1)`
+
+```java
+// return true if this element is added, or false if it already exists.
+public boolean add(T item, int priority) {
+  if (item == null) {
+    throw new NullPointerException();
+  }
+  if (contains(item)) {
+    return false;
+  }
+  heap.add(new Node<>(item, priority));
+  size++;
+  indices.put(item, size() - 1);
+  siftUp(size() - 1);
+  return true;
+}
+```
+
+Time coplexity: O(logN) in worst case, O(1) in average
+
+#### deleteMin
+
+swap the first element with the last element, size -= 1, then `siftDown(0)`
+
+```java
+public T deleteMin() {
+  T ret = getMin();
+  swap(0, size() - 1);
+  size--;
+  siftDown(0);
+  return ret;
+}
+```
+
+Time complexity: O(logN)
+
+#### getMin
+
+return the top (smallest) element
+
+```java
+public T getMin() {
+  return heap.get(0).data;
+}
+```
+
+Time complexity: O(1)
+
+#### changePriority
+
+```java
+public void changePriority(T item, int priority) {
+  if (!contains(item)) {
+    throw new NoSuchElementException();
+  }
+  int index = indices.get(item);
+  Node<T> node = heap.get(index);
+  int oldPriority = node.priority;
+  node.priority = priority;
+  if (priority > oldPriority) {
+    siftDown(index);
+  } else {
+    siftUp(index);
+  }
+}
+```
+
+Time complexity: O(logN)
 
 ## Applications
 
