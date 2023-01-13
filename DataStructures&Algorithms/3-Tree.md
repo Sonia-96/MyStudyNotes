@@ -10,7 +10,7 @@ Trees have no loops (if there are loops, it's a graph), which means that one chi
 ## Terminology
 
 - Depth: the number of ancestors of a node. The depth of root is 0.
-- Height: The number of nodes from the node to its descendant leaf node. The height of all leaf nodes is 1.
+- Height: The number of link from the node to its descendant leaf node. The height of all leaf nodes is 0.
   - the height of a tree: the height of its root node
 - Level: level = depth + 1
 
@@ -469,3 +469,27 @@ The height of tree:
 - Best case: If the tree is well balanced, the height will be O(logN) 
 
 The shape of the tree depends on the insert order. If we insert sorted elements, the tree will be extremely unbalanced. 
+
+# AVL Trees
+
+AVL tree is a type of self-balancing binary search tree. Except for the bianry search property, there are extra rules for AVL trees:
+
+- store the height at each node, and for each node, |left.height - right.height| <= 1
+
+## Tree Rotation
+
+1. rotateRight: if left.height - right.height > 1, make the left as the new root
+   - 
+2. rotateLeft
+
+
+
+# Red Black Trees // TODO
+
+# Splay Trees // TODO
+
+When we access elements, we rotate them up to the root.
+
+# BTree
+
+BTree is used in CS6016-Database. BTree is like a BST set but not binary. Nodes in BTree have many children (100s). Btree has much better cache performance than BST.

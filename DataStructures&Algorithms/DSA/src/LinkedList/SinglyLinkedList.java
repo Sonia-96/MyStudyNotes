@@ -11,7 +11,7 @@ public class SinglyLinkedList<T> {
      * usually an inner class needs a pointer to the outer class,
      * but a static inner class doesn't need that
      */
-    private static class Node<T> {
+    protected static class Node<T> {
         T data;
         Node<T> next;
         Node(T x, Node<T> n) {

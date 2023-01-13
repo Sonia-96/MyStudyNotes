@@ -3,9 +3,9 @@ package Tree;
 import java.util.ArrayList;
 
 public class Tree<T extends Comparable<? super T>> {
-    private class Node {
+    private static class Node<T> {
         T item;
-        ArrayList<Node> children;
+        ArrayList<Node<T>> children;
 
         public Node(T x) {
             item = x;
@@ -13,5 +13,5 @@ public class Tree<T extends Comparable<? super T>> {
         }
     }
 
-    Node root;
+    Node<T> root;
 }

@@ -148,7 +148,7 @@ Time complexity: O(logN)
 
 ### Heap Sort 
 
-1. Build the heap (heapify): O(N)
+1. Build the heap (**heapify**): O(N)
    - add all elements to the array
    - Ranging from the last non-leaf element (the index is ` size / 2`, 1-based) to the root, `sink(i)`
 2. Heap sort: O(NlogN)
