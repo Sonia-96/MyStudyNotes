@@ -209,7 +209,7 @@ Read more: https://docs.microsoft.com/en-us/cpp/cpp/scope-visual-cpp?view=msvc-1
   #include "<filename>.hpp"
   ```
 
-  - `\#include “”` vs `#include <>`: `""` is for local files, `<>` is for system files
+  - `#include “”` vs `#include <>`: `""` is for local files, `<>` is for system files
 
 - **Include Guards**: to avoid include a header file twice. 
 
@@ -233,6 +233,8 @@ Read more: https://docs.microsoft.com/en-us/cpp/cpp/scope-visual-cpp?view=msvc-1
 clang++ -std=c++11 -c *.cpp  
 # link all .o files to a program named myProgram
 clang++ -o myProgram *.o
+# run the program
+./myProgram
 ```
 
 ## Vector
@@ -372,7 +374,17 @@ Array is fixed-sized, and has no member functinos, e.g., `.size()`.
 
 ## Pointers
 
-   1. Arrays are **pointers**, which means it will be passed by reference into a function.
+1. Syntax:
+
+   ```c++
+   int* ptr;
+   int x = 5;
+   ptr = &x; // use & to get the address of x
+   int y = *ptr; // *ptr is dereference. This line assign the value of x to y
+   *ptr = 8; // change the value of x to 8
+   ```
+
+   2. Arrays are **pointers**, which means it will be passed by reference into a function.
 
       - a pointer is a variable that holds the address of another value
       - pointer is a data type, not an integer
@@ -392,7 +404,7 @@ Array is fixed-sized, and has no member functinos, e.g., `.size()`.
       }
       ```
 
-2. pointers use `->` to objects' field:
+3. pointers use `->` to objects' field:
 
    ```c++
    struct Point {
@@ -402,16 +414,6 @@ Array is fixed-sized, and has no member functinos, e.g., `.size()`.
    Point point {1, 2};
    Point* pPoint = &point;
    cout << pPoint -> x ; // 1
-   ```
-
-3. Syntax:
-
-   ```c++
-   int* ptr;
-   int x = 5;
-   ptr = &x; // use & to get the address of x
-   int y = *ptr; // *ptr is dereference. This line assign the value of x to y
-   *ptr = 8; // change the value of x to 8
    ```
 
 4. an array can be written as a pointer. For example, `int a[]` can be wrriten like `int*`, and this pointer points to the first elements of the array
