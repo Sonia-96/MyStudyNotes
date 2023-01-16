@@ -739,7 +739,7 @@ Stack Memory is also called **Call Stack Memory**. When a function is called, me
 
 ## Heap Memory
 
-### new & delete
+### keywords new & delete
 
 1. The heap is used for:
 
@@ -756,7 +756,7 @@ Stack Memory is also called **Call Stack Memory**. When a function is called, me
    double* myArray = new double[10]; // create an array of size 10 and return the adress of the 1st double
    ```
 
-   Note: only when you use `new` to create an object, the heap memory can be used. Therefore, the array can be either stored on stack or heap.
+   Note: only when we use `new` to create an object, the heap memory can be used. 
 
    ```c++
    double d1[3]; // the actual data is stored in stack
@@ -779,18 +779,18 @@ Stack Memory is also called **Call Stack Memory**. When a function is called, me
 
 #### Memory Leak
 
-if you use `new` to get memory on the heap but never use `delete`  to get rid of it, you'll meet the error of memory leak. For example:
+if you use `new` to get memory on the heap but never use `delete`  to get rid of it, you'll meet the error of **memory leak**. For example:
 
 ```c++
 double* myArray = new double[10];
-myArray = &somethingElse; 
+myArray = &somethingElse; // TODO bad example
 ```
 
-You don't delete `myArray` before assigning a new address to it. Then this memory won't be used when your program is running. This error is called "memory leak". (Memory leak is very dangerous. It will make your program become very huge, and freeze your computer!!)
+If you don't deallocated `myArray`, the memory will never be used when your program is running. As this error accumulates, your program will become very huge, and even free your computer!
 
 #### Memory Corruption
 
-If you already delete a pointer that points to a memory on the heap, when you assign a value to the memory later, you'll meet an error of memory corruption. That's why wee should assign `nullptr` to the pointer after deleting it. 
+If you already delete a pointer that points to a memory on the heap, when you assign a value to the memory later, you'll encounter an error of memory corruption. That's why wee should assign `nullptr` to the pointer after deleting it. 
 
 ```c++
 delete [] data; // avoid memory leak
@@ -810,9 +810,17 @@ If you don't assign `nullptr` to `myArray`, then `myArray` will become a danglin
 
 <img src="./assets/page1-423px-Dangling_Pointer.pdf.jpg" alt="img" style="zoom:80%;" />
 
+Therefore, a safe way to delete a pointer:
+
+```c++
+double* myArray = new double[10];
+delete [] myArray;
+myArray = nullptr;
+```
+
 #### Double Delete
 
-Delete the same object for twice. If the compiler can't find this error, this may cause undefined bahavior while the program is running. (Very dangerous!!)
+Double delete means that you delete the same object for twice. If the compiler can't find this error, this may cause undefined bahavior while the program is running. (Very dangerous!!)
 
 > Your program could crash. Your data could be corrupted. The direct deposit of your next paycheck could instead take 5 million dollars out of your account. [What happens in a double delete?](https://stackoverflow.com/questions/9169774/what-happens-in-a-double-delete)
 
@@ -822,8 +830,6 @@ Obj *op2 = op;
 delete op;
 delete op2;
 ```
-
-
 
 ## A practice
 
@@ -849,11 +855,11 @@ int main() {
 
 
 
-# 15 Classes and Objectes
+# 15 Classes & Objectes
 
 ## Classes
 
-A class is similar to a struct but with one minor difference: everything in a `struct` is public by default, while everything in a `class` is private by default.
+A class is similar to a struct but has one minor difference: everything in a `struct` is public by default, while everything in a `class` is private by default.
 
 ### Access modifiers
 
@@ -870,7 +876,7 @@ Use trailing underscore to mark a class variable, distinguishing from local vari
 Constructor is a "function" used to create a object. A constructor must:
 
 - has the same name as the class
-- Does not have any return type (including  `void`)
+- does not have any return type
 
 ### Method (member functions)
 
@@ -878,7 +884,7 @@ Constructor is a "function" used to create a object. A constructor must:
 
 - A class is declared in a .hpp file. Its methods are implemented in .cpp file.
 
-- A method that doesn't change any data within a class should be declared `const`.
+- :star: A method that doesn't change any data within a class should be declared `const`.
 
   - Note, remember to add `const` after the function_name in both .cpp and .hpp files, or you'll get a linking erorr.
 
