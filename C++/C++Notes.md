@@ -60,9 +60,9 @@ Note, the types of constants can be modified by adding a letter suffix if needed
 
 #### Type conversion
 
-In type conversion, a data type is automatically converted to another type by the **compiler** at the compiler time. In this way, the bit representation of the original type will be changed to that of the new type. It should be noted that the destination data type cannot be smaller than the source data type, that's why it is also called *type promotion*.
+In type conversion, a data type is automatically converted to another type at the **compiler time**. In this way, the bit representation of the original type will be changed to that of the new type. It should be noted that the destination data type cannot be smaller than the source data type, that's why it is also called **type promotion**.
 
-  There are four common ways to change the bit representation during the type promotion:
+ There are four common ways to change the bit representation during the type promotion:
 
   1. smaller signed int -> larger signed int: **sign extended** (the sign must be copied an appropriate times to fill in the additional bits.)
 
@@ -80,7 +80,7 @@ In type conversion, a data type is automatically converted to another type by th
      In this code, the resulted `s` is -31073. Why?
 
      - The binary representation of 99999 is 11000011010011111
-     - Since the `short int` has only 16 bits, when the compiler convert `int` to `short`, it will throw away the bits other than the 16 least significant bits, resulting in 1000011010011111.
+     - Since the `short int` has only 16 bits, when the compiler convert `int` to `short`, it will throw away the higher 16 bits, resulting in 1000011010011111.
      - In two's compliment, '1000011010011111' is '0111100101100001', which is 31073 in decimal.
      - The most significant bit is the sign bit, which means this number is negative. Therefore, the resulted `s` is -31073.
 
@@ -863,9 +863,9 @@ A class is similar to a struct but has one minor difference: everything in a `st
 
 ### Access modifiers
 
-- `public`: everyone can see this piece of the class
 - `private`: only accessible within the class that defines them
 - `protected`: accessible within the class that defines them and other classes which inherit from that class
+- `public`: everyone can see this piece of the class
 
 ### Variables
 
@@ -962,6 +962,18 @@ Destructor is a method which is invoked whenever an object is going to be destro
 ## Objects
 
 Objects are instantiations (or instances) of classes.
+
+Two ways to initialize an object:
+
+```c++
+// create an object on stack
+MyVector vec(someData, 5);
+
+// use a pointer to store a class object
+MyVector* p = new MyVector(someData, 5);
+delete p; // remember to delete the pointer 
+p = nullptr;
+```
 
 ## Example
 
@@ -1102,15 +1114,13 @@ Overloading: functions with the same name but different parameters.
 1. `+` is an **overloaded** method. It had different functions when meeting different parameters:
 
      - Addition: 3 + 4 = 7
-
-
+     
      - concanetation: "Hello" + " World" = "Hello World"
-
-
+     
      - **unary operator** (operators that act upon a single operand to produce a new value): convert a character into a number. for example:
-    
+     
        ```c++
-       cout << +'a'; // the output is 97
+          cout << +'a'; // the output is 97
        ```
 
 
@@ -1139,7 +1149,7 @@ Overloading: functions with the same name but different parameters.
 
    - Method 2: return a reference
 
-     Must use pointer to store `res` on stack memory, or `res` will disappear after the method returns!!
+     Must use a pointer to store `res` on stack memory, or `res` will disappear after the method returns!!
 
      ```c++
      MyVector<T>& operator+(const MyVector& rhs) {
@@ -1181,7 +1191,7 @@ In this function, we return a reference to `MyVector`.  `this` is a pointer to t
 Create the `[]` operand for `MyVector`, so we can use it in this way: `int i = vec[2]`, and `vec[0] = 1`.
 
 ```c++
-// & is useful when we want to do vec[0] = 1
+// & is useful when we want to do assignment like vec[0] = 1
 double& MyVector::operator[](size_t index) {
     return data_[index];
 }
@@ -1244,7 +1254,7 @@ There are two kinds of copy:
 
 - deep copy: copy the actual data and store it in a new address
 
-Normally, when we do `MyVector v2 = v1`, we are doing shallow copy. Therefore, when v2 was destroyed (goes out of scope), the memory that `v1` still points at will be deleted.
+Normally, when we execute `MyVector v2 = v1`, we are doing shallow copy. Therefore, when v2 was destroyed (goes out of scope), the memory that `v1` still points at will be deleted.
 
 We use a copy constructor to do deep copy. The constructor takes in an object of the same type as its parameter:
 
