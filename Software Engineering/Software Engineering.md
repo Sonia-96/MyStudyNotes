@@ -88,12 +88,13 @@ printM:
 
 ### cerr
 
-`cerr`: output error messages
+`cerr`: output error messages. `cerr` is unbuffered
 
 - `std::cerr` vs. `std::cout`:
   - `cerr` is for error messages, `cout` is for normal output
-  - `cerr` is unbuffered, which means it write out the error message immediately and it cannot store the error message to display it later
-
+  - `cerr` is unbuffered, which means it write out the error message immediately and it cannot store the error message to display it later. This way, we can know the problem of the program immediately.
+  - `cout` is buffered. Although it cannot write out messages immediately, it can make the program have better performance
+  
 - redirect output to a file: `./myProgram > filename` [(ref)](https://askubuntu.com/questions/420981/how-do-i-save-terminal-output-to-a-file)
   - `> filename`: save stdout to a file
 
@@ -305,4 +306,121 @@ In type casting (also called **explicit type conversion**): a date type is conve
    - reinterpret_cast / TODO
 
 # 4 Version Control
+
+git book: https://git-scm.com/book/en/v2/
+
+master chapter 1-6 if you want to be a software developer
+
+## Concepts
+
+- working area
+- staging area
+
+## Basic Commands
+
+- `tree - a`: 
+- `git checkout <commit_id>`
+- `git reset --hard`
+- HEAD detached ???: https://www.cloudbees.com/blog/git-detached-head
+
+1. Git HEAD detached from XXX 解决办法
+
+   HEAD相当于一个指针，指向当前所在分支。使用`git checkout <branch name>`, HEAD会移动到指定分支；但如果使用`git checkout <commit ID>`，HEAD就会处于detached状态（游离状态）。
+
+   HEAD处于游离状态，好处是便于在历史版本之间切换，如果要回到某次提交，直接`git checkout <commit ID> <filename>`；但坏处是，此时的提交无法可见保存，一旦我们切到别的分支，游离状态的提交就不可追溯了。
+
+   解决办法：新建一个临时分支保存游离状态时的提交
+
+   ```
+   git branch -v // 查看当前分支领先多少次提交
+   git checkout temp //新建分支temp
+   git checkout <branch name> // 切换到我们要回去的分支，比如这门课的分支是“master”
+   git merge temp // 合并分支
+   git status //查看合并结果，有冲突就解决
+   git push origin <branch name> //提交远端，这里是master
+   git branch -d temp // 删除刚才创建的临时分支
+   ```
+
+## Branch
+
+- `git branch`：查看分支列表
+- `git branch <branch_name>`：创建新分支
+- `git checkout <branch_name>`：切换分支
+- `git checkout -b <branch_name>`：创建并切换分支
+- `git merge <branch_name>`：合并当前分支和别的分支
+- `git branch -d <branch_name>`：删除分支
+- `git rebase master`：采用rebase的方式将当前分支合并到master分支后
+- `git push origin <branch_name>`: push local changes to the corresponding branch of the remote repo 
+- `git merge --squash bugfix`: takes all commits from the `bugfix` branch and groups it for a 1 commit with your current branch.
+- `git pull --rebase`: if someone (suppose A) pushes a changes to the master branch, then you cannot push your changes to the repo. You can use this command to update your local repo and apply your commit after A's commit. 
+  - Use this command when your changes do not deserve a separate branch
+
+# 5 C++ Unit Testing
+
+## Catch2
+
+https://github.com/catchorg/Catch2/blob/v2.x/docs/tutorial.md
+
+1. main.cpp
+
+   ```c++
+   #define CATCH_CONFIG_RUNNER //before include 
+   #include "catch.h" // the unit test library
+   int main(int argc, char **argv) {
+     Catch::Session().run(argc, argv);
+   	return 0; 
+   }
+   ```
+
+2. Tests:
+
+   - Assertion **Macros**:
+
+     - `CHECK`: tests an expression and continue even if the assertion fails
+     - `REQUIRE`: tests an expression and aborts if it fails
+     - `CHECK_FALSE`
+     - `REQUIRE_FALSE`
+     - `CHECK_THROWS`: ensure that an expression throws an exception
+
+   - syntax:
+
+     ```c++
+     #include "catch.h"
+     TEST_CASE("Search Element in an Array") {
+       int a[8] = {4, 9, 21, 33, 35, 50, 55, 60}; // like junit setUp() @BeforeEach
+       SECTION("element anywhere in the array") {
+         CHECK(<expression> == <value>);
+         REQUIRE(<expression> == <value>);
+       }
+       SECTION("edge cases") {
+         CHECK_FALSE(<expression>);
+       }
+     }
+     ```
+
+3. Testing with I/O
+
+   - ```c++
+     static void 
+     ```
+
+   - 
+
+Q: Macros vs. Functions?
+
+https://www.geeksforgeeks.org/macros-vs-functions/
+
+- A macro（宏） in C is a fragment of code that is given a name. You can use the `#define` preprocessor to define a macro.
+
+  ```c
+  #define EXIT_SUCCESS 0 // from stdlib.h
+  ```
+
+- A macro can be a function, and its arguments do not have types
+
+  ```c
+  #define SQUARE(x) x * x
+  ```
+
+  **macro expansion**: SQUARE(z-y) = z-y*z-y.
 
