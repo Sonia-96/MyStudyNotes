@@ -36,7 +36,9 @@ From top to bottom, the network layers and corresponding protocols:
    - DNS: turn human-readable domain names to numeric numbers
 2. **Transport Layer**: process to process communication (port)
    - TCP - Transmission Control Protocol: gurantees your will receive all data because it will resend lost packages
+     - stream-based, reliable data transfer
    - UDP - User Datagraph Protocol: cannot gurantee you receive all data
+     - IP packets + port numbers
 3. **Network Layer**: host to host communication (IP) (multiple-hop communication)
    - IP protocol
 4. Link Layer: one-hop communication, e.g. Wifi, Ethernet
@@ -73,7 +75,7 @@ From top to bottom, the network layers and corresponding protocols:
 
 ## Measuring Delays
 
-1. It's hard to measure the time from host1 to host2, because we will get delays to get the timestamp. But we can measure the time on the same host -- Round Trip Time (RTT)
+1. It's hard to measure the time from host1 to host2, because we will get delays to get the timestamp. But we can measure the time on the same host -- **Round Trip Time** (RTT)
    - RTT = 2 processing delays (~0) + 2 * (4 delays for each hop)
 
 2. Queuing delay: test RTT for the packets of the same size between the same hops; the variability should be due to queueing delay (but probably they go different paths). 
@@ -169,20 +171,17 @@ Q: TCP - stream?
      - text-based, TCP-base
 
      - how SMTP works: laptop -> utah.edu email server (SMTP client) ->  (use SMTP to push emails to) gmail (SMTP Server) 
-
-
-  	![How the email protocol SMTP works?](./assets/smtp-process-708x374.png)
+     
+     <img src="./assets/smtp-process-708x374.png" alt="How the email protocol SMTP works?" style="zoom=80%;" />
 
 2. IMAP (internet message access protocol) /POP (post office protocol): receiving email
 
      - IMAP is text-based.
-
-
-     - both are TCP based
-
-
+     
+     -  both are TCP based
+     
      - how IMAP works:
-
+     
        ![How the email protocol IMAP works?](./assets/how-imap-works-1-708x414.png)
 
 
@@ -201,32 +200,74 @@ Q: TCP - stream?
 1. DNS (domain name system)
 
    - tanslate a domain name to an IP address: e.g., cs.utah.edu -> 155.22.17. 21 (iPv4)
-
-
-   - binary protocol: quick machine processing, reducing packet size
-
-
-   - use UDP: because IP address is so small that both request and response can fit in one single packet
+   
+   
+      - binary protocol: for quick machine processing, reducing packet size
+   
+   
+      - use UDP: because IP address is so small that both request and response can fit in one single packet
+   
 
 
 2. DNS system
 
-   - a DNS server is called "resolver" and clients send queries to the resolver
-
-
-   - How to respond to quries:
-
-     - in cache: respond the queries with answers in cache with the cached values
-     - recursive query: ask another resolver for the answer
-     - iterative query: find th answer themselves
-       - e.g., for the address "shell.cs.utah.edu" (`.edu` is a top level domain)
-         - ask a root server "where I can find DNS servers for .edu domains"
-         - ask a .edu DNS server for the authorative server for `utah.edu` domains
-         - keep asking the authorative servers for more specific subdomains until we get the answer
-
+   - a DNS server is called "**resolver**" and clients send queries to the resolver
+   
+   
+      - How to respond to quries:
+   
+        - cached answer: respond the queries with answers in **cache** with the cached values
+        - recursive query: ask another resolver for the answer
+        - iterative query: find th answer themselves
+          - e.g., for the address "shell.cs.utah.edu" (`.edu` is a top level domain)
+            - ask a **root server** "where can I find DNS servers for .edu domains"
+            - ask a .edu DNS server for the authorative server for `utah.edu` domains
+            - keep asking the authorative servers for more specific subdomains until we get the answer
+      - dig: DNS lookup utility
+   
+        - `dig +trace domain_name`
+   
+          - Adding the +trace option instructs dig to resolve the query from the root nameservers downwards and to report the results from each query step. Thus dig will only use the default or explicitly specified nameserver for the initial discovery of the root nameservers.
+   
 3. DNS query types:
+   
+      - Type A: “give me the IP for a hostname” - hostname
+      - Type NS: “give mt the nameserver responsible for this hostname”
+      - Type CNAME: “give me the 'canonical name 规范名称' of a hostname” which would tell you that google.com is really row3.rack2.lax02.westcoast.google.com
+      - Type MX: “tell me the canonical name of the email server for this domain” - mail server
 
-   - Type A: “give me the IP for a hostname”
-   - Type NS: “give mt the nameserver responsible for this hostname”
-   - Type CNAME: “give me the 'canonical name 规范名称' of a hostname” which would tell you that google.com is really row3.rack2.lax02.westcoast.google.com
-   - Type MX: “tell me the canonical name of the email server for this domain”
+# 4 Transport Layer
+
+process to process communication; use protocols TCP/UDP
+
+1. port
+   - usualy uint_16 (0 ~ 2<sup>16</sup> - 1 = 65535)
+   - ports < 1024 are priviledged
+   - Servers choose port number
+   - clients are assigned an ephemeral port number ( a big number)
+2. TCP/UDP
+   - TCP: src & dest IP, src & dest port
+   - UDP: only has dest IP & port, applications have to track src IP & port (我的理解正确吗？)
+3. Reliable Data Transfer
+   - possible problems:
+     - packets are corrupted
+     - packets are not in order
+     - packets are dropped
+4. finite state machine (review lecture video & notes)
+   - sender & receiver
+5. checksum
+6. sequence number: 
+   - an ACK with a wrong sequence number will be treated as a NACK
+   - timeout but don't receive ACK -> NACK
+     - choose timeout: 1 RTT is the absolute minimum. usually we use this expression to set the timeout: `scale * RTT + std(RTT)`
+       - too small: resend packets unnecessarily
+       - too big: sender waits too long to resend
+
+7. pipeling
+   - Go back N
+   - Selective Repeat
+
+TODO: 
+
+1. read: reliable data transfer
+2. 3.4.3 GBN
