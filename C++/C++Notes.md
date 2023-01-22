@@ -753,7 +753,7 @@ Stack Memory is also called **Call Stack Memory**. When a function is called, me
 
    ```c++
    int* pInt = new int; // create a new integer on the heap and give me the address
-   double* myArray = new double[10]; // create an array of size 10 and return the adress of the 1st double
+   double* myArray = new double[10]; // create an array of size 10 and return the adress of the first double
    ```
 
    Note: only when we use `new` to create an object, the heap memory can be used. 
