@@ -154,21 +154,22 @@ A device that executes the instructions defined by ISA, like a CPU, is called an
 
 ### Operands
 
-1. 8 general purpose registers in 16 bits: :
-
-   - ax, bx, cx, dx
+1. Registers
+   - general registers (in 16 bits); ax, bx, cx, dx
      - add a prefix if we want to look at more than 16 bits:
-     - 64 bits: r. rax, rbx, ...
-     - 32 bits: e
-     - lower 8 bits: l
-     - higher 8 bits: h
-
-   - bp (base pointer): the start of the stack frame
-
+       - 64 bits: `r`. `rax`, `rbx`, ...
+       - 32 bits: `e`
+       - lower 8 bits: l
+       - higher 8 bits: h
+   
+   - xmm0, xmm1, ... : floating point parameters
+     
+   - bp (base pointer / frame pointer): the start of the stack frame
+   
    - sp (stack pointer): the top of the stack frame
-
+   
    - si (source index), di (destination index)
-
+   
 2. memory access - `[]`
 
    - `mov eax, DWORD PTR [rcx+8]`: read 32 bits from the address in the square bracket, and store its value in the register eax
@@ -203,3 +204,74 @@ jmp J1;
 J2:
 ```
 
+# 4 ASM Function Calls
+
+x86 Assembly guide: https://www.cs.virginia.edu/~evans/cs216/guides/x86.html
+
+## Application Binary Interface (ABI)
+
+registers hold addresses in RAM
+
+- first 6 int or pointer parameters must be placed in: `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9`
+- floating point parameters: xmm0, ..., xmm7
+- int return value: `rax`
+- callee-saved registers (preserved): register value remains the same after the function call,  `rbx`, `rbp`, r12-r15 (Q: not change after return?)
+- caller-saved registers (temproraries): `r10`, `rsi`
+
+## Managing the Stack
+
+one prpogram has only one stack. Different programs have different memory space in computer.
+
+1. Prologue - set up the stack
+   - save `rbp` to the stack: `rbp` stores the address of the bottom of the stack, its value never changes
+     - Backup `rbp` values: push the value into some register?
+   - `rsp`: if we push something, `rsp` will decrease; pop, `rsp` increase
+2. Epilogue - clean up the stack
+3. push & pop
+   - "push" stores a constant or 64-bit register out onto the stack. So "push \<stuff>" is equivalent to a "sub rsp, 8" and then "mov QWORD[rsp], \<stuff>".
+   - "pop" retrieves the last value pushed from the stack. Everything you push, you MUST pop again afterwards, or your code will crash almost immediately!
+
+## Disassembly Lab
+
+1. login CADE:
+
+   - from terminal: `ssh u1428723@lab1-17.eng.utah.edu`
+   - `logout` to logout
+2. copy file between local computer and remote server (`sftp` & `scp` command)
+
+   - Run commands in local computer:
+
+     - Copy a file from remote server to local computer: `scp u1428723@lab1-17.eng.utah.edu:<remote_path> <local_path>`
+       - or you can first `sftp u1428723@lab1-17.eng.utah.edu`, then `get <remote_path> .`
+
+     - Copy a file from local computer to the remote server: `scp <local_path> u1428723@lab1-17.eng.utah.edu:<remote_path>`
+     - this requires password for the remote server
+
+   - Run commands in remote server:
+
+     - Copy a file from remote server to local computer: `scp <remote_path> sonia@127.0.01:<local_path>`
+     - Copy a file from local computer to the remote server: `scp sonia@127.0.01:<local_path> <remote_path>`
+     - this requires ssh password for the local computer
+3. [Optimization options](https://developer.arm.com/documentation/100748/0618/Using-Common-Compiler-Options/Selecting-optimization-options) for assembly
+   - `-O0`: no optimization
+   - `O2`, `-O3`: faster performance
+4. example:
+   - `sub rsp, 16`: reserve 16 bits for the next function call 
+   - `add rsp, 16`: the function call is ended, release the stack
+
+# 5 ASM System Calls
+
+1. system calls
+   - In computing, a **system call** is the programatic way in whch a computer program requests a service (like I/O, reating new process, checking the time, etc.) from the operating system. (use API)
+   - When a system call is made, the CPU switch to kernal mode to perform the task, then back to the user mode when it returns. Therefore, a system call can slow down your program.
+2. Wake up system calls
+   - traps
+   - exceptions
+   - Interrupts: usually relate to I/O 
+     - OS uses the interrupt vector to store pointers to each interrupt handler. When an interrupt occurs, the CPU is switched into kernel mode and jumps to the appropriate interrupt handler code.
+3. Anatomy of a system call
+   - put syscall parameters in registers
+   - put syscall numbers in registers
+   - `syscall` ASM instruction
+4. Example:
+   - the assembly of `printf("%d", 1)`, the last line is `mov eax, 0`. because the number of this syscall is 0.
