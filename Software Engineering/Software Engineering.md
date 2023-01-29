@@ -218,7 +218,7 @@ An **abstract class** is the class designed to be specifically used as a base cl
 
    - virtual functions can be implemented in the base class
 
-   - Only virtual functions can be overriden by subclasses
+   - only virtual functions can be overriden by subclasses
 
 
    ```c++
@@ -255,7 +255,9 @@ An **abstract class** is the class designed to be specifically used as a base cl
    }
    ```
 
-2. `=0`: a virtual function with `=0` in the end of its declaration is called pure virtual function. A pure virtual function has no implementation and should be implemented by its subclasses. For example, `virtual bool equal(Object* other) = 0`
+2. `=0`: a virtual function with `=0` in the end of its declaration is called **pure virtual function**. A pure virtual function has no implementation and should be implemented by its subclasses. For example, `virtual bool equal(Object* other) = 0`
+
+   - `=0` should appear with `virtual`, but `virtual` might not appear with `=0`
 
 3. It is not allowed to declare an object of an abstract class. But you can declare references or pointers to an abstract class. For example, for the base class `Shape` and subclass `Circle`:
 
@@ -424,3 +426,56 @@ https://www.geeksforgeeks.org/macros-vs-functions/
 
   **macro expansion**: SQUARE(z-y) = z-y*z-y.
 
+# 6 Program Design
+
+Best approach for writing programs:
+
+1. write a description about the program: purpose, input, return
+2. provide some tests
+3. create a template for the implementation
+4. finish body implemenration
+5. run tests (fix if tests fail)
+
+# 7 Debugging
+
+## Error Types
+
+1. syntax or type errors
+2. typos
+3. logical error: the algorithm has logical error
+4. implementation errors: the algorithm is correct, but it is not correctly implemented
+
+## Debugging Strategies
+
+1. incremental & bottom-up program development
+2. backtracking
+3. binary search
+   - `git bisect`: use binary search to find the commit that introduced a bug
+     - enter the toplevel of the working directory: `git bisect start`
+     - read through the `git log`, find the good commit and bad commit
+       - `git bisect good <commit_id>`
+       - `git bisect bad <commit_id>`
+     - git will go back to the version in the middle of the good commit and bad commit, then we can check the code and decide if it's good or bad
+       - `git bisect good`: mark this commit is good
+       - `git bisect bad`: mark this commit is bad
+     - the last step will repeated until we find the first bad commit
+     - // TODO: what is "create mode 100644 git_bisect/file1.cpp.bak"???
+   - `git diff`: show differences between commits
+
+## LLDB
+
+In this cours, wee use `LLDB` to debug, which is the default debugger in Xcode.
+
+- `clang++ -g -O0 <all .cpp files> -o <executable_name>`
+  - `-g`: build the executable with debugging symbols
+- `lldb <executable_name>`
+
+Commands:
+
+1. compile and run the debug executable
+2. Breakpoints
+3. run the debug executable:
+   - run
+   - c
+   - exit
+   - bt: print the stack trace of the current thread
