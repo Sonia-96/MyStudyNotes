@@ -72,7 +72,7 @@
 3. **Registers**: high-speed **storage** areas in the CPU. The data processed by the CPU are fetched from the registers.
 
    - instruction register: hold the current instruction during processing
-   - instruction pointer (IP): hold the address of the current instrution in RAM
+   - **instruction pointer** (IP): holds the address of the current instrution in RAM
 
 #### Buses
 
@@ -210,6 +210,8 @@ x86 Assembly guide: https://www.cs.virginia.edu/~evans/cs216/guides/x86.html
 
 ## Application Binary Interface (ABI)
 
+An ABI is the **calling convention** which determines how data is provided as input to, or read as output from, computational routines. Examples of this are the x86 calling conventions.
+
 registers hold addresses in RAM
 
 - first 6 int or pointer parameters must be placed in: `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9`
@@ -231,34 +233,6 @@ one prpogram has only one stack. Different programs have different memory space 
    - "push" stores a constant or 64-bit register out onto the stack. So "push \<stuff>" is equivalent to a "sub rsp, 8" and then "mov QWORD[rsp], \<stuff>".
    - "pop" retrieves the last value pushed from the stack. Everything you push, you MUST pop again afterwards, or your code will crash almost immediately!
 
-## Disassembly Lab
-
-1. login CADE:
-
-   - from terminal: `ssh u1428723@lab1-17.eng.utah.edu`
-   - `logout` to logout
-2. copy file between local computer and remote server (`sftp` & `scp` command)
-
-   - Run commands in local computer:
-
-     - Copy a file from remote server to local computer: `scp u1428723@lab1-17.eng.utah.edu:<remote_path> <local_path>`
-       - or you can first `sftp u1428723@lab1-17.eng.utah.edu`, then `get <remote_path> .`
-
-     - Copy a file from local computer to the remote server: `scp <local_path> u1428723@lab1-17.eng.utah.edu:<remote_path>`
-     - this requires password for the remote server
-
-   - Run commands in remote server:
-
-     - Copy a file from remote server to local computer: `scp <remote_path> sonia@127.0.01:<local_path>`
-     - Copy a file from local computer to the remote server: `scp sonia@127.0.01:<local_path> <remote_path>`
-     - this requires ssh password for the local computer
-3. [Optimization options](https://developer.arm.com/documentation/100748/0618/Using-Common-Compiler-Options/Selecting-optimization-options) for assembly
-   - `-O0`: no optimization
-   - `O2`, `-O3`: faster performance
-4. example:
-   - `sub rsp, 16`: reserve 16 bits for the next function call 
-   - `add rsp, 16`: the function call is ended, release the stack
-
 # 5 ASM System Calls
 
 1. system calls
@@ -275,3 +249,85 @@ one prpogram has only one stack. Different programs have different memory space 
    - `syscall` ASM instruction
 4. Example:
    - the assembly of `printf("%d", 1)`, the last line is `mov eax, 0`. because the number of this syscall is 0.
+
+# 6 Process
+
+## Typical OS Structure
+
+1. User-level: applications
+
+   - many common OS functions:
+
+     - `malloc()`: C version of `new`
+
+     - `sbrk()`: change the space allocated for the calling process
+
+2. Kernel-level
+
+3. Hardwre-level
+
+   - device make: make APIs
+   - device driver: 
+   - interrupts
+   - DMA?
+
+## Process
+
+1. process: execution context of a running program
+
+   - process != program. many copies of a program can be running at the same time
+   - TODO: what is shell scripts?
+
+2. OS manages a variety of activities: // TODO 
+
+3. a process includes:
+
+   - state
+     - memory state
+     - Processor state
+     - kernel state: **priority**, 
+   - space
+     - Code: instructions that can be read by CPU, like ASM and binary code
+       - the copies of the same program will have different addresses of stack and heap
+     - each process has its own call stack and heap. stack gown downwards, heap go upwards
+       - brk: top of heap
+
+4. Process Control Block (PCB)
+
+   CPU need to switch from process to process, so each process's PCB need to backup values stored in the registers to RAM.
+
+   each process has its own PCB. PCB tracks state of a process
+
+   Q: process vs. thread?
+
+   - PCB can control multiple threads
+   - python doesn't have threading mechanism? // TODO
+   - switching between threads are faster than processes
+
+5. process state machine
+
+   - new (embryo)
+   - ready: in ready queue
+   - running
+   - blocked (sleeping): 
+   - Terminated (zombie)
+
+   ![image-20230126230839845](./assets/image-20230126230839845.png)
+
+6. process state queues
+
+   - ready processes are on the ready queue
+   - wait queue
+
+7. xv6 PCB
+
+8. linux comamnds for process management
+
+   - `fork()`: create a new process, which is called child process. The child process runs concurrently with its parent process. They share the same program counter, same registers, and same open files. But they reside in different addresses.
+     - Clone program: get your program run other program (?)
+   - `exec()`：creates a child process that replace the parent process. Termination occurs in the currently running process once we make an exec() call. Then the newly created process replaces this parent process (in the same address). 
+
+shell assignment will be the hardest program in this class 
+
+### Isolating Processes
+
