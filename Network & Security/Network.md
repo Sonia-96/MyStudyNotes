@@ -26,7 +26,7 @@ the Internet: connect hosts and transmit data
 
   ![img](./assets/Hop-count-trans.png)
 
-## Network Layer
+## Network Layers
 
 From top to bottom, the network layers and corresponding protocols:
 
@@ -226,8 +226,7 @@ Q: TCP - stream?
       - dig: DNS lookup utility
    
         - `dig +trace domain_name`
-   
-          - Adding the +trace option instructs dig to resolve the query from the root nameservers downwards and to report the results from each query step. Thus dig will only use the default or explicitly specified nameserver for the initial discovery of the root nameservers.
+   - Adding the +trace option instructs dig to resolve the query from the root nameservers downwards and to report the results from each query step. Thus dig will only use the default or explicitly specified nameserver for the initial discovery of the root nameservers.
    
 3. DNS query types:
    
@@ -236,7 +235,13 @@ Q: TCP - stream?
       - Type CNAME: “give me the 'canonical name 规范名称' of a hostname” which would tell you that google.com is really row3.rack2.lax02.westcoast.google.com
       - Type MX: “tell me the canonical name of the email server for this domain” - mail server
 
+
+
 # 4 Transport Layer
+
+## Reliable Data Transfer
+
+In this part, we'll talk about how to build a reliable protocol on top of a unreliable network channel. (The data transmission in network layer is unreliable. 数据丢了就丢了)
 
 process to process communication; use protocols TCP/UDP
 
@@ -247,7 +252,12 @@ process to process communication; use protocols TCP/UDP
    - clients are assigned an ephemeral port number ( a big number)
 2. TCP/UDP
    - TCP: src & dest IP, src & dest port
-   - UDP: only has dest IP & port, applications have to track src IP & port (我的理解正确吗？)
+   - UDP: only has dest IP & port, applications have to track src IP & port (我的理解正确吗？), and the app can receive from any sender
+     - one socket for all senders???
+   
+   > A UDP listener listens for segments destined for a given port. Any segment from any sender is acceptable. In order to know who to reply to, the segment contains the source IP/port as well.
+   >
+   > For TCP, there is a persistent connection between endpoints. A TCP socket will only receive messages from the sender who initated the connection. As programmers, this means that if we use TCP, we don't have to manually think about which clients we're getting messages from. One socket is connected to one client.
 3. Reliable Data Transfer
    - possible problems:
      - packets are corrupted
@@ -271,3 +281,171 @@ TODO:
 
 1. read: reliable data transfer
 2. 3.4.3 GBN
+
+## TCP
+
+### Overview
+
+1. Basic features of TCP:
+   - Point to point: host to host
+   
+   - Full **duplex**: once the connection is established, both sides can send data at any time, even simultaneously
+   
+     > duplex (in communication system): allowing the transmission of two signals simultaneously in opposite directions.
+   
+   - conenction oriented: unlike UDP which doesn’t really know or care whether the receiver gets anything, TCP needs to know that the packet was received. It finds out because the receiver sends an Acknowledgement (or ACK) packet.
+   
+     - stateful? https://en.wikipedia.org/wiki/Connection-oriented_communication // TODo
+   
+   - reliable data transmission (RDT)
+   
+   - throttles senders to protect receiver and network
+   
+2. TCP segments (packet - network layer, frame - UDP, segment - TCP. They basically are the same things.)
+   - headers: (in plain text)
+     - src/dest ports: 2 bytes each
+     
+     - sequence number & ACK number: the units are bytes (in UDP, it's packet).  // TODO draw a picture
+       
+       - sequence number is the last received ACK number
+       - ACK number is the number of the next byte that the receiver wants
+       - ACK number on one side goes up as we send data
+       
+       - ACK number on one side goes up as we receive **in-order** data
+       - even a message with no data should contain these 2 fields. An empty ACK will have as a sequence number the sequence number for the next byte it would send (but the data will have a length of zero). If a client sends several empty ACKs in a row, they'll all have the same sequence number.
+       
+     - Flags: `SNC`, `ACK`, `FIN`, `RST` (reset)
+     
+       - Q: what is RST?
+     
+     - `rwnd` (receive window): the amount of free space in the receive buffer. `rwnd` limits how fast the sender can send the data
+     
+       - The `rwnd` increases when the application reads data out of the buffer and decreases when it receives a message.
+
+### Setup + Teardown
+
+1. build connection - TCP handshake - 3 way handshake (TODO 绘图)
+   - client: `SYN`, randomly choose a sequence number. e.g. seq=1000, ack=0 (ack number is not set), len=0 (the length of the data)
+   - server: `SYN`, `ACK`. randomly choose a sequence number. seq=5000, ack=1001, len = 0
+   - client: `ACK`, seq=1001, ack=5001 (may include application data)
+
+2. close connection: `FIN` // TODO draw the picture by myself
+
+   <img src="./assets/7668a8777dd2047fb6aae55c45aa072a084a4393.png" alt="img" style="zoom:50%;" />
+
+### Reliable Data Transmission
+
+#### Fast Retransmit
+
+what if sender gets multiple segments with the same ACK number? Indicates a "hole" in the receiver buffer because packets arrives out of order (why ACK would be duplicate? since it based on seq + Len)
+
+fast retransmit: resend packet after 3 duplicate ACKs
+
+https://www.isi.edu/nsnam/DIRECTED_RESEARCH/DR_HYUNAH/D-Research/fast-retransmit.html
+
+#### Delayed ACK
+
+Q: what's the purpose of delayed ACK?
+
+#### Timeouts
+
+Timeout: how long transmitted data may remain unacknowledged before a connection is forcefully closed. 
+
+timeout interval computation:
+
+- estimates RTT with an "**exponentially weighted moving average**", usually alpha is 1/8
+  $$
+  estimateRTT = (1 - alpha) * estimateRTT + alpha * latestRTT
+  $$
+  
+- also track the variance with an exponentially weighted moving average:
+  $$
+  estimateVar = (1 - beta) * estimateVar + beta * |packetRTT - estimateRTT|
+  $$
+
+- compute the timeout:
+  $$
+  timeout = estimateRTT + 4 * estimateVar
+  $$
+  
+
+### Flow Control - receiver protection
+
+slow transmission rate to make sure the receiver buffer will never be overflowed  
+
+if rwnd=0, the sender wil stop sending data. Or the sender can send 1-byte segment to see if the receiver can handle this, so the sender can know the rwnd of the receiver.
+
+> It's likely that the receiver application will eventually read from the buffer, making space for new segments, but it won't send any TCP messages informing the sender!
+>
+> To combat this, if the rwnd is 0, the sender sends 1 byte messages when it has data to send. Hopefully it will quickly get an ACK with a larger rwnd and can send larger segments right away. If the receiver takes its time, some of these 1-byte segments might get dropped and need to be resent after a timeout.
+
+<img src="./assets/fca79139f0656a8ccb9d25e361f69f9c3d85a492.png" alt="img" style="zoom:40%;" />
+
+### Congestion Control - network protection
+
+Flow control prevents one host from overwhelming the other, but it ignores the network. If the network is congested, packets will be delayed or dropped. If hosts just send the data as fast as they can, they will overwhelm the network. Therefore, we need to control the transmission rate based on the network condition, which is called "congestion control".
+
+General principles for congestion control:
+
+- lost packets -> network congestion -> slow down transmission
+- ACKed packets -> good network -> speed up transmission
+
+#### Congestion Window (cwnd)
+
+Just like `rwnd` (receive window) limiting the sender's transmission rate, the sender tracks `cwnd` (**congestion window**) to limit how much data can be **in flight** (bytes in flight: the number of bytes that are sent but un-ACKed. Bytes in flight = LastByteSent - LastByteACKed) . 
+$$
+max(bytes\ in\ flight) = min (rwnd, cwnd)
+$$
+
+#### Congestion Control Protocol
+
+A lost packet is detected either when the sender gets 3 duplicate ACKs, or when its timeout fires.
+
+CCP switches among 3 different states based on packets being acknowledge / lost. (This is mechanism implemented in OS kernels.)
+
+ // TODO review the lecture video or the corresponding charpters in the book
+
+1. Slow Start mode
+   - in the begining `cwnd`= 1 MSS (max segement size) 
+   - Every time we get an ACK, cwnd += MSS // TODO actually it's cwnd * 2?
+   - 1, 2, 4, 8, ... (exponentially increace, doubling)
+   - but it can't grow forever. Slow start threshold: when `cwnd` > `ssthresh`, transition to congestion avoidance mode
+2. Congestion Avoidance mode
+   - we are close to the network limit, do no more doubling now
+   - `cwnd += 1 MSS`
+3. fast recovery: we don't need to dramatically reduce our sending data
+   - `cwnd /= 2`
+   - get new ACK: swich back to congestion avoidance mode
+
+#### AIMD
+
+AIMD: additive increase, multiplicative decrease
+
+- fair: multiple TCP connections will send at the same rate on average
+
+## TCP problems
+
+1. Ossification: hard to change
+2. middle boxes: snoop on TCP ???
+3. Streaming: the content of multiiple files are in the same stream. the application need to split them
+   - drawbacks: TCP only send full data to the application. So even the received data is fine, the application cannot use it until TCP received all data （我的理解对吗？
+4. When I change wifi, my IP and port will change. TCP need to associate with that. The implementation is complicated.
+5. handshake hell: tcp handshake -> tls handshake
+
+### QUIC - quick UDP Internet Connections
+
+Google invent QUIC, which  is built on UDP but has TCP's reliable data transfer and flow/congestion control features.
+
+- connection is based on 64-bit connection ID -> no parking-lot problem
+- Stream-based
+- Handshake is slightly shortened and **reconnection don't need handshake**
+
+# 5 Network Layer
+
+host to host connection
+
+## Destination Based Routing
+
+examine dest IP and see which output link to use
+
+IP address
