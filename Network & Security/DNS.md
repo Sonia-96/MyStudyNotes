@@ -71,7 +71,7 @@ Answers, authority, and additional information are all included in resource reco
 
 ### Message Compression
 
-If a domain name appears more than one in a message, the entire domain name or a list of lables at the end of the domain name is replaced with a pointer to a prior occurence of the same name. The pointer is 2 byte. The first two bits are `0b11`, the rest 6 bits is the offset.
+If a domain name appears more than once in a message, the entire domain name or a list of lables at the end of the domain name is replaced with a pointer to a prior occurence of the same name. The pointer is 2 byte. The first two bits are `0b11`, the rest bits are the offset.
 
 ```
     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
