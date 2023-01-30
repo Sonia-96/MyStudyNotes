@@ -4,7 +4,7 @@
 
 ### Format
 
-![image-20230122140144633](/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230122140144633.png)
+![image-20230122140144633](./assets/image-20230122140144633.png)
 
 A DNS Message can be devided into 5 sections, some of which might be empty:
 

@@ -440,12 +440,67 @@ Google invent QUIC, which  is built on UDP but has TCP's reliable data transfer 
 - Stream-based
 - Handshake is slightly shortened and **reconnection don't need handshake**
 
-# 5 Network Layer
+# 5 Network Layer: Data Plane
 
-host to host connection
+The network layer is responsible for moving packets from a sending host to a receiving host. To do so, every router in the network layer should **forward** and **route** packets to their destinations.
 
-## Destination Based Routing
+- **fowarding**: move a packet from its input link to an appropriate output link, which is network's **data plane** function.
+  - traditional IP forwarding: use destination IP address
+  - generalized forwarding: using several different fileds in the header
+- **routing**: determine the route or path taken by packets as they flow from a send to a receiver (use routing algorithm), which is network's **control plane** function.
 
-examine dest IP and see which output link to use
+## What's inside a router?
 
-IP address
+### Router Components
+
+1. Hardware part - forwarding
+
+     - **Input link** (port): input port performs several key functions:
+       - network layer function: translate physical layer signals to bits (shown in the first box)
+       - link layer function: interoporate with the link layer at the other side of the incoming link (shown in the second box and the dots)
+       - lookup & forwarding: determine which output port this packet will be forwarded to
+         - Note, forwarding decision is made in the input port!!!
+
+     - **Switching fabrics**: connect the router's input ports to output ports. Switching fabric is like a network inside a network router!
+
+     - Output link (port): (a home router usually have 4-6 input & output ports)
+       - Store packet received from the switch fabric
+       - Transmit packets over the outgoing link 
+
+2. Software part- routing
+
+   - **Routing processor**: performs control-panel function -- executing routing protocols, maintaining routing tables, and network management
+
+
+<img src="./assets/image-20230129105540663.png" alt="image-20230129105540663" style="zoom:75%;" />
+
+### Destination Based Forwarding
+
+A router uses a **forwarding table** to decide which output port a packet should be sent to. Forwarding table is a hash table with IP prefix as key and output port number as value. If a packet's destination IP matches the prefix stored in the forwarding table, the packet will be switched to the corresponding output port. If there're multiple matches, the router uses **longest prefix matching rule**.
+
+For example, a router uses the folowing forwarding table. For the prefixes in the table, the number after the slash means the number of bits of the prefix, "0" after the prefix means any number. For example, "1.2.3.0/24" matches any IP address starts with "1.2.3". The packet with destination IP "1.2.3.5" will be swtiched to interface 0 (not 1!!), and "127.0.28.5" will be switched to default interface 3.
+
+| Prefix     | Output Link Interface |
+| ---------- | --------------------- |
+| 1.2.3.0/24 | 0                     |
+| 1.0.0.0/8  | 1                     |
+| 1.3.0.0/16 | 2                     |
+| Otherwise  | 3                     |
+
+### Switching 
+
+- shared memory
+- a bus
+- an interconnection network
+
+### Queuing
+
+two queues:
+
+- input queueing
+- output queueing
+
+priority queueing
+
+## IPv4
+
