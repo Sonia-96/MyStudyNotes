@@ -28,7 +28,7 @@ The header section is 12 bytes and always present in the message.
 
      - Truncated (TC): 1 bit, if the message is more than 512 bits, it will be truncated
 
-     - Recursion Desired (RD): 1 bit
+     - Recursion Desired (RD): 1 bit. 1 - Recursive query, 0- iterative query
        - 该位为 1 时，服务器必须处理这个请求：如果服务器没有授权回答，它必须替客户端请求其他 DNS 服务器，这也是所谓的 **递归查询** ；
        - 该位为 0 时，如果服务器没有授权回答，它就返回一个能够处理该查询的服务器列表给客户端，由客户端自己进行 **迭代查询** ；
 
@@ -36,6 +36,7 @@ The header section is 12 bytes and always present in the message.
 
      - Recursion Available (RA): 1 bit
      - Reserver Bit (Z): 3 bits, should be 0
+       - Note, in new DNS protocol, this is 1 bit, and the rest 3 bits are used for other flags. You can check this in Wireshark
      - Response Code (RCode): 4 bits. 0 - No error, 3 - name error. This is set as a part of response
 
 3. question count (2 bytes): the number of questions

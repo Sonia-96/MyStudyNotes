@@ -440,7 +440,7 @@ Google invent QUIC, which  is built on UDP but has TCP's reliable data transfer 
 - Stream-based
 - Handshake is slightly shortened and **reconnection don't need handshake**
 
-# 5 Network Layer: Data Plane
+# 5 Network Layer 1: Data Plane
 
 The network layer is responsible for moving packets from a sending host to a receiving host. To do so, every router in the network layer should **forward** and **route** packets to their destinations.
 
@@ -465,7 +465,7 @@ The network layer is responsible for moving packets from a sending host to a rec
 
      - Output link (port): (a home router usually have 4-6 input & output ports)
        - Store packet received from the switch fabric
-       - Transmit packets over the outgoing link 
+       - Transmit packets over the outgoing link (transmit means turn bits to physical layer signal)
 
 2. Software part- routing
 
@@ -489,18 +489,157 @@ For example, a router uses the folowing forwarding table. For the prefixes in th
 
 ### Switching 
 
-- shared memory
-- a bus
-- an interconnection network
+Switching means switching a packet from an input port to a output port. There are a number of ways to accomplish this:
+
+- shared memory: the routing processor read from the input port then write to the output port
+- a bus: a packet is written to all output ports through the bus, but only the port that should output the packet receive the packet, other ports just ignore it. Only a packet can be written to the bus at a time, so other ports have to wait their turn to forward their packets.
+- an interconnection network: capable of forwarding multiple packets in parallel
+
+These techniques can be combines/layered to maximize throughput and minimize delays.
 
 ### Queuing
 
-two queues:
+A router contains several queues that can cause packet delays or packet loss:
 
-- input queueing
-- output queueing
+- input queueing: waiting for the switching fabric to send them to the output port
+- output queueing: waiting for transmission at the outgoing links
 
-priority queueing
+If we want to forward packets besed on their priorities, we can use several normal queues with different priorities (the queue with higher priority will send packets first) or a priority queue. This could compeletely block lower-priority queue.
 
 ## IPv4
 
+IPv4 is the major network protocol in use today. IPv6 is increasing its market share, but fairly slowly. 
+
+An IPv4 has the following important informaiton in its header:
+
+- src/dest IP address
+- packet length
+- TTL: the number of hops before a packet should be dropped. 
+  - TTL changes at each hop, then checksum should be recomputed at each hop
+- Protocol: TCP/UDP/ICMP
+- header checksum: check to see if the header is corrupted or not
+- fragmentation info: The link layer may not support sending large packets. If a packet is bigger than the maximum packet size (which is Maximum Transfer Unit, MTU) that a link layer can handle, the network layer will break it into smaller packets. This process is called fragmentation. Fragmentation is hard to implement, so transport protocols just avoid sending packets bigger than MTU.
+
+protocol, header checksum, and fragmentation are the things we want to get rid of!
+
+### IP Address Assignment
+
+IANA assigns big IP ranges for entities like universities and governments, and these entities will manually assign IPs to its routers. 
+
+In small scale, each router needs to assign IPs to the connected devices (hosts). But devices come and go, it's impratical to assign IPs manually. Usually those network use use **Dynamic Host Configuration Protocol (DHCP)** to assign IPs automatically.
+
+#### subnet
+
+A subnet is a segmented piece of a larger network. The devices in a subnet are connected without a router, and they all share the same IP prefixes. For example, in the following picture, there are 3 routers and 6 subnets.  
+
+- an IP address is technically associated with an **interface** (the boundary between the host and the physical link), rather than a host or a router that containing the interface. 
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230130225222620.png" alt="image-20230130225222620" style="zoom:80%;" />
+
+#### DHCP
+
+DHCP is used for small-scale IP addresses assignment. Server tracks allocated IP addresses or which IP addresses are available.
+
+DHCP is a client-server protocol. When a client just enters a subnet, they doesn't have an IP. They need to ask for the server for it. There are 4 steps:
+
+1. client sends a **broadcast** message "DHCP Discover" to `255.255.255.255` 
+
+2. server broadcasts DHCP OFFER
+
+3. client broadcasts DHCP ACKNOWLEDGE
+
+4. serfer broadcasts ACK
+
+Then the client can use the allocated IP address.
+
+![image-20230130231136367](./assets/image-20230130231136367.png)
+
+DHCP potential issue: doesn't have anything like "byte" handshake, cannot track if a device has already left the network
+
+### NAT
+
+There are only 2<sup>32</sup> IPv4 = 4 billion addresses, but there are more than 4 billion connected devices in the world. How do they each get an IP? One trick used by ISPs is **Network Address Translation (NAT)**.
+
+NAT: share 1 public IP address with many devices. use extra port number info to tell  connections apart
+
+my homerouter IP address: `10.0.0,1`, `197.186.1.1`
+
+each device in the network has a port number
+
+Modem: NAT router. will change the src IP. e.g. `10.0.0.1 : 11111` -> public IP address + an arbitrary port
+
+
+
+issues:
+
+- Bottleneck
+- port forwarding ???
+- Connection-based
+
+## IPv6
+
+Some improvements over IPv4:
+
+- bigger addresses: 128bits = 16 bytes = 32 hex num. We'll never run out of IPv6 addresses
+- improved header: header is fixed size and doesn't have a checksum, so we don't need to recompute checksum or deal with variable-length headers
+  
+- no fragmentation: packets that are too big are dropped and the sender will be notified
+
+## IPv4 -> IPv6
+
+Only endpoints in the path need to do transport things, but every router need to do network things. So, switching from IPv4 to IPv6 requires we to update all devices including routers. 
+
+- Dual Stacking: routers can understand both 4 and 6
+
+- Tunneling:  
+
+  > when an IPv6 packet hits an IPv4 only link, it puts the whole IPv6 packet in an IPv4 packet and forwards it on. When it gets to a node that understands IPv6, the IPv6 packet is unwrapped and sent onward.
+
+Since it takes extra costs to transit from IPv4 to IPv6, and NAT kind of solves the problem of running out of IPv4 addresses, many operators have decided not to invest in supporting IPv6.
+
+## Match and Action
+
+Match and Action: 
+
+- forwarding table (prefix -> output link) : 
+  - on the "match" side, we can look at src/dest IP addresses (some src IP has higher priority, some src IP like sendign spams, so we can give them lower priority), port numbers
+  - on the action side: forwarding
+- flow table: similar to forwarding table, but looks at more fields in the header (we can think flow table is a generalized version of forwarding table)
+- NAT router:
+  - Action: change src IP/port
+- firewall
+
+# 6 Network Layer 2: Control Plane
+
+Modern networks use "Software Defined Networking" (SDN) to come up with the routing plans.
+
+## Routing Algorithms
+
+1. use Dijkstra's algorithm to find the shortest path to each IP address - "single source shortest path"
+
+   - only store first edge in each path in my forwarding table
+   - OSPF: 
+
+2. Bellman-Ford algorithm: keep track of the shortest distance and the neighbor that's the first hop on the route
+   $$
+   dist(x, y) = min_{n in neighbors}( cost(x, neighbor) + dist(neighbor, y))
+   $$
+   each node store "distance vector". 
+
+   send DV to neighbors, and they will update DV with improved distances.
+
+   If table changes, send updated DB to neighbors.
+
+   each node only need to know their distance to neighbors.
+
+## Autonomous System
+
+An Autonomous system is a group of routers + hosts that manages itself and has some connection points to other ASs. Each As has its AS number. With ASs, we're interested in 2 different types of routing: routing within an AS (intra-AS routing), and routing among ASs (inter-AS routing).
+
+### Intra-AS rounting
+
+OSPF - use Dijkstra's algorithm
+
+### Inter-AS routing
+
+border routers/gateway routers: connect a AS with another AS, talk with each other using protocol BGP (Border Gateway Protocol) - protocol for sharing AS paths
