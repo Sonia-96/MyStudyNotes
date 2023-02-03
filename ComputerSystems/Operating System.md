@@ -121,9 +121,10 @@ A device that executes the instructions defined by ISA, like a CPU, is called an
 
 1. priviledge rings / CPU protection rings
 
-   Computer operating systems provide different layers of access to resources. Each of these layers have different priviledges. We use "**protection rings**" term while mentioning this system. The rings are arranged in a hierachy from the most privileged (most trusted) to the least privileged (least trusted) layer. Protection rings are one of the key solutions for sharing resources and hardware.
-   Most OS only use two of these: Kernel Mode (ring 0), Usere Mode (ring 3).
-
+   - Computer operating systems provide different layers of access to resources. Each of these layers have different priviledges. We use "**protection rings**" term while mentioning this system. The rings are arranged in a hierachy from the most privileged (most trusted) to the least privileged (least trusted) layer. Protection rings are one of the key solutions for sharing resources and hardware.
+   - Most OS only use two of these: Kernel Mode (ring 0), Usere Mode (ring 3). Ring 1 and ring 2 are rarely used. Switching from user mode to kernel mode can cost 1000 - 1500 CPU cycles.
+   - Hypervisor (Ring -1) allows guest operating system to run Ring 0 operations. (a host OS runs on hardware, a guest OS runs on Virtual Machine)
+   
    <img src="./assets/1_rings3-1024x678.png" alt="1 rings3" style="zoom:50%;" />
 
 
@@ -262,7 +263,7 @@ one prpogram has only one stack. Different programs have different memory space 
 
      - `sbrk()`: change the space allocated for the calling process
 
-2. Kernel-level
+2. Kernel-level: Kernel is a core component of OS and generally has control over everything in the system
 
 3. Hardwre-level
 
@@ -275,59 +276,134 @@ one prpogram has only one stack. Different programs have different memory space 
 
 1. process: execution context of a running program
 
-   - process != program. many copies of a program can be running at the same time
-   - TODO: what is shell scripts?
+   - a process is not equal to a program. Many copies of a program can be running at the same time
+   - everything happens either in a kernel or a process (OS is not a process)
 
-2. OS manages a variety of activities: // TODO 
-
-3. a process includes:
+2. A process includes the following things. All are tracked in PCB
 
    - state
-     - memory state
-     - Processor state
-     - kernel state: **priority**, 
-   - space
-     - Code: instructions that can be read by CPU, like ASM and binary code
+     - memory state: code, data, heap, stack
+     - Processor state: registers, IP (instruction register)
+     - kernel state: 
+       - process: ready, running, ...
+       - resources: open files/sockets, etc.
+       - scheduling: **priority**, CPU time
+   - Address space
+     - code: instructions that can be read by CPU, like ASM and binary code
        - the copies of the same program will have different addresses of stack and heap
-     - each process has its own call stack and heap. stack gown downwards, heap go upwards
-       - brk: top of heap
+     - static data: data and BSS (block starting symbol) ???
+       - [BSS](https://en.wikipedia.org/wiki/.bss#:~:text=Historically%2C%20BSS%20(from%20Block%20Started,others%20at%20United%20Aircraft%20Corporation.) (block starting symbol): the portion of code that contains statically allocated variables that has been declared but has not been assigned a value 
+     - dynamic data: data stored in heap and stack
+   - Special pointers: each process has its own call stack and heap. Stack grows downwards, heap goes upwards
+     - `brk`: the front of heap (explicitly moved)
+     - `sp`: top of stack (implicitly moved)
 
-4. Process Control Block (PCB)
+3. Process Control Block (PCB)
 
-   CPU need to switch from process to process, so each process's PCB need to backup values stored in the registers to RAM.
+   - Each process has its own PCB, which is allocated in kernel memory
+   - Tracks states of a process, including:
+     - PID: process identifier, usually 2 bytes
+     - process states: running, waiting, ...
+     - machine state: IP, SP, registers
+     - memory management info: 
+     - open file table (open socket table)
+     - Queue pointers: waiting queue, I/O, sibling list, parent, ...
+     - sheduling info: priority, time used so far, ...
 
-   each process has its own PCB. PCB tracks state of a process
+   - CPU needs to switch from process to process, so each process's PCB need to backup values in the registers to RAM.
 
    Q: process vs. thread?
 
-   - PCB can control multiple threads
-   - python doesn't have threading mechanism? // TODO
-   - switching between threads are faster than processes
+   - A process can have multiple threads, switching between threads are faster than processes
+   - A PCB can control multiple threads
 
-5. process state machine
+4. process state machine
 
    - new (embryo)
    - ready: in ready queue
-   - running
-   - blocked (sleeping): 
-   - Terminated (zombie)
+   - running: executing instructions on CPU
+   - blocked (sleeping): stalled for some event, e.g., I/O
+   - Terminated (zombie): process is dead or dying
 
    ![image-20230126230839845](./assets/image-20230126230839845.png)
 
-6. process state queues
+5. process state queues
 
    - ready processes are on the ready queue
-   - wait queue
+   - each I/O device has a wait queue
+   -  A process is either running, or on the ready queue, or on a single wait queue
+   - processes are linked to parents and siblings -- support using `wait()`
 
-7. xv6 PCB
+6. xv6 PCB
 
-8. linux comamnds for process management
+## Process Management API
 
-   - `fork()`: create a new process, which is called child process. The child process runs concurrently with its parent process. They share the same program counter, same registers, and same open files. But they reside in different addresses.
-     - Clone program: get your program run other program (?)
-   - `exec()`：creates a child process that replace the parent process. Termination occurs in the currently running process once we make an exec() call. Then the newly created process replaces this parent process (in the same address). 
+### fork()
 
-shell assignment will be the hardest program in this class 
+`fork()` create a new process, which is called **child process**. The child process runs concurrently with its parent process. They share the same program counter, same registers, and same open files. But they reside in different addresses.
 
-### Isolating Processes
+### exec()
 
+creates a child process that replace the parent process. Termination occurs in the currently running process once we make an exec() call. Then the newly created process replaces this parent process (in the same address). 
+
+### wait()
+
+
+
+# 7 Limited Direct Execution
+
+1. Virtualization: share the CPU among many processes
+2. Isolation:
+   - processes must be isolated with each other
+   - kernel must be isolated with processes
+   - hardware must be isolated with processes
+3. Limited Direct Execution: run code on CPU with constraints
+   - restrict access to sensitie state (anything that need to be protected), like the memory (addresses in RAM), addresses (registers), interrupts
+   - prevent **denial-of-service** (what's this???)
+4. Problem #1: Sensitive Table
+   - hide **control registers** (convert virtual addresses to physical addresses) from applications
+     - `%CR3`
+     - `HLT`: hault instruction - halt the entire system
+     - `LIDT`: load interrupt descriptor table register
+     - `MOV %CRn`: ???
+     - `CLI`: clear interrupts
+     - `STI`: set interrupt flag
+     - `%IDTR`: interrupt descriptor table register
+   - Priviledged instructions are only available in Ring 0
+5. Virtual addressing: isolating memory
+   - **Page table** holds the virtual addresses and corresponsing physical addresses
+   - `%cr3`: page directory base register
+   - CPU will translate virtual address to physical address 
+   - what is **kstack**???
+   
+6. Virtual Address Space
+7. Exceptioinal Control Flow: switch from user mode to kernel mode
+   - "exception" here is not a bag thing. It means interrupt the process of CPU fetching instructions from IP
+   - Types of exceptions:
+     - **interrupt**: asynchronous, **resume** afterward
+       - e.g., mouse moved, key pressed, network packet arrived
+     - **trap**: synchronous, intentional, resume afterward
+       - e.g., syscall, breakpoint, overflow
+     - **fault**: syncrhonous, unintentional, **retry** or **abort**
+     - **abort**: unintentional, abort
+       - machine check exception, **double fault** (?)
+     
+     Q: syncrhonous & asynchronous? we can think asynchronous things happen unexpectedly. 
+     
+   - resume & retry & abort
+     
+     - Resume: restart on instruction after exception
+     - Retry: 
+     - Abort: terminate
+
+8. Example: debugger
+   - When you add a breakpoint, the debugger adds code to the assembly:
+     - remembers the data stored at the address
+     - replaces the first byte with the **int 3** instruction (int - interrupt)
+   - run the process: when hit a int 3, cause a trap in OS and process halts
+     - int 3 -> original instruction
+     - roll IP back by one (this can only be done in Ring 0, because IP is priveliged register)
+     - Interact with the halted process
+   - if the user want to keep running, the debugger will put the breakpoint back
+
+9. Interrupt Descriptor Table (trap table)
