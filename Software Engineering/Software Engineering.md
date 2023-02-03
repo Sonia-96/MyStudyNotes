@@ -32,7 +32,7 @@ Write the following things in the file named `Makefile`:
 
 2. Rules: describe the targets and their dependencies, and the commands to execute
 
-   ![image-20230110101221735](./assets/make_rules.png)
+   <img src="./assets/make_rules.png" alt="image-20230110101221735" style="zoom: 50%;" />
 
    - implicit rules / built-in generic rules: `%.o : %.c` is an implicit rule, we don't need to specify this.
 
@@ -307,7 +307,7 @@ In type casting (also called **explicit type conversion**): a date type is conve
 
    - reinterpret_cast / TODO
 
-# 4 Version Control
+# 3 Version Control
 
 git book: https://git-scm.com/book/en/v2/
 
@@ -348,6 +348,7 @@ master chapter 1-6 if you want to be a software developer
 - `git branch`：查看分支列表
 - `git branch <branch_name>`：创建新分支
 - `git checkout <branch_name>`：切换分支
+
 - `git checkout -b <branch_name>`：创建并切换分支
 - `git merge <branch_name>`：合并当前分支和别的分支
 - `git branch -d <branch_name>`：删除分支
@@ -356,6 +357,30 @@ master chapter 1-6 if you want to be a software developer
 - `git merge --squash bugfix`: takes all commits from the `bugfix` branch and groups it for a 1 commit with your current branch.
 - `git pull --rebase`: if someone (suppose A) pushes a changes to the master branch, then you cannot push your changes to the repo. You can use this command to update your local repo and apply your commit after A's commit. 
   - Use this command when your changes do not deserve a separate branch
+
+## Git Branch Workflow
+
+1. create a work branch:
+   - `git branch`：查看分支列表
+   - `git branch <branch_name>`：创建新分支
+   - `git checkout <branch_name>`：切换分支
+2. make changes and periodically save work
+   - `git add .`
+   - `git commit -m "..."`
+   - `git push origin <branch_name>`
+3. merge branch with main
+   - `git checkout main`
+   - `git merge --squash <branch_name>` : stage all work changes in main
+   - `git commit -m "..."`
+
+# 4 Program Design
+
+1. Determine the representation: Chose how to represent data for your problem by selecting or defining a type.
+2. Write a purpose statement
+3. Write examples
+4. Create a template for the implementation
+5. Finish body implementation case by case
+6. Run tests
 
 # 5 C++ Unit Testing
 
@@ -479,3 +504,115 @@ Commands:
    - c
    - exit
    - bt: print the stack trace of the current thread
+
+# 8 Defensive Programming
+
+## Assertions
+
+1. `assert(<expression>)`: make assertions at run-time
+
+   - `#define NDEBUG`: we don't want to use assert in production code because we want to go through all tests. Use this macro can disable assert.
+
+   ```c++
+   void printNumber(int* myNum) {
+       assert (myNum!=nullptr); // if a nullptr is passed, then a bug.
+       cout << "myInt contains value" << " = " << *myNum << endl;
+   }
+   ```
+
+2. `static_assert(<constant_expression>, <message>)`: check if a condition is true when the code is compiled. If it isn’t, the compiler is required to issue an error message and stop the compiling process. The condition that needs to be checked is a constant expression.
+
+   ```c++
+   void testStaticAssertion() {
+       int arr[] = {1, 2, 3};
+       static_assert((sizeof(arr) / sizeof(arr[0])) > 3, "Array size is too small!"); // this will fail at compile time
+   }
+   ```
+
+   
+
+## Error Handling
+
+1. Error types:
+   - `std::exception`: parent class of all standard exceptions
+   - `logic_error`
+   - `runtime_error`
+   - ...
+
+2. Throw an exception: An exception won't crash the program
+
+   ```c++
+   float devide(int denominator, int divisor) {
+       if (divisor == 0) {
+           throw runtime_error("Divisor couldn't be 0!");
+       }
+       return (denominator + 0.0) / divisor;
+   }
+   
+   int main(int argc, const char * argv[]) {
+       try {
+           devide(100, 0);
+       } catch(exception const& e) {
+           cout << "Exception: " << e.what() << endl;
+       }
+       return 0;
+   }
+   ```
+
+   Output:
+
+   ```c++
+   Exception: Divisor couldn't be 0!
+   Program ended with exit code: 0
+   ```
+
+3. multiple catches:
+
+   ```c++
+   int main(int argc, const char * argv[]) {
+       while (true) {
+           int x;
+           cin >> x;
+           try {
+               if (x > 10) {
+                   throw x;
+               } else if (x < 0){
+                   throw to_string(x);
+               } else if (x == 0) {
+                   throw runtime_error("x couldn't be 0!");
+               } else {
+                   throw "whatever";
+               }
+           }
+           catch(int i) {
+               cout << "Caught int: " << x << endl;
+           }
+           catch(string s) {
+               cout << "Caught negative int: " << s << endl;
+           }
+           catch(runtime_error e) {
+               cout << "Caught runtime error: " << e.what() << endl;
+           }
+           catch(...) { // catch-all block
+               cout << "Default caught.\n";
+           }
+       }
+       return 0;
+   }
+   ```
+
+   output:
+
+   ```c++
+   11
+   Caught int: 11
+   0
+   Caught runtime error: x couldn't be 0!
+   -1
+   Caught negative int: -1
+   5
+   Default caught.
+   ```
+
+   
+
