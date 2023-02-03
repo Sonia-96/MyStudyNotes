@@ -1523,4 +1523,4 @@ Smart pointers: you don't need to manually delete these pointers
 
 - `std::unique_ptr<T>`
 - `std::shared_ptr<T>`
-- `std::weak_ptr<T>`: a pointer that holds a non-owning reference to an object managed by `shared_ptr`
+- `std::weak_ptr<T>`: a pointer that holds a non-owning reference to an object managed by `shared_ptr`ƒbit
