@@ -642,4 +642,42 @@ OSPF - use Dijkstra's algorithm
 
 ### Inter-AS routing
 
-border routers/gateway routers: connect a AS with another AS, talk with each other using protocol BGP (Border Gateway Protocol) - protocol for sharing AS paths
+**border routers/gateway routers/edge routers**: connect a AS with another AS, talk with each other using protocol BGP (Border Gateway Protocol) - protocol for sharing AS paths
+
+1. BGP
+   - IP prefix
+   - list of AS's on the way
+   - the IP address of a border router in the first AS on the route (next hop)
+
+2. Hot potato routing: 
+   - Definition:
+   - Solution: 
+     - choose fastest path that gets me to the next hop
+     - can also assign preference to different path
+
+3. IP Anycast: multiple machiens use the same IP address, then the router can find the shortest path to the machine. They don't care about the packet goes to different places.
+4. BGP Hijack: ???
+
+# 7 Link Layer
+
+LInk layer is reponsible for one-hop communication. It breaks up packets in to "**frames**" and send them from src to dest.
+
+1. 2 types of link layer protocol: 
+
+   - Point to point: easy mode. only 2 devices are in the channel
+
+   - broadcast channels: the physical layer is shared among many devices
+
+2. frame: // reiew video - what is included in frame
+
+## Error Detection
+
+error detection/correction: the frame is easier to be corrupted during router, it'seasier to handle the error in the link layer. Early detection improves speed a lot!
+
+1. **parity bit**: count the number of bit 1 in the message, and add parity bit to the end. 1 is odd, 0 is even. This way can detect any odd-number flip bits.
+
+   - tradeoff: reliability & minimizing checksum size and computation
+
+   - cyclic redundancy check: 4 * 4 matrix -> check parity bit for each row and column (9 parity bits). This way we can find the location of teh error.
+
+2. Broadcast
