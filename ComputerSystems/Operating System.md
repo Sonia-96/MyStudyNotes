@@ -336,19 +336,178 @@ one prpogram has only one stack. Different programs have different memory space 
 
 6. xv6 PCB
 
-## Process Management API
+## Practical Process Management
 
-### fork()
+### Process API
 
-`fork()` create a new process, which is called **child process**. The child process runs concurrently with its parent process. They share the same program counter, same registers, and same open files. But they reside in different addresses.
+#### fork() system call
 
-### exec()
+1. Synopsis:
 
-creates a child process that replace the parent process. Termination occurs in the currently running process once we make an exec() call. Then the newly created process replaces this parent process (in the same address). 
+   ```c
+   #include <unistd.h>
+   pid_t fork();
+   ```
 
-### wait()
+2. Description:
 
+   `fork()` creates a new process (**child process**) from duplicating the calling process (parent process). The child process runs concurrently with its parent process. They share the same program counter (pc), same registers, and same open files (**really???**). But they reside in different addresses and have different PIDs
 
+3. Return values
+
+   - on success: 0 in the child process, child's PID in the parent process
+   - on failure: -1is returned in the parent, no child process is created
+
+4. Example:
+
+   ```c
+   #include <stdio.h>
+   #include <stdlib.h>
+   #include <unistd.h>
+   
+   int main() {
+       printf("Hello, World! (pid: %d)\n", (int) getpid());
+       int rc = fork();
+       if (rc < 0) { // fork failed
+           fprintf(stderr, "fork failed\n");
+           exit(1);
+       } else if (rc == 0) { // child
+           printf("Hello, I am child! (pid: %d)\n", (int) getpid());
+       } else { // parent
+           printf("Hello, I am parent of %d! (pid: %d)\n", rc, (int) getpid());
+       }
+       return 0;
+   }
+   ```
+
+   The child process will not start running at main(); it will execute the next instruction after `fork()`.  And since the child the parent are running concurrently, we don't know the CPU **scheduler** will first give control to which process. So there are 2 possible outputs:
+
+   ```c
+   1. 
+   Hello, World! (pid: 47517)
+   Hello, I am parent of 47519! (pid: 47517)
+   Hello, I am child! (pid: 47519)
+     					(or)
+   2. 
+   Hello, World! (pid: 47517)
+   Hello, I am child! (pid: 47519)
+   Hello, I am parent of 47519! (pid: 47517)
+   ```
+
+#### wait() system call
+
+The parent process calls `wait()` to delay its execution until the child finishes executing. On success, it returns the PID of the terminated child, else -1.
+
+`wait()` makes the output of the above program to be deterministic:
+
+```c
+int main() {
+    printf("Hello, World! (pid: %d)\n", (int) getpid());
+    int rc = fork();
+    if (rc < 0) { // fork failed
+        fprintf(stderr, "fork failed\n");
+        exit(1);
+    } else if (rc == 0) { // child
+        printf("Hello, I am child! (pid: %d)\n", (int) getpid());
+    } else { // parent
+        int rc_wait = wait(NULL);
+        printf("Hello, I am parent of %d! (rc_wait: %d) (pid: %d)\n", rc, rc_wait, (int) getpid());
+    }
+    return 0;
+}
+```
+
+output:
+
+```bash
+Hello, World! (pid: 47587)
+Hello, I am child! (pid: 47591)
+Hello, I am parent of 47591! (rc_wait: 47591) (pid: 47587)
+```
+
+#### exec() system call
+
+1. Description:
+
+   - The `exec()` family of functions load a new program into the current process. The code, data, and memory will all be replced.
+   - `exec` only returns to the caller if it fails
+
+2. `exec` has 6 variants:
+
+   - `int execvp(const char *file, char *const argv[]);`: 
+     - file: the filename of the executable
+     - argv: an array of pointers to null-terminated strings that represent the argument list for the new program
+       -  the pointers must be terminated with by a null pointer
+   - `execl`
+   - ...
+
+3. example: 
+
+   ```c
+   int main() {
+       printf("Hello, World! (pid: %d)\n", (int) getpid());
+       int rc = fork();
+       if (rc < 0) { // fork failed
+           fprintf(stderr, "fork failed\n");
+           exit(1);
+       } else if (rc == 0) { // child
+           printf("Hello, I am child! (pid: %d)\n", (int) getpid());
+           char* myArgs[3];
+           myArgs[0] = strdup("wc"); // program: wc - word count
+           myArgs[1] = strdup("../main.c"); // argument: file to count
+           myArgs[2] = NULL; // marks end of array
+           execvp(myArgs[0], myArgs);
+           printf("This shouldn't print out\n");
+       } else { // parent
+           int rc_wait = wait(NULL);
+           printf("Hello, I am parent of %d! (rc_wait: %d) (pid: %d)\n", rc, rc_wait, (int) getpid());
+       }
+       return 0;
+   }
+   ```
+
+   Output:
+
+   ```c
+   Hello, World! (pid: 48997)
+   Hello, I am child! (pid: 49000)
+         26     112     849 ../main.c
+   Hello, I am parent of 49000! (rc_wait: 49000) (pid: 48997)
+   ```
+
+   In this example, the child process calls `wc` (the word counting program), and the `wc` program replaces the child process. Note, `execvp` doesn't create a new process, it just loads code from `wc` and overwrite the current code segment; the stack, heap, and other parts of memory space are also re-initialized.
+
+#### Termination
+
+1. `int kill(pid_t pid, int sig);`: kill other process
+   - sig: SIGKILL (9), SIGSTOP(19), SIGCONT(18)
+2. `exit`: kill the current process
+
+#### Summary
+
+The seperation of `fork()` and `exec()` is essential in building a Unix shell. When you type a command, the shell will call `fork()` to create a new process, then it calls `exec()` to run the command in the child process, then calls `wait()` to wait for the command to complete. When the child completes, the shell returns from `wait()` and prints out a new prompt again, ready for a new command.
+
+### Linux Commands
+
+- `ps`: display all process statuses that have controling terminals
+- `top`: display the information of the top running jobs
+- `kill <PID>`: kill a specific process
+- Unix pipe - `|`: e.g., `grep -o <word> <file> | wc -l`
+
+  - `grep`: file pattern searcher
+
+    - `-o`: print the only matching part of the line
+
+  - `wc`: displays a file's line, word, and byte count
+    - `-l`: the number of lines
+- `./prog &`: run prog in background
+
+## Zombies & Orphans & Daemon
+
+1. zombie: exited process with uncollected statuses
+2. orphans: if a parent process exits before the child terminates, the child becomes an orphan 
+3. daemon （守护进程）: computer programs that run as a background process
+   - The first process `init` is a daemon that keeps running as the computer is on. And `init` will adopt orphaned processes.
 
 # 7 Limited Direct Execution
 
