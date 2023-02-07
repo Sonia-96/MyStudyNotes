@@ -241,7 +241,7 @@ Q: TCP - stream?
 
 ## Reliable Data Transfer
 
-In this part, we'll talk about how to build a reliable protocol on top of a unreliable network channel. (The data transmission in network layer is unreliable. 数据丢了就丢了)
+In this part, we'll talk about how to build a reliable protocol on top of a unreliable network channel. (The data transmission in network layer is unreliable. （数据丢了就丢了)
 
 process to process communication; use protocols TCP/UDP
 
@@ -634,7 +634,7 @@ Modern networks use "Software Defined Networking" (SDN) to come up with the rout
 
 ## Autonomous System
 
-An Autonomous system is a group of routers + hosts that manages itself and has some connection points to other ASs. Each As has its AS number. With ASs, we're interested in 2 different types of routing: routing within an AS (intra-AS routing), and routing among ASs (inter-AS routing).
+An **Autonomous system** is a group of routers + hosts that manages itself and has some connection points to other ASs. Each As has its AS number. With ASs, we're interested in 2 different types of routing: routing within an AS (intra-AS routing), and routing among ASs (inter-AS routing).
 
 ### Intra-AS rounting
 
@@ -642,42 +642,116 @@ OSPF - use Dijkstra's algorithm
 
 ### Inter-AS routing
 
-**border routers/gateway routers/edge routers**: connect a AS with another AS, talk with each other using protocol BGP (Border Gateway Protocol) - protocol for sharing AS paths
+**border routers/gateway routers/edge routers**: connect a AS with another AS, talk with each other using protocol **BGP (Border Gateway Protocol)** - protocol for sharing AS paths
 
-1. BGP
+1. BGP manages paths to a IP prefix and contains: 
    - IP prefix
    - list of AS's on the way
-   - the IP address of a border router in the first AS on the route (next hop)
-
+   - the IP address of the first border router in the first AS on the route (next hop)
 2. Hot potato routing: 
    - Definition:
    - Solution: 
      - choose fastest path that gets me to the next hop
      - can also assign preference to different path
-
 3. IP Anycast: multiple machiens use the same IP address, then the router can find the shortest path to the machine. They don't care about the packet goes to different places.
+   - this works great for DNS since there's only a packet and a response
+   - for TCP, if packets got routed to different devices, this wouldn't work
 4. BGP Hijack: ???
 
 # 7 Link Layer
 
-LInk layer is reponsible for one-hop communication. It breaks up packets in to "**frames**" and send them from src to dest.
+The lInk layer is reponsible for transmiting **frames** of data between 2 adjacent nodes in a network (**one-hop communication**). 
 
-1. 2 types of link layer protocol: 
+1. There are 2 types of link layer protocols: 
 
-   - Point to point: easy mode. only 2 devices are in the channel
+   - point to point: only two devices are in the channel, so there's no interference (easy mode)
 
-   - broadcast channels: the physical layer is shared among many devices
+   - broadcast channels: many hosts shares the same channel and must coordinate to avoid interfering with each other
 
 2. frame: // reiew video - what is included in frame
 
 ## Error Detection
 
-error detection/correction: the frame is easier to be corrupted during router, it'seasier to handle the error in the link layer. Early detection improves speed a lot!
+The frame is easier to be corrupted during routers, it's easier to handle the error in the link layer. Most link layer protocols also provide error detection, and in some cases **forward error detection**, where the error is fixed by the receiving end without retransmission!
 
-1. **parity bit**: count the number of bit 1 in the message, and add parity bit to the end. 1 is odd, 0 is even. This way can detect any odd-number flip bits.
+- tradeoff: reliability & minimizing checksum size and computation
 
-   - tradeoff: reliability & minimizing checksum size and computation
+### Parity Checking
 
-   - cyclic redundancy check: 4 * 4 matrix -> check parity bit for each row and column (9 parity bits). This way we can find the location of teh error.
+1. **parity bit**: count the number of bit 1 in the message, and add a parity bit to the end, for which 1 is odd, 0 is even. So the total number of 1 bits + the parity bit is even. When the receiver checks the message and counts an even number of ones (in pratical, they just xor all bits to check if they can get an 0), there must be an even number of bit flips in the message. Hopefully, but not granted, there's 0 error!
+   - disadvantage: can only detect odd-number bit flips
+2. 2D parity bit
 
-2. Broadcast
+   - cyclic redundancy check: 4 * 4 matrix -> check parity bit for each row and column (9 parity bits). This way we can find the location of the error then fix it! This is forward error detection.
+   - // TODO add a picture as an example
+
+## Broadcast Channels
+
+1. Collision: there are at least 2 devices transmitting at the same time
+2. Assume the sender can detect collisions. Our goals are:
+   - main goals: 
+     - Fairness: when multiple devices are transmitting, they should get equal recourses
+     - If there's only 1 device transmitting, it should get all bandwith (transmission time)
+   - others:
+     - robust when the program crash
+     - don't add much overhead
+     - decentralized (???)
+
+### Protocol 1: Taking Turns - centralized time scheduling
+
+Each node will get a time slot once they join the network.
+
+This method is fair but not efficient. If there's only 1 device transmiting, the device cannot use the whole bandwidth.
+
+- super resistent to crashes (why??) // TODO review
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206095405770.png" alt="image-20230206095405770" style="zoom:50%;" />
+
+
+
+## Protocol 2: Slotted ALOHA
+
+All devices have a synchronized clock. If a device has data to send, it will tries the next time slot. If there are collisions, they will "flip a coin" to decide if they should resend the data in the next time slot. Only if there's only one device deciding to retransmitting the data, can the time slot be used.
+
+ Cases:
+
+- not collision: that device resend the data
+
+- Collisions: this time slot is wasted, everyone will wait and flip a coin again
+
+  
+
+  If there are multiple devices are sending the data at the same time, there's only 37% of time slots are used. (Really?? this method is so stupid, so 37% is pretty high for me)
+
+## Protocol 3: Unslotted ALOHA
+
+This protocol is the same as slotted ALOHA, except that devices don't have syncrhonized clocks. Now collisions can occur with 2 time slots for each node (why???), so only 50% time slots are used. (why 50%???)
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206101417161.png" alt="image-20230206101417161" style="zoom:50%;" />
+
+## Protocol 4: CSMA
+
+CSMA - Carrier Sense Multiple Access
+
+1. strategies: 
+   - listen to see if there's other node transmitting and wait until they stop before we start transmitting
+   - if detect a transmission in our time slots, we'll stop transmitting right away
+2. This still might cause collisions (see the figure below), then we use **binary exponential backoff** to decide the time slots to wait --  Choose a random number between 1 and 2<sup>#collisions</sup>
+3. The faster the collisions are detected, the better CSMA performs. If collisions detection time is 0, 100% time slots willl be used.
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206101431930.png" alt="image-20230206101431930" style="zoom:50%;" />
+
+## Cable Internet: DOCSIS
+
+what does DOCSIS stands for???
+
+CMTS, cable modem termination system
+
+1. Downloading: the ISP (internet service provider) **broadcast** to all the neighbors but modem will drop packets that are not meant for them
+2. Uploading: there are 2 phases:
+   - request: clients send upload requests (they pick slots randomly and hope for no collisions)
+   - Announcement: the CMTS assigns time slots based on the requests and annouces which customers get which time slots in the next upload cycle
+
+That's why in your home network, you find that usually upload speed is much slower than the download speed. 
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206102127275.png" alt="image-20230206102127275" style="zoom:50%;" />
