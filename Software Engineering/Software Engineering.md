@@ -614,5 +614,14 @@ Commands:
    Default caught.
    ```
 
-   
 
+# Documentation
+
+## Doxygen
+
+1. Create a configuration file: `doxygen -g <config-file-name>`
+2. document your code
+3. Run Doxygen: `doxygen <config-file-name>`
+4. generate a pdf file:
+   - Install ghostscript interpreter: `brew install ghostscript`
+   - Enter `latex` foler: `make pdf`
