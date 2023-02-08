@@ -623,3 +623,20 @@ The seperation of `fork()` and `exec()` is essential in building a Unix shell. W
 
 # 9 Scheduling + IPC
 
+## Multilevel Feedback Queue
+
+5 rules:
+
+1. if priority(A) > priority(B), A runs
+2. if priority(A) == priority(B), use RR to run A and B
+3. processes starts at the top priority, 
+4. Once a process uses the allotment at a given level, it moves down a queue. -- avoid gaming CPU
+5. after some time period, move all jobs to the top priority queue. -- avoid starvation
+
+### Lottery Scheduling
+
+random algorithm, simple to implement
+
+### Interprocess Communication
+
+![img](/Users/sonia/Documents/CSStudy/MyStudyNotes/ComputerSystems/assets/Half-vs-Full-duplex-e1657701720121.jpg)
