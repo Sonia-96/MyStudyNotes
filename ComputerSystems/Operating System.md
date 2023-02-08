@@ -566,3 +566,60 @@ The seperation of `fork()` and `exec()` is essential in building a Unix shell. W
    - if the user want to keep running, the debugger will put the breakpoint back
 
 9. Interrupt Descriptor Table (trap table)
+
+# 8 Scheduling
+
+## Recall
+
+1. policy & mechanism
+
+   - Policy: choose what to run in a consistent way. e.g., process scheduler
+   - Mechanism: low-level code that implements the decision. e.g., dispatcher, context switch 
+
+2. Dispatch mechanism
+
+   ```bash
+   while (1) { // infinit loop
+   	run process A for some time slices
+   	
+   	stop process A and save its context \
+   	                               context switched
+   	load context of process B           /
+   }
+   ```
+
+3. cooperative vs. preemptive multitasking
+
+   - **cooperative multitasking**: not used in modern operating system
+     - OS trusts that processes to behave reasonably -- they will relinquish CPU to OS through traps (e.g., making system calls, page fault, errors).
+     - such system often have a explicit **yield()** system call, which transfers control to the OS so it can run other processes.
+     - disadvange: if an unfriendly process avoids all the traps and performs no I/O, it will take over the entire machine!
+   - **preemptive multitasking**: the OS takes control
+     - **timer interrupt**: the timer raises a interrupt every so many milliseconds. When the interrupt is raised, the OS will regain control, then it will stop the current process and start a different one.
+
+4. context switch: 
+
+   > A context switch is conceptually simple: all the OS has to do is save a few register values for the currently-executing process (onto its kernel stack, for example) and restore a few for the soon-to-be-executing process (from its kernel stack). By doing so, the OS thus ensures that when the return-from-trap instruction is finally executed, instead of returning to the process that was running, the system resumes execution of another process.
+
+5. Diagram: how OS switches from process A to process B (important!!! If I can draw the diagram by myself, I have understood the context switch)
+
+## Scheduling Performance Metrics
+
+1. turnaround time = completion time - arrival time
+2. response time = first run time - arrival time
+3. Fairness: all jobs get the same CPU time over some time interval
+
+## Schedulers
+
+1. Non-preemptive algorithms:
+   - **FIFO (first in first out)**: turnaround time suffers when short jobs are behind the long job (**convoy effect**)
+   - **SJF (shortest job first)**: can minimize turnaround time. But this algorithm is impractical since we don't know each job's running time
+2. Preemptive schedulers:
+   - **STCF (shortest time-to-complete first)**: based on SJF, but jobs can have different arrival time
+     - for time sharing system, when a job completes is not very important. We care more about the response time
+   - **Round-Robin(RR)**: runs a process in a fixed time slice, then switches to another process
+     - have good average response time, but might have bad average turnaround time with equal job lengths
+     - The size of time slice is important. The smaller the size, the response time is better, but the costs of context swithces will be larger. So there's a tradeoff.
+
+# 9 Scheduling + IPC
+
