@@ -623,20 +623,30 @@ The seperation of `fork()` and `exec()` is essential in building a Unix shell. W
 
 # 9 Scheduling + IPC
 
-## Multilevel Feedback Queue
+## Multi-level Feedback Queue (MLFQ)
+
+Multiple queues, different priorities. The higher-priority queue runs its jobs first.
 
 5 rules:
 
 1. if priority(A) > priority(B), A runs
 2. if priority(A) == priority(B), use RR to run A and B
 3. processes starts at the top priority, 
-4. Once a process uses the allotment at a given level, it moves down a queue. -- avoid gaming CPU
-5. after some time period, move all jobs to the top priority queue. -- avoid starvation
+4. Once a process uses the allotment at a given level, it moves down a queue. -- prevent gaming
+5. after some time period, move all jobs to the top priority queue. -- prevent starvation
 
 ### Lottery Scheduling
 
 random algorithm, simple to implement
 
+Approach: 
+
+1. give processes lottery tickets
+2. whoever wins runs
+3. more tickets means higher priority
+
 ### Interprocess Communication
 
 ![img](/Users/sonia/Documents/CSStudy/MyStudyNotes/ComputerSystems/assets/Half-vs-Full-duplex-e1657701720121.jpg)
+
+1. Pipes: half duplex (data flows in only one direction)
