@@ -1,4 +1,4 @@
-# DNS
+# DNS Protocol
 
 ## DNS Message
 
@@ -49,7 +49,7 @@ The header section is 12 bytes and always present in the message.
 
 ### Questions
 
-1. For each question in the qeustion part, they have 3 parts:
+1. For each question, they have 3 parts:
 
    - Question name (QName): QName is a domain name represented as a sequence of labels, where each label consists of a **length octet** followed by that number of octets. The length octet ranges from 0 ~ 63, because the maximum length of each label is 63. The domain name terminates with a zero length octet (0x00) for the null label of the root. For example:
 

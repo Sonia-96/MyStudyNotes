@@ -5,13 +5,15 @@ Course overview:
 - Cryptography
 - Computer Security
 
-## The Internet
+## The Internet Topology
 
-the Internet: connect hosts and transmit data
+the Internet: 
 
-- hosts: endpoint devices that want to exchange data. Clients and servers are both hosts.
-- access network: a small network with many hosts. e.g., UConnect, Google Fiber, Xfinity
-- internet backbone: networks with many high-capacity fiber optic links that can carry huge amounts of traffic, e.g., AT&T, T-mobile
+- **hosts**: endpoint devices that want to exchange data. Clients and servers are both hosts.
+  - hosts can be any physical device: phone, laptop, desktop, smart fridge, google server... 
+
+- **access network**: a small network with many hosts. e.g., ISP (Xfinity, Google Fiber, ..), a corporate/academic network (UConnect,.. ) 
+- **internet backbone**: a network with high-speed, high-capacity links, e.g., AT&T, T-mobile. Access network are connected to internet backbone
 
 ## Switching
 
@@ -19,29 +21,29 @@ the Internet: connect hosts and transmit data
 
   - Computer communication is bursty, which is not suitable for circuit switching.
 
-- **packet switching:** Data is split into packets. Instead of reserving a path from host to host, at each **hop** along the path, the packet is forward to the next hop.
+- **packet switching:** Data is split into packets. Instead of reserving a path from host to host, the packet is forward to the **next hop** at each hop along the path.
 
   - Packet: header + payload
-  - voice phone calls use packet switching!
+  - voice phone calls use packet switching
 
-  ![img](./assets/Hop-count-trans.png)
+  <img src="./assets/Hop-count-trans.png" alt="img" style="zoom:80%;" />
 
-## Network Layers
+## Network Layer Model
 
-From top to bottom, the network layers and corresponding protocols:
+From top to bottom, the network layers and corresponding protocols are:
 
 1. **Application Layer**: how applications parse the data
    - HTTP protocol: web page. a type of client-server protocol
    - SATP protocol: email
    - DNS: turn human-readable domain names to numeric numbers
 2. **Transport Layer**: process to process communication (port)
-   - TCP - Transmission Control Protocol: gurantees your will receive all data because it will resend lost packages
+   - TCP (Transmission Control Protocol): gurantees your will receive all data because it will resend lost packages
      - stream-based, reliable data transfer
-   - UDP - User Datagraph Protocol: cannot gurantee you receive all data
+   - UDP (User Datagraph Protocol): cannot gurantee you receive all data
      - IP packets + port numbers
 3. **Network Layer**: host to host communication (IP) (multiple-hop communication)
-   - IP protocol
-4. Link Layer: one-hop communication, e.g. Wifi, Ethernet
+   - IP protocol. IP networks are often described as "best-effort" networks because they deliver every packet as fast as they can but don't guarantee the full packets will be received.
+4. **Link Layer**: one-hop communication, e.g. Wifi, Ethernet
    - breaks up packets into frames and sends them from source to destination
 5. Physical Layer: mechanism for one hop communication, e.g., electrocal/optical/eletromagnetic wave stuff
 
@@ -62,11 +64,10 @@ From top to bottom, the network layers and corresponding protocols:
 
    - processing delay is usually in the order of nanoseconds, which is constant and negligible
 
-3. **Transmission Delay**: the time to convert packets from bits to physical signals. This depends on devices.
-
-   - the devices are rated by their transmission delay, e.g., 1 Gbps ethernet device, 54 Mbps wireless device
+3. **Transmission Delay**: the time to convert packets from bits to physical signals. This kind of delay depends on devices.
+   - Devices are rated by their transmission delay, e.g., 1 Gbps ethernet device, 54 Mbps wireless device
    - `transmission_delay = data_length / device_transmission_rate`
-
+   
 4. **Queuing Delay**: the time that packets are stored in the queue. The queue is fix-sized. If the queue is full, the packets outside of the queue will be dropped. 
    - Queueing delay depends on how busy the network is. So queueing delay is very unpredictable and variable.
    
@@ -116,13 +117,9 @@ Each packet has a "time to lie (TTL)" packet which specifys the number of hops i
 - Throughput: the amount of data (bits/s) that can be transmitted etween hosts
 - bottleneck node: the minimum throughput device on a path
 
-for example, if i send data from my laptop through my wifi to google server, the bottleneck node is highly propably my own wifi.The internet backbone usually has a big capacity so is rarely a bottleneck.
-
-a bottleneck node is usually the access network.
+A bottleneck node is usually the access network. For example, if I send data from my laptop through my wifi to Google server, the bottleneck node is highly propably my own wifi. The internet backbone usually has a big capacity so is rarely a bottleneck.
 
 # 3 Application Layer
-
-homework: write a DNS server
 
 Q: TCP - stream?
 
@@ -146,7 +143,7 @@ Q: TCP - stream?
 
    - client/server model (most commonly used):
      - HTTP, web socket
-   - peer to peer model: programs behaves as both clients and clients at various times. e.g., BitTorrent
+   - peer to peer model: programs behave as both clients and clients at various times. e.g., BitTorrent
      - Disadvantages: 
        - can be very slow if multiple computers access to the same computer
        - limited security (viruses, file security)
@@ -159,12 +156,12 @@ Q: TCP - stream?
 ### HTTP protocol
 
 - use TCP
-- Text based: is easier to read, write, and debug but has bigger size
+- **Text based**: is easier to read, write, and debug but has bigger size
 - One-shot request/response model: Request -> response -> done
 - Content Length header (content-length): the size of the body in bytes
 - special characters: \r\n, ' ' (empty space), : (colon)
 
-### [protocols for email](https://www.siteground.com/tutorials/email/protocols-pop3-smtp-imap/)
+### [Protocols for Email](https://www.siteground.com/tutorials/email/protocols-pop3-smtp-imap/)
 
 1. SMTP (Simple Mail Transfer Protocol): sending email
 
@@ -184,8 +181,7 @@ Q: TCP - stream?
      
        ![How the email protocol IMAP works?](./assets/how-imap-works-1-708x414.png)
 
-
-3. Your email server has to understand both SMTP and POP or IMAP to allow users to send and receive emails.
+Your email server has to understand both SMTP and POP or IMAP to allow users to send and receive emails.
 
 ### BitTorrent
 
@@ -234,53 +230,91 @@ Q: TCP - stream?
       - Type NS: “give mt the nameserver responsible for this hostname”
       - Type CNAME: “give me the 'canonical name 规范名称' of a hostname” which would tell you that google.com is really row3.rack2.lax02.westcoast.google.com
       - Type MX: “tell me the canonical name of the email server for this domain” - mail server
-
-
+      
+4. [DNS protocol](./DNS Protocol.md)
 
 # 4 Transport Layer
 
-## Reliable Data Transfer
+## Transport Layer Features
 
-In this part, we'll talk about how to build a reliable protocol on top of a unreliable network channel. (The data transmission in network layer is unreliable. （数据丢了就丢了)
-
-process to process communication; use protocols TCP/UDP
-
-1. port
+1. process to process communication; use protocols TCP and UDP
+2. port - process ID
    - usualy uint_16 (0 ~ 2<sup>16</sup> - 1 = 65535)
-   - ports < 1024 are priviledged
-   - Servers choose port number
-   - clients are assigned an ephemeral port number ( a big number)
-2. TCP/UDP
-   - TCP: src & dest IP, src & dest port
-   - UDP: only has dest IP & port, applications have to track src IP & port (我的理解正确吗？), and the app can receive from any sender
-     - one socket for all senders???
-   
-   > A UDP listener listens for segments destined for a given port. Any segment from any sender is acceptable. In order to know who to reply to, the segment contains the source IP/port as well.
-   >
-   > For TCP, there is a persistent connection between endpoints. A TCP socket will only receive messages from the sender who initated the connection. As programmers, this means that if we use TCP, we don't have to manually think about which clients we're getting messages from. One socket is connected to one client.
-3. Reliable Data Transfer
-   - possible problems:
-     - packets are corrupted
-     - packets are not in order
-     - packets are dropped
-4. finite state machine (review lecture video & notes)
-   - sender & receiver
-5. checksum
-6. sequence number: 
-   - an ACK with a wrong sequence number will be treated as a NACK
-   - timeout but don't receive ACK -> NACK
-     - choose timeout: 1 RTT is the absolute minimum. usually we use this expression to set the timeout: `scale * RTT + std(RTT)`
-       - too small: resend packets unnecessarily
-       - too big: sender waits too long to resend
+   - ports < 1024 are priviledged by the OS, so you need elevated priviledges to listen on those ports
+   - the server choose its own port number
+     - standard port: 80 for HTTP, 443 for HTTPS, 53 for DNS
+   - clients are assigned an ephemeral port number (usually a high arbitrary number) by the OS
+3. TCP/UDP connections
+   - Their segment/frames both have src & dest IP, src & dest port in the header
+   - UDP socket: one socket for all senders
+     - a UDP listenser listens for segments destined to a specific port. Any segment from any sender is acceptable. 
+   - TCP socket: one socket for one sender
+     - a TCP socket is specified by 4 numbers: src & dest IP, src & dest port. Therefore, a TCP socket can only receive messages from the client who initializes the connection
 
-7. pipeling
-   - Go back N
-   - Selective Repeat
+## Reliable Data Transfer (RDT)
 
-TODO: 
+In this part, we'll learn how to build a reliable protocol (TCP, the transport layer) on top of an unreliable network channel (IP, the network layer). With a reliable data transfer channel, there are no bits corrupted (bits are flipped from 0 to 1, or vice versa), no lost packets, and packets should be delivered in order.
 
-1. read: reliable data transfer
-2. 3.4.3 GBN
+In the following discussin, we'll use the following API for our RDT protocol (Note, to simplify the problem, we consider only unidirectional data transfer, but actually the sender and the receiver transmit packets in both directions). And we'll use **finite state machine (FSM)** to show the states of the sender and the receiver.
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212081135698.png" alt="image-20230212081135698" style="zoom:50%;" />
+
+### rdt 1.0: built on reliable channel
+
+If the unreliable channel is actually reliable, then the transport layer just calls `udt_send()` or `rcv` as needed.
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212082201164.png" alt="image-20230212082201164" style="zoom:50%;" />
+
+### rdt 2.0: bit errors (corruptions)
+
+To handle bit errors, three additional pieces are added to the protocol:
+
+- **error detection**: checksum
+- **receiver feedback**: ACK/NAK  + sequence number
+  - an ACK with a wrong sequence number will be treated as a NAK
+- **retransmission**: resend the packet until it ges an ACK
+
+The sender will not send a new packet until it is sure that the receiver has corectly received the current packet. Because of this behavior, rdt 2.0 is called stop-and-wait protocol. In this case, 1 bit (0/1) is enough for the sequence number.
+
+### rdt 3.0: lossy channel with bit errors
+
+Now, in addition to corrupting bits, the network layer might lose packets as well, which is not uncommon in today's computer network. Our way to solve this problem is **retransmission**. However, it's impractical for the sender to wait forever for a lost ACK, so we use **timeout** to specify the time to wait. If we don't receive ACK for a sent packet after the timeout, we treat it as NAK.
+
+If the timeout is too small, the sender resends packets unnecessarily. If it's too big, the sender will wait for too long to resend. Therefore, we should choose a proper timeout value. Usually we use this expression to set the timeout: `scale * RTT + std(RTT)`
+
+![image-20230212083707136](/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212083707136.png)
+
+### rdt4.0: pipeling
+
+The stop-and-wait protocol is too inefficient -- it will spend too much time in waiting for ACKs. Now, to solve this problem, the sender is allowed to send multiple packeted without waiting for ACKs. This technique is called **pipeling**. Pipeling has the following consequences for the RDT protocols:
+
+- The range of sequence numbers must be increased, since each in-flight (in-transit) packet must have a unique sequence number.
+- The sender and the receiver need to buffer more than one packet (ACKed packets, sent but un-ACKed packets, unsent packets)
+
+Two basic approaches toward pipelined error recovery can be identified: **Go-Back-N** (GBN) and **Selective Repeat**.
+
+#### Go-Back-N (GBN)
+
+GBN protocol allows no more than N (**window size**, a fixed number) un-ACKed packets in the pipeline.
+
+- base: the sequence number of the oldest un-ACKed packet
+- nextseqnum: the sequence number of the next packet to be sent
+
+The sequence numbers that are bigger or equal than base + N cannot be used until an un-ACKed packet has been ACKed.
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212085420349.png" alt="image-20230212085420349" style="zoom:80%;" />
+
+In GBN protocol, an acknowledged packet wih a sequence number n will be taken to be a cumulative acknowledgement, indicating that packets with a sequence numver <= n are all receivec. However, if a packet is not ACKed after the timeout, then all the packets after its sequence number need to be retransmitted. This causes many unnecassary retransmissions. 
+
+#### Selective Repeat (SR)
+
+Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledge acorrectly received packet whether or not it is in order. The out-of-order packets will be buffered until the missing packet is received, at which point these packets can be delivered to the upper layer.
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212132128360.png" alt="image-20230212132128360" style="zoom:80%;" />
+
+(the sliding window is moved forward when the lowest un-ACKed packet bacomes ACKed)
+
+// TODO read more analysis in the textbook
 
 ## TCP
 
@@ -530,7 +564,7 @@ In small scale, each router needs to assign IPs to the connected devices (hosts)
 
 #### subnet
 
-A subnet is a segmented piece of a larger network. The devices in a subnet are connected without a router, and they all share the same IP prefixes. For example, in the following picture, there are 3 routers and 6 subnets.  
+A subnet is a segmented piece of a larger network. The devices in a subnet are connected without a router, and they all share the same IP prefixes. For example, in the picture below, there are 3 routers and 6 subnets.  
 
 - an IP address is technically associated with an **interface** (the boundary between the host and the physical link), rather than a host or a router that containing the interface. 
 
@@ -548,19 +582,19 @@ DHCP is a client-server protocol. When a client just enters a subnet, they doesn
 
 3. client broadcasts DHCP ACKNOWLEDGE
 
-4. serfer broadcasts ACK
+4. server broadcasts ACK
 
 Then the client can use the allocated IP address.
 
 ![image-20230130231136367](./assets/image-20230130231136367.png)
 
-DHCP potential issue: doesn't have anything like "byte" handshake, cannot track if a device has already left the network
+DHCP potential issue: doesn't have anything like "bye" handshake, cannot track if a device has already left the network
 
 ### NAT
 
 There are only 2<sup>32</sup> IPv4 = 4 billion addresses, but there are more than 4 billion connected devices in the world. How do they each get an IP? One trick used by ISPs is **Network Address Translation (NAT)**.
 
-NAT: share 1 public IP address with many devices. use extra port number info to tell  connections apart
+NAT: share 1 public IP address with many devices. use extra port number info to tell connections apart
 
 my homerouter IP address: `10.0.0,1`, `197.186.1.1`
 
@@ -709,7 +743,7 @@ This method is fair but not efficient. If there's only 1 device transmiting, the
 
 
 
-## Protocol 2: Slotted ALOHA
+### Protocol 2: Slotted ALOHA
 
 All devices have a synchronized clock. If a device has data to send, it will tries the next time slot. If there are collisions, they will "flip a coin" to decide if they should resend the data in the next time slot. Only if there's only one device deciding to retransmitting the data, can the time slot be used.
 
@@ -723,13 +757,13 @@ All devices have a synchronized clock. If a device has data to send, it will tri
 
   If there are multiple devices are sending the data at the same time, there's only 37% of time slots are used. (Really?? this method is so stupid, so 37% is pretty high for me)
 
-## Protocol 3: Unslotted ALOHA
+### Protocol 3: Unslotted ALOHA
 
 This protocol is the same as slotted ALOHA, except that devices don't have syncrhonized clocks. Now collisions can occur with 2 time slots for each node (why???), so only 50% time slots are used. (why 50%???)
 
 <img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206101417161.png" alt="image-20230206101417161" style="zoom:50%;" />
 
-## Protocol 4: CSMA
+### Protocol 4: CSMA
 
 CSMA - Carrier Sense Multiple Access
 
@@ -741,7 +775,7 @@ CSMA - Carrier Sense Multiple Access
 
 <img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206101431930.png" alt="image-20230206101431930" style="zoom:50%;" />
 
-## Cable Internet: DOCSIS
+### Cable Internet: DOCSIS
 
 what does DOCSIS stands for???
 
@@ -755,3 +789,57 @@ CMTS, cable modem termination system
 That's why in your home network, you find that usually upload speed is much slower than the download speed. 
 
 <img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206102127275.png" alt="image-20230206102127275" style="zoom:50%;" />
+
+## Local Area Networks
+
+LAN uses link-layer **switches** rather than network-layer routers to connect devices. The link layer devices are basically just "plug and play" and don't require administration to set up routing/flow tables.
+
+### MAC Addresses
+
+MAC:
+
+- link layer identifiers
+- no organization
+- Address Resolution Protocol (ARP): 
+  - ARP table: IP address -> MAC address mapping. 
+  - "Who has this IP?" . broadcast this message to all devices, the address is FF-FF-FF-FF-FF-FF
+
+- frames has src and dest MAC addresses
+
+### Switch
+
+A link layer switch is a **transparent**, automatically self-configuing device. Hosts basically don't realize that switches are there!
+
+Q: what is transparent???
+
+assume 10.0.0.1 want to send packets to 10.0.0.3
+
+1. 10.0.0.1: broadcast "who has 10.0.0.3 IP address?"
+2. switch doesn't know which device, so it broadcast the message
+   - Switch keeps a switching table: MAC -> link number
+3. 10.0.0.3 sends a response to switch
+4. swtich sends the respnse to 10.0.0.1
+
+In the old days, the ethernet use hubs (like a switch but always broadcasts), which cause lots of collisions. Now we use switch, avoid colliding. 
+
+#### Switch vs. Router
+
+1. switches have a swtichiing tbale (a entry for each device), so it is not suitable for gigantic network
+2. Routers: forwarding table -- big network
+   - downside: forwarding table has to be manually by softwares, but switches are self-configuring
+3. switch only works in a tree topology network (a loop wil crash the switches because it broadcast messages) (a switch cannot work in a cycle!!!). routers can work in any topology 
+   - "top of rack switch"
+
+### Ethernet
+
+1. ethernet header:
+   - Src/dest MAC
+   - CRC checksum
+   - Network layer type: usually IPv4
+   - Preamble: an alternating sequence of 1s and 0s that basically join the link and physical layers. It provides information about the physical signal being transmitted (MARKER)
+     - 1010101010... : clock signal
+   - 
+
+### Link Layer Tricks: Virtual LANs (VLANs)
+
+I don't understand this part. need to review this part of vedio. 
