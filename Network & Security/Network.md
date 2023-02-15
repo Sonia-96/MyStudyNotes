@@ -318,60 +318,49 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
 
 ## TCP
 
-### Overview
+### TCP Overview
 
 1. Basic features of TCP:
-   - Point to point: host to host
-   
+   - **conenction oriented**: unlike UDP which doesn’t really know or care whether the receiver gets anything, TCP needs to know that the packet was received. It finds out because the receiver sends an acknowledgement (or ACK) packet.
+   - Point to point: between a single sender to a singgle receiver. communication between two processes, no broadcast
    - Full **duplex**: once the connection is established, both sides can send data at any time, even simultaneously
-   
-     > duplex (in communication system): allowing the transmission of two signals simultaneously in opposite directions.
-   
-   - conenction oriented: unlike UDP which doesn’t really know or care whether the receiver gets anything, TCP needs to know that the packet was received. It finds out because the receiver sends an Acknowledgement (or ACK) packet.
-   
-     - stateful? https://en.wikipedia.org/wiki/Connection-oriented_communication // TODo
-   
-   - reliable data transmission (RDT)
-   
    - throttles senders to protect receiver and network
-   
+   - reliable data transmission
 2. TCP segments (packet - network layer, frame - UDP, segment - TCP. They basically are the same things.)
    - headers: (in plain text)
      - src/dest ports: 2 bytes each
-     
-     - sequence number & ACK number: the units are bytes (in UDP, it's packet).  // TODO draw a picture
+     - sequence number & ACK number: the unit is byte (in UDP, it's packet).  // TODO draw a picture
        
-       - sequence number is the last received ACK number
-       - ACK number is the number of the next byte that the receiver wants
+       - **sequence number** is the last received ACK number
+       - **ACK number** is the number of the next byte that the receiver wants (usually = last seq number + 1)
        - ACK number on one side goes up as we send data
        
        - ACK number on one side goes up as we receive **in-order** data
-       - even a message with no data should contain these 2 fields. An empty ACK will have as a sequence number the sequence number for the next byte it would send (but the data will have a length of zero). If a client sends several empty ACKs in a row, they'll all have the same sequence number.
-       
+       - even a message with no data should contain these 2 fields. An empty ACK will have as a sequence number for the next byte it would send (but the data will have a length of zero). If a client sends several empty ACKs in a row, they'll all have the same sequence number.
      - Flags: `SNC`, `ACK`, `FIN`, `RST` (reset)
      
-       - Q: what is RST?
-     
-     - `rwnd` (receive window): the amount of free space in the receive buffer. `rwnd` limits how fast the sender can send the data
-     
-       - The `rwnd` increases when the application reads data out of the buffer and decreases when it receives a message.
+       - the RST flag is set whenever a TCP packet doesn't comply with the protocol's criteria for a connection. It signifies that we should immediately terminate the connection.
+     - `rwnd` (**receive window**): the number of available bytes in the **receive buffer**. `rwnd` limits how fast the sender can send the data
+     - The `rwnd` increases when the application reads data out of the buffer and decreases when it receives a message.
 
 ### Setup + Teardown
 
-1. build connection - TCP handshake - 3 way handshake (TODO 绘图)
+1. build connection: TCP handshake - 3 way handshake
    - client: `SYN`, randomly choose a sequence number. e.g. seq=1000, ack=0 (ack number is not set), len=0 (the length of the data)
    - server: `SYN`, `ACK`. randomly choose a sequence number. seq=5000, ack=1001, len = 0
    - client: `ACK`, seq=1001, ack=5001 (may include application data)
 
-2. close connection: `FIN` // TODO draw the picture by myself
+   <img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/feb32d1804b04233f0c7b580248f95c93bbe5ac1.png" alt="img" style="zoom: 33%;" />
+   
+2. close connection: `FIN`
 
-   <img src="./assets/7668a8777dd2047fb6aae55c45aa072a084a4393.png" alt="img" style="zoom:50%;" />
+   <img src="./assets/7668a8777dd2047fb6aae55c45aa072a084a4393.png" alt="img" style="zoom: 33%;" />
 
 ### Reliable Data Transmission
 
 #### Fast Retransmit
 
-what if sender gets multiple segments with the same ACK number? Indicates a "hole" in the receiver buffer because packets arrives out of order (why ACK would be duplicate? since it based on seq + Len)
+what if sender gets multiple segments with the same ACK number? Indicates a "hole" in the receiver buffer because packets arrives out of order (why ACK would be duplicate? since it is based on seq + Len)
 
 fast retransmit: resend packet after 3 duplicate ACKs
 
@@ -407,17 +396,17 @@ timeout interval computation:
 
 slow transmission rate to make sure the receiver buffer will never be overflowed  
 
-if rwnd=0, the sender wil stop sending data. Or the sender can send 1-byte segment to see if the receiver can handle this, so the sender can know the rwnd of the receiver.
+If rwnd=0, the sender wil stop sending data. Or the sender can send one-byte segment to see if the receiver can handle this, so the sender can know the rwnd of the receiver.
 
 > It's likely that the receiver application will eventually read from the buffer, making space for new segments, but it won't send any TCP messages informing the sender!
 >
-> To combat this, if the rwnd is 0, the sender sends 1 byte messages when it has data to send. Hopefully it will quickly get an ACK with a larger rwnd and can send larger segments right away. If the receiver takes its time, some of these 1-byte segments might get dropped and need to be resent after a timeout.
+> To combat this, if the rwnd is 0, the sender sends 1 byte messages when it has data to send. Hopefully it will quickly get an ACK with a larger rwnd and can send larger segments right away. If the receiver takes its time, some of these one-byte segments might get dropped and need to be resent after a timeout.
 
 <img src="./assets/fca79139f0656a8ccb9d25e361f69f9c3d85a492.png" alt="img" style="zoom:40%;" />
 
 ### Congestion Control - network protection
 
-Flow control prevents one host from overwhelming the other, but it ignores the network. If the network is congested, packets will be delayed or dropped. If hosts just send the data as fast as they can, they will overwhelm the network. Therefore, we need to control the transmission rate based on the network condition, which is called "congestion control".
+Flow control prevents one host from overwhelming the other, but it ignores the network. If the network is congested, packets will be delayed or dropped. If hosts just send the data as fast as they can, they will overwhelm the network. Therefore, we need to control the transmission rate based on the network condition, which is called "**congestion control**".
 
 General principles for congestion control:
 
@@ -451,6 +440,8 @@ CCP switches among 3 different states based on packets being acknowledge / lost.
    - `cwnd /= 2`
    - get new ACK: swich back to congestion avoidance mode
 
+![image-20230213035750155](/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230213035750155.png)
+
 #### AIMD
 
 AIMD: additive increase, multiplicative decrease
@@ -481,7 +472,7 @@ The network layer is responsible for moving packets from a sending host to a rec
 - **fowarding**: move a packet from its input link to an appropriate output link, which is network's **data plane** function.
   - traditional IP forwarding: use destination IP address
   - generalized forwarding: using several different fileds in the header
-- **routing**: determine the route or path taken by packets as they flow from a send to a receiver (use routing algorithm), which is network's **control plane** function.
+- **routing**: determine the route or path taken by packets as they flow from a sender to a receiver (use routing algorithm), which is network's **control plane** function.
 
 ## What's inside a router?
 
@@ -505,8 +496,7 @@ The network layer is responsible for moving packets from a sending host to a rec
 
    - **Routing processor**: performs control-panel function -- executing routing protocols, maintaining routing tables, and network management
 
-
-<img src="./assets/image-20230129105540663.png" alt="image-20230129105540663" style="zoom:75%;" />
+<img src="./assets/image-20230129105540663.png" alt="image-20230129105540663" style="zoom: 67%;" />
 
 ### Destination Based Forwarding
 
@@ -568,11 +558,11 @@ A subnet is a segmented piece of a larger network. The devices in a subnet are c
 
 - an IP address is technically associated with an **interface** (the boundary between the host and the physical link), rather than a host or a router that containing the interface. 
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230130225222620.png" alt="image-20230130225222620" style="zoom:80%;" />
+<img src="./assets/image-20230130225222620.png" alt="image-20230130225222620" style="zoom:80%;" />
 
 #### DHCP
 
-DHCP is used for small-scale IP addresses assignment. Server tracks allocated IP addresses or which IP addresses are available.
+DHCP is used for **small-scale** IP addresses assignment. Server tracks allocated IP addresses or which IP addresses are available.
 
 DHCP is a client-server protocol. When a client just enters a subnet, they doesn't have an IP. They need to ask for the server for it. There are 4 steps:
 
@@ -621,9 +611,9 @@ Some improvements over IPv4:
 
 ## IPv4 -> IPv6
 
-Only endpoints in the path need to do transport things, but every router need to do network things. So, switching from IPv4 to IPv6 requires we to update all devices including routers. 
+Only endpoints in the path need to do transport things, but every router need to do network things. So, switching from IPv4 to IPv6 requires us to update all devices including routers. 
 
-- Dual Stacking: routers can understand both 4 and 6
+- Dual Stacking: routers can understand both IPv4 and IPv6
 
 - Tunneling:  
 
@@ -645,26 +635,36 @@ Match and Action:
 
 # 6 Network Layer 2: Control Plane
 
-Modern networks use "Software Defined Networking" (SDN) to come up with the routing plans.
+Many modern networks use centralized controller to collect the information from routers and come up with routing palns for the network. This is usually runnign a software program, so this approach is called "Software Defined Networking (SDN)".
+
+Modern networks use  (SDN) to come up with the routing plans. 
 
 ## Routing Algorithms
 
-1. use Dijkstra's algorithm to find the shortest path to each IP address - "single source shortest path"
+Routing algorithms are to find a good path from senders to receivers through the network of routers. Typically, a good path is the one that has the least cost.
 
-   - only store first edge in each path in my forwarding table
-   - OSPF: 
+"single source shortest path" algorithm
 
-2. Bellman-Ford algorithm: keep track of the shortest distance and the neighbor that's the first hop on the route
-   $$
-   dist(x, y) = min_{n in neighbors}( cost(x, neighbor) + dist(neighbor, y))
-   $$
-   each node store "distance vector". 
+### The "Link-State" Algorithm (Dijkstra's Algorithm)
 
-   send DV to neighbors, and they will update DV with improved distances.
+Each node knows the cost to all nodes linked to it, so it can run Dijkstra's Algorithm locally. 
 
-   If table changes, send updated DB to neighbors.
+- only store first edge in each path in my forwarding table
+- OSPF protocol
 
-   each node only need to know their distance to neighbors.
+### Distance Vector Algorithm (Bellman Ford)
+
+Bellman-Ford algorithm: keep track of the shortest distance and the neighbor that's the first hop on the route
+$$
+dist(x, y) = min_{n in neighbors}( cost(x, neighbor) + dist(neighbor, y))
+$$
+each node store "distance vector". 
+
+send DV to neighbors, and they will update DV with improved distances.
+
+If table changes, send updated DB to neighbors.
+
+each node only need to know their distance to neighbors.
 
 ## Autonomous System
 
