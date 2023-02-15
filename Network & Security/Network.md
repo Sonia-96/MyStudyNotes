@@ -739,7 +739,7 @@ This method is fair but not efficient. If there's only 1 device transmiting, the
 
 - super resistent to crashes (why??) // TODO review
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206095405770.png" alt="image-20230206095405770" style="zoom:50%;" />
+<img src="./assets/image-20230206095405770.png" alt="image-20230206095405770" style="zoom:50%;" />
 
 
 
@@ -761,7 +761,7 @@ All devices have a synchronized clock. If a device has data to send, it will tri
 
 This protocol is the same as slotted ALOHA, except that devices don't have syncrhonized clocks. Now collisions can occur with 2 time slots for each node (why???), so only 50% time slots are used. (why 50%???)
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206101417161.png" alt="image-20230206101417161" style="zoom:50%;" />
+<img src="./assets/image-20230206101417161.png" alt="image-20230206101417161" style="zoom:50%;" />
 
 ### Protocol 4: CSMA
 
@@ -773,7 +773,7 @@ CSMA - Carrier Sense Multiple Access
 2. This still might cause collisions (see the figure below), then we use **binary exponential backoff** to decide the time slots to wait --  Choose a random number between 1 and 2<sup>#collisions</sup>
 3. The faster the collisions are detected, the better CSMA performs. If collisions detection time is 0, 100% time slots willl be used.
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206101431930.png" alt="image-20230206101431930" style="zoom:50%;" />
+<img src="./assets/image-20230206101431930.png" alt="image-20230206101431930" style="zoom:50%;" />
 
 ### Cable Internet: DOCSIS
 
@@ -788,7 +788,7 @@ CMTS, cable modem termination system
 
 That's why in your home network, you find that usually upload speed is much slower than the download speed. 
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230206102127275.png" alt="image-20230206102127275" style="zoom:50%;" />
+<img src="./assets/image-20230206102127275.png" alt="image-20230206102127275" style="zoom:50%;" />
 
 ## Local Area Networks
 
