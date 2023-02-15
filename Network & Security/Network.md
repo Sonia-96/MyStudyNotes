@@ -257,13 +257,13 @@ In this part, we'll learn how to build a reliable protocol (TCP, the transport l
 
 In the following discussin, we'll use the following API for our RDT protocol (Note, to simplify the problem, we consider only unidirectional data transfer, but actually the sender and the receiver transmit packets in both directions). And we'll use **finite state machine (FSM)** to show the states of the sender and the receiver.
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212081135698.png" alt="image-20230212081135698" style="zoom:50%;" />
+<img src="./assets/image-20230212081135698.png" alt="image-20230212081135698" style="zoom:50%;" />
 
 ### rdt 1.0: built on reliable channel
 
 If the unreliable channel is actually reliable, then the transport layer just calls `udt_send()` or `rcv` as needed.
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212082201164.png" alt="image-20230212082201164" style="zoom:50%;" />
+<img src="./assets/image-20230212082201164.png" alt="image-20230212082201164" style="zoom:50%;" />
 
 ### rdt 2.0: bit errors (corruptions)
 
@@ -282,7 +282,7 @@ Now, in addition to corrupting bits, the network layer might lose packets as wel
 
 If the timeout is too small, the sender resends packets unnecessarily. If it's too big, the sender will wait for too long to resend. Therefore, we should choose a proper timeout value. Usually we use this expression to set the timeout: `scale * RTT + std(RTT)`
 
-![image-20230212083707136](/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212083707136.png)
+![image-20230212083707136](./assets/image-20230212083707136.png)
 
 ### rdt4.0: pipeling
 
@@ -302,7 +302,7 @@ GBN protocol allows no more than N (**window size**, a fixed number) un-ACKed pa
 
 The sequence numbers that are bigger or equal than base + N cannot be used until an un-ACKed packet has been ACKed.
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212085420349.png" alt="image-20230212085420349" style="zoom:80%;" />
+<img src="./assets/image-20230212085420349.png" alt="image-20230212085420349" style="zoom:80%;" />
 
 In GBN protocol, an acknowledged packet wih a sequence number n will be taken to be a cumulative acknowledgement, indicating that packets with a sequence numver <= n are all receivec. However, if a packet is not ACKed after the timeout, then all the packets after its sequence number need to be retransmitted. This causes many unnecassary retransmissions. 
 
@@ -310,7 +310,7 @@ In GBN protocol, an acknowledged packet wih a sequence number n will be taken to
 
 Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledge acorrectly received packet whether or not it is in order. The out-of-order packets will be buffered until the missing packet is received, at which point these packets can be delivered to the upper layer.
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230212132128360.png" alt="image-20230212132128360" style="zoom:80%;" />
+<img src="./assets/image-20230212132128360.png" alt="image-20230212132128360" style="zoom:80%;" />
 
 (the sliding window is moved forward when the lowest un-ACKed packet bacomes ACKed)
 
@@ -350,7 +350,7 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
    - server: `SYN`, `ACK`. randomly choose a sequence number. seq=5000, ack=1001, len = 0
    - client: `ACK`, seq=1001, ack=5001 (may include application data)
 
-   <img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/feb32d1804b04233f0c7b580248f95c93bbe5ac1.png" alt="img" style="zoom: 33%;" />
+   <img src="./assets/feb32d1804b04233f0c7b580248f95c93bbe5ac1.png" alt="img" style="zoom: 33%;" />
    
 2. close connection: `FIN`
 
