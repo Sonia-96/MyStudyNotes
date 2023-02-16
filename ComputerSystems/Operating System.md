@@ -59,7 +59,7 @@
 
      b. execute: execute the instruction
 
-     c. Repeat: add 1 to the address stored in IP, then go back to step a
+     c. repeat: add the size of the instruction to the address stored in IP, then go back to step a
 
    <img src="./assets/image-20230115113015708.png" alt="image-20230115113015708" style="zoom: 67%;" />
 
@@ -650,3 +650,23 @@ Approach:
 ![img](/Users/sonia/Documents/CSStudy/MyStudyNotes/ComputerSystems/assets/Half-vs-Full-duplex-e1657701720121.jpg)
 
 1. Pipes: half duplex (data flows in only one direction)
+
+# 10 Virtual Memory: Address Translation
+
+1. Multiprogramming Goals:
+   - transparency
+   - efficiency
+   - protection
+   - Sharing
+2. Address space
+   - Static components: code and global variables
+   - dynamic components: stack and heap
+3. Stack & heap:
+   - Stack: no fragmentation
+     - backup `sp` when doing context switch
+   - Heap: fragmentation
+4. Memorry Accessing: review the example in the slide
+5. Virtualizing Memory
+   - time sharing: not good. we do space sharing
+   - static relocation
+   - dynamic relocation
