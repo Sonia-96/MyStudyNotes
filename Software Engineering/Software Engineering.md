@@ -431,8 +431,6 @@ https://github.com/catchorg/Catch2/blob/v2.x/docs/tutorial.md
      static void 
      ```
 
-   - 
-
 Q: Macros vs. Functions?
 
 https://www.geeksforgeeks.org/macros-vs-functions/
@@ -529,7 +527,6 @@ Commands:
    }
    ```
 
-   
 
 ## Error Handling
 
@@ -614,8 +611,29 @@ Commands:
    Default caught.
    ```
 
+# 9 Code Coverage
 
-# Documentation
+## Code Coverage
+
+Describe how much of your code is executed while testing.
+
+- Statement/line coverage: how many lines/statements have been executed while testing
+- Branch coverage: how many branches of conditional statements have been executed while testing. For example, an if statement have 2 branches (true or false), each of them should be executed at least once. If we only hit the true condition, then the branch coverage is 50%.
+- Path coverage: how many possible paths have been taken while testing. For example, 2 if statements result in 4 paths. If we only test one path, then the path coverage is 25%.
+
+// TODO given a example and show their differences.
+
+From the top to the bottom, the difficulty to achieve 100% coverage is increasing.
+
+## Test Coverage
+
+1. Code coverage: verified the extent to which the program has been tested
+   - quantitive measure
+
+2. Test coverage: measures how much of the feature set is covered.
+   - qualitive measure
+
+# 10 Documentation
 
 ## Doxygen
 
