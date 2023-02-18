@@ -314,8 +314,6 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
 
 (the sliding window is moved forward when the lowest un-ACKed packet bacomes ACKed)
 
-// TODO read more analysis in the textbook
-
 ## TCP
 
 ### TCP Overview
@@ -329,10 +327,10 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
 2. TCP segments (packet - network layer, frame - UDP, segment - TCP. They basically are the same things.)
    - headers: (in plain text)
      - src/dest ports: 2 bytes each
-     - sequence number & ACK number: the unit is byte (in UDP, it's packet).  // TODO draw a picture
+     - sequence number & ACK number: the unit is **byte** (in UDP, it's packet).  
        
        - **sequence number** is the last received ACK number
-       - **ACK number** is the number of the next byte that the receiver wants (usually = last seq number + 1)
+       - **ACK number** is the number of the next byte that the receiver wants (or the first un-ACKed byte in the stream) (usually = last seq number + 1)
        - ACK number on one side goes up as we send data
        
        - ACK number on one side goes up as we receive **in-order** data
@@ -341,7 +339,7 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
      
        - the RST flag is set whenever a TCP packet doesn't comply with the protocol's criteria for a connection. It signifies that we should immediately terminate the connection.
      - `rwnd` (**receive window**): the number of available bytes in the **receive buffer**. `rwnd` limits how fast the sender can send the data
-     - The `rwnd` increases when the application reads data out of the buffer and decreases when it receives a message.
+       - The `rwnd` increases when the application reads data out of the buffer and decreases when it receives a message.
 
 ### Setup + Teardown
 
@@ -350,7 +348,7 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
    - server: `SYN`, `ACK`. randomly choose a sequence number. seq=5000, ack=1001, len = 0
    - client: `ACK`, seq=1001, ack=5001 (may include application data)
 
-   <img src="./assets/feb32d1804b04233f0c7b580248f95c93bbe5ac1.png" alt="img" style="zoom: 33%;" />
+   <img src="./assets/image-20230218154239893.png" alt="image-20230218154239893" style="zoom:50%;" />
    
 2. close connection: `FIN`
 
@@ -360,7 +358,7 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
 
 #### Fast Retransmit
 
-what if sender gets multiple segments with the same ACK number? Indicates a "hole" in the receiver buffer because packets arrives out of order (why ACK would be duplicate? since it is based on seq + Len)
+what if sender gets multiple segments with the same ACK number? This indicates a gap in the receiver buffer because packets arrive out of order (why ACK would be duplicate? since it is based on seq + Len)
 
 fast retransmit: resend packet after 3 duplicate ACKs
 
@@ -429,7 +427,9 @@ TCP congestion control protocol tracks the congestion window by switching among 
    - every time receive an ACK, cwnd += MSS -> grows exponentially
    - when `cwnd` > `ssthresh`, switch to congestion avoidance mode
 2. Congestion Avoidance: `cwnd` grows linearly
-   - new ACK:`cwnd += MSS * (MSS / cwnd)`
+   - new ACK: `cwnd += MSS * (MSS / cwnd)`
+   - 3 duplicate ACKs: fast recovery
+     - 3 duplicate ACKs means the network is still delievering packets from the sender to the receiver, which is less drastic than a timeout-indicated loss. 
 3. fast recovery: we don't need to dramatically reduce the transmission rate
    - receive duplicate ACK: `cwnd += 1MSS`
    - get new ACK: switch back to congestion avoidance mode
