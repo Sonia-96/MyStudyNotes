@@ -394,19 +394,19 @@ timeout interval computation:
 
 ### Flow Control - receiver protection
 
-slow transmission rate to make sure the receiver buffer will never be overflowed  
+The flow control prevents the sender from overwhelming the receiver. To explain, the sender at each side of the TCP connection has a receive buffer. They send a TCP segment with a field “rwnd” (receive window), which tells the other side the number of available bytes in their receiver buffer. Then the sender on the other side should keep unacknowledged data less than the last rwnd it received.
 
-If rwnd=0, the sender wil stop sending data. Or the sender can send one-byte segment to see if the receiver can handle this, so the sender can know the rwnd of the receiver.
+Special care should be taken when rwnd = 0. Suppose the host B tells the host A its rwnd = 0, and also B has nothing to send to A. Now, consider what happens. As the application process at B empties the buffer, TCP doesn't send any new segments to A with a new rwnd value. Therefore, A will never be informed that some space has opened up in B's buffer -- A is blocked and cannot transmit any more data. To solve this problem, TCP requires A to continue to send data with one byte when B's rwnd is 0.
 
-> It's likely that the receiver application will eventually read from the buffer, making space for new segments, but it won't send any TCP messages informing the sender!
->
-> To combat this, if the rwnd is 0, the sender sends 1 byte messages when it has data to send. Hopefully it will quickly get an ACK with a larger rwnd and can send larger segments right away. If the receiver takes its time, some of these one-byte segments might get dropped and need to be resent after a timeout.
+// TODO draw a picture similar to the following, but consider the case when rwnd = 0
 
 <img src="./assets/fca79139f0656a8ccb9d25e361f69f9c3d85a492.png" alt="img" style="zoom:40%;" />
 
 ### Congestion Control - network protection
 
 Flow control prevents one host from overwhelming the other, but it ignores the network. If the network is congested, packets will be delayed or dropped. If hosts just send the data as fast as they can, they will overwhelm the network. Therefore, we need to control the transmission rate based on the network condition, which is called "**congestion control**".
+
+TCP uses end-to-end congestion control protocol, which means they ask for no information from intermediate routers. 
 
 General principles for congestion control:
 
@@ -422,48 +422,73 @@ $$
 
 #### Congestion Control Protocol
 
-A lost packet is detected either when the sender gets 3 duplicate ACKs, or when its timeout fires.
+TCP congestion control protocol tracks the congestion window by switching among 3 different states based on packets acknowledgement. (This mechanism is implemented in OS kernels.)
 
-CCP switches among 3 different states based on packets being acknowledge / lost. (This is mechanism implemented in OS kernels.)
+1. Slow Start: `cwnd` starts slow but grows exponentially, so the sender can find the avaliable bandwith quickly.
+   - in the begining, `cwnd`= 1 MSS (max segement size)  -> starts slow
+   - every time receive an ACK, cwnd += MSS -> grows exponentially
+   - when `cwnd` > `ssthresh`, switch to congestion avoidance mode
+2. Congestion Avoidance: `cwnd` grows linearly
+   - new ACK:`cwnd += MSS * (MSS / cwnd)`
+3. fast recovery: we don't need to dramatically reduce the transmission rate
+   - receive duplicate ACK: `cwnd += 1MSS`
+   - get new ACK: switch back to congestion avoidance mode
 
- // TODO review the lecture video or the corresponding charpters in the book
+<img src="./assets/image-20230213035750155.png" alt="image-20230213035750155" style="zoom:67%;" />
 
-1. Slow Start mode
-   - in the begining `cwnd`= 1 MSS (max segement size) 
-   - Every time we get an ACK, cwnd += MSS // TODO actually it's cwnd * 2?
-   - 1, 2, 4, 8, ... (exponentially increace, doubling)
-   - but it can't grow forever. Slow start threshold: when `cwnd` > `ssthresh`, transition to congestion avoidance mode
-2. Congestion Avoidance mode
-   - we are close to the network limit, do no more doubling now
-   - `cwnd += 1 MSS`
-3. fast recovery: we don't need to dramatically reduce our sending data
-   - `cwnd /= 2`
-   - get new ACK: swich back to congestion avoidance mode
+Evolution of TCP's congestion window (see the line of TCP Reno):
 
-![image-20230213035750155](/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230213035750155.png)
+<img src="./assets/image-20230218133019813.png" alt="image-20230218133019813" style="zoom:67%;" /> 
 
-#### AIMD
 
-AIMD: additive increase, multiplicative decrease
 
-- fair: multiple TCP connections will send at the same rate on average
+The Congestion Control Protocol can be described by 4 words: additive increase, multiplicative decrease(AIMD). 
 
-## TCP problems
+Advantages:
 
-1. Ossification: hard to change
-2. middle boxes: snoop on TCP ???
-3. Streaming: the content of multiiple files are in the same stream. the application need to split them
-   - drawbacks: TCP only send full data to the application. So even the received data is fine, the application cannot use it until TCP received all data （我的理解对吗？
-4. When I change wifi, my IP and port will change. TCP need to associate with that. The implementation is complicated.
-5. handshake hell: tcp handshake -> tls handshake
+- this scheme gets us about 75% of maiximum possible transmission rate
 
-### QUIC - quick UDP Internet Connections
+- fairness: multiple TCP connections will send at the same rate on average
 
-Google invent QUIC, which  is built on UDP but has TCP's reliable data transfer and flow/congestion control features.
+Disadvantages:
 
-- connection is based on 64-bit connection ID -> no parking-lot problem
-- Stream-based
-- Handshake is slightly shortened and **reconnection don't need handshake**
+- The fairness only applis to TCP connections to the same host
+  - doesn't guarantee fairness between hosts
+  - a UDP socket can use all resources while TCP connections politely lower their transmission rate
+
+## QUIC
+
+Google has been frustrated with some issues of TCP. This led them to develop a new protocol called QUIC (Quick UDP Internet Connections). 
+
+Problems of TCP & how QUIC overcomes them
+
+1. Ossification (not flexible): 
+
+   - TCP:
+     - middle boxes don't let Google send unusual or nonstrandar TCP packet
+     - updating TCP requires update middle boxes + servers + clients, which is estimated to take 5 - 15 years
+   - QUIC: built on UDP and all features are added in user space
+
+2. handshake hell: 
+
+   - TCP: 3-way handshake, which means clients must wait for at least 2 RRTs to receive data from the server
+   - Handshake is slightly shortened and **reconnection don't need handshake**
+
+3. Multiplexing: 
+
+   - TCP: the content of multiple files are in the same stream. the application need to split them. TCP only send full data to the application. So even the received data is fine, the application cannot use it until TCP received all data  （理解可能不对）
+
+   - QUIC: a single TCP connection can have multiple streams
+
+4. Parking lor problem: 
+
+   - TCP: TCP connections are identified by IP + port. When you walk from your office to the parking lot, your phone will switch from using  WIFI to LTE. TCP connection can't be transferred during this switch.
+   - QUIC: connection is based on 64-bit connection ID -> no parking-lot problem
+
+5. head of line blocking:
+
+   - TCP: TCP only sends full in-order data to the application. If a packet is lost for one stream, any data sent after it, regardless of which stream it's for, will be stuck in the receiver's receive buffer until that packet is retransmitted.
+   - QUIC: a lost packet only blocks packets in its own stream
 
 # 5 Network Layer 1: Data Plane
 

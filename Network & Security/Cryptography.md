@@ -50,7 +50,7 @@
 9. Cyphertext should:
    - Appear random
    - small changes to input should result in large changes to cyphertext: avoid chosen plaintext 
-   - "Avalanche effect"??? // TODO review
+   - "Avalanche effect": small changes in plaintext make big difference in cypiertext
 
 # 1 Block Cypher - Symmetric 
 
@@ -139,15 +139,34 @@ expected period = 10 ** 100
 
 modern stream cypher
 
-
-
 1. Confidential: canno't know the plaintext without knowing the key
 2. Integrity: if the output is changed, can we detect it?
 
 stream cypher vs. block cypher:
 
-- if one bit is changed in block cypher, the plaintext decrypted will be huge different. So block cypher is clower to integerity than stream cypher. (???)
+- if one bit is changed in block cypher, the plaintext decrypted will be huge different. So block cypher is closer to integerity than stream cypher. (???)
 - stream cypher & bloc cypher are both confidential
 
-# 3. Message Authentication
+## Bit Flipping Attacks
+
+# 3 Message Authentication
+
+1. Crypto Hash Function properties:
+   - Collision resistant: 
+     - attackers cannot find 2 messages that hash to the same value
+     - attackers know the hash value but still cannot know anything about the key
+   - irreversible
+   - output should appear random
+   - avalanche effect: any change to a message will cause a big change in hash
+2. Hash functions:
+   - MD5: broken
+   - SHA-1: 128 bits
+   - SHA-2: similar to SHA-1. 256 bits
+   - SHA-3 are totally different from SHA-2. So if there's an attack on SHA-2, hope it won't work on SHA-3
+   - Black: the best hash function so far
+3. Message Integrity Checking: H(message + key) --> HMAC algorithm
+
+## HMAC
+
+H(K | H(K|M))
 
