@@ -1,58 +1,77 @@
-# Intro
+# 1 Intro
 
-1. Things we care about for secure communication:
-   - Confidentiality: no one but intended recipient can read the message
-   - message integrity: 
-   - Authentication: know who we are talking to 
-   - non-repudiation
+## Cryptography
 
-2. Adversaries:
+- Cryptography: secure communication in the presence of adversaries
 
-   - Eavesdropper
-   - man in the middle ([MITM](https://www.imperva.com/learn/application-security/man-in-the-middle-attack-mitm/))
-   - assume adversaries have NSA data centers (???)
+- Cryptoanalysis: attempts to break cryptographic systems
 
-3. Terminologies
+1. Adversaries:
 
-   - plaintext
-   - cyphertext
+     - Eavesdropper
+     
+     -  man in the middle ([MITM](https://www.imperva.com/learn/application-security/man-in-the-middle-attack-mitm/)): "broadly speaking, a MITM attack is the equivalent of a mailman opening your bank statement, writting down your account details, then resealing the envolope and delivering it to your door"
+     
+         ![man in the middle mitm attack](./assets/man-in-the-middle-mitm-attack.png)
+     
+     - assume adversaries have NSA(National Security Agency)-sized data centers
+
+2. Secure communication requirements:
+   - Confidentiality: only the intended recipient can read the message
+   - Data integrity: the message received contains the information the sender intended 
+   - Authentication: can verify the sender
+   - non-repudiation: the assurance that someone cannot deny the validity of something. For example, if I receive a message from you, you cannot say this is not from you.
+
+3. Cryptographic Components
+
+   - plaintext: original message
+   - cyphertext: encrypted message
    - Keys:
-     - Shared secrete key (symmetric key): the same key is used for both encryption and decryption
-       - Encrypt: CC(plaintext, key)
-       - Decrypt: CC(cyphertext, -key)
-     - Public key cryptography (assymetric cryptography): parties have a public key and secret key // TODO
+     - Shared secrete key (**symmetric cryptography**): K<sub>A</sub> == K<sub>B</sub> and are secret
+     - Public key  (**asymmetric cryptography**): parties have a public key (everyone knows) and a secret key (only Alice and Bob knows)
+     - Symmetric crypto is usually faster than asymmetric crypto, so in practice we often use a combination of both
 
    <img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230210093741719.png" alt="image-20230210093741719" style="zoom:50%;" />
 
-4. Cryptosystems
-   - Substitution building block: replace parts of the message with something else
-     - Caeser Cypher: each letter are rotated by an offset
-   - permutation building block: shifting things around
-     - pig latin
-   - XOR
-     - XOR and plus are similar, but plus need to deal with carrying / borrowing bits
-     - a ^ b ^ b = a
-     - x ^ 0 = x
-5. Requirements for builidng blocks:
+## Cryptography Building Blocks
+
+1. Requirements for builidng blocks:
    - deterministic: a plaintext can generate only one cyphertext
    - Reversible: we can decrypt cyphertext to the plaintext
    - Efficient to compute
-6. downsides:
-   - Substitution: often use bytes. Then there are only 256 entries in the table, which is easy to decode
-   - Permutations: 
-   - combine substitution + permutation can get better crypto system // TODO review this part
-7. A cryptosystem is secure if attacks can only use brute force to do key guessing
-8. types of attack
-   - cyphertext only: 
-     - statistical analysis can help this
-   - Known plaintext: get cyphertext & plaintext pairs and decode the key
-   - chosen plaintext: if the output ctyphertext is very similar, attacker might get some information from it
-9. Cyphertext should:
-   - Appear random
-   - small changes to input should result in large changes to cyphertext: avoid chosen plaintext 
-   - "Avalanche effect": small changes in plaintext make big difference in cypiertext
+2. Common building blocks:
+   - substitution: replace each byte with a different byte
+     - Caeser Cypher crypto system: each alpha letter are rotated by an offset, e.g., a -> d, b -> e, ...
+       - for example, "DSZQUP SVMFT" -> "CRYPTO RULES", for which the key is the offset 1
+       - symmetric algorithm:
+         - Encrypt: CC(plaintext, key)
+         - Decrypt: CC(cyphertext, -key)
+   - permutation: shifting things around
+     - pig latin: move the consonant clusters to the end and add "ay", e.g., "CRYPTO RULES" -> "YPTOCRAY ULESRAY"
+   - XOR: bitwise exclusive or. XOR and plus are similar, but XOR is slightly nicer because plus need to deal with carrying / borrowing bits
+     - important applications of XOR:
+       - a ^ b ^ b = a
+       - x ^ 0 = x
+3. Downsides of the above building blocks:
+   - Substitution: easy to decode. Since substitution is used for bytes, there are only 2<sup>8</sup> possible keys. We can use brute force or statistical analysis to find the key.
+   - Permutations: [ref](https://en.wikibooks.org/wiki/Cryptography/Permutation_cipher)
+     - the plaintext may have to be padded (if the padding is identifiable then part of the key is revealed)
+     - information relating to the length of the key is revealed by the length of the ciphertext.
+   - combine substitution + permutation can get better crypto system
 
-# 1 Block Cypher - Symmetric 
+## Types of Attack
+
+A cryptosystem is secure if attacks can only use brute force to do key guessing.
+
+1. Cyphertext Only: the attacker has access to only the intercepted cyphertext. The statistical analysis can help in a cypiertext-only attack.
+2. Known Plaintext: the attacker knows some of the cyphertext & plaintext pairs and decode the key
+3. Chosen Plaintext: the attacker can choose plaintexts and view their corresponding cyphertext. For example, the attacker might try encrpting messages `000000` and `000001`. If the output ctyphertexts are very similar, the attacker can know something about the key from the difference.
+4. Cyphertext should:
+   - appear random: avoid cyphertext-only and known-plaintext attacks
+   - small changes to input should result in large changes to cyphertext ("Avalanche effect"): avoid chosen plaintext 
+   - possible combining 3 different building blocks in various orders
+
+# 2 Block Cypher - Symmetric 
 
 A block cipher is an encryption algorithm that encrypts a **fixed size** of n-bits of data - known as a **block** - at one time. The usual sizes of each block are 64 bits, 128 bits, and 256 bits. So for example, a 64-bit block cipher will take in 64 bits of plaintext and encrypt it into 64 bits of ciphertext. 
 
@@ -119,7 +138,7 @@ new, good
    - Decryption: cyphertext xor key
    - We need to get a good pseduo random number generator. repeated key string can cause compromised data
 
-# 2 Stream Cypher
+# 3 Stream Cypher
 
 1. key stream: pseudo random
 
@@ -149,7 +168,7 @@ stream cypher vs. block cypher:
 
 ## Bit Flipping Attacks
 
-# 3 Message Authentication
+# 4 Message Authentication
 
 1. Crypto Hash Function properties:
    - Collision resistant: 
