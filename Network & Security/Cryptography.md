@@ -71,39 +71,71 @@ A cryptosystem is secure if attacks can only use brute force to do key guessing.
    - small changes to input should result in large changes to cyphertext ("Avalanche effect"): avoid chosen plaintext 
    - possible combining 3 different building blocks in various orders
 
-# 2 Block Cypher - Symmetric 
+# 2 Symmetric Cyptography
 
-A block cipher is an encryption algorithm that encrypts a **fixed size** of n-bits of data - known as a **block** - at one time. The usual sizes of each block are 64 bits, 128 bits, and 256 bits. So for example, a 64-bit block cipher will take in 64 bits of plaintext and encrypt it into 64 bits of ciphertext. 
+## Block Cypher
 
-- symmetric
-- encrypts block-sized (fixed size) plaintext to a certain-byte cyphertext
-- security depends on key size / block size. assuming n bit key, then there are 2<sup>n</sup> possibilities, attackers need to guess 2<sup>n-1</sup> times statistically. The bigger the block size is, the more possibilities there are.
-- usually the cyphertext and plaintext are the same size
-  - if cyphertext < plaintext, they it is not reversible
-  - in theory cyphytext can be bigger than plaintext, but we don't see such algorithm
+In a block cypher （分组加密）, the message to be encrypted is processed in blocks of `k` bits. Say, if k = 64, the message will be broken into 64-bit blocks and each block will be encrypted independently. 
 
-## DES (Data Encryption Standard)
+1. usually the cyphertext and plaintext are the same size
 
-Old, broken
+   - if cyphertext < plaintext, this algorithm is not reversible because not each input can have a unique output
 
-64-bit block
+   - in theory, cyphytext can be bigger than plaintext, but we never see such algorithms
 
-Key size: 56 bits (too small for the modern computingd)
+2. The block cypher's security depends on the key size and the block size. 
+
+   - For a n-bit key size, there are 2<sup>n</sup> possibible keys. The attacker has to guess at least 50% of possibilities, which is  2<sup>n-1</sup> before they get the correct answer. The bigger the key size is, the more difficult it is to decode the message.
+   - For a n-bit block size, there are 2<sup>n</sup> possible inputs and 2<sup>n</sup>! permutations (one-to-one mappings).  Say, if the block size is 2 bits. There are only 4 possible inputs and 4!=24 possible mappings. Therefore, if the block size is too small, the attacker don't even need to guess the key, they just use brute force to guess the mapping.
+
+In theory, we can use only substitutions to implement a "perfect" block cypher. To explain, we can map each possible input to a output, and the values are chosen randomly. However, this requires the sender and the receiver to maintain a hash table, which can be huge. For example, for a 64-bit block, there are 2<sup>64</sup> 8-byte entries in the table, which is 2<sup>34</sup> GB. Apparently this is infeasible.
+
+Instread, the block cypher use functions to simulate randomly permuted tables.
+
+### DES (Data Encryption Standard)
+
+DES is old and broken. 64-bit block size, 56-bit key size (too small for the modern computing).
+
+DES is a type of **Feistel Network**. 
+
+For encryption:
+
+- A n-bit palintext is split into left and right halfves, each are n/2 bits.
+
+- The network operated in a series of rounds. Each round use a different **round key** and the same **mangler function**. The mangler function is not reversible. For i-th round, L<sub>i</sub> = R<sub>i-1</sub>, and R<sub>i</sub> = L<sub>i-1</sub> ⊕ F(K<sub>i-1</sub>, R<sub>i-1</sub>)
+
+  - > The purpose of the rounds is to make each input bit affect most (if not all) of the final output bits. (If only one round were used, a given input bit would affect only 8 of the 64 output bits.)
+
+![image-20230226142255615](./assets/image-20230226142255615.png)
+
+For decryption, we just need to all operations in reverse order.
+
+advantages:
+
+- mangler functions are non-invertible, but the whole scheme is invertible
 
 downsides: 
 
-- desgined for hardware implementation, not software: bit permutation is easy in hardware but hard in software 
+- requires operations like bit swapping, which is easy in hardware implementation but inefficient in software. so this scheme is not efficient in software
 - 56 bits are too small for a key
 
-## 3DES
+// Q: are round keys totally different and 互不关联？还是说K1依靠于K0生成？
 
-do DES three times: E(D(E(m, k1), k2), k3)
+### 3DES
 
-- a = E(plaintext, K1)
-- b = D(a, k2)
-- c = E(b, k3)
+Since DES's key size is too small, we can do DES three times: E(D(E(m, k1), k2), k3), each time use a different key.
 
-## AES (Advanced Encryption Standard)
+Advantages:
+
+- triple the key length
+- using an existing cypher
+
+Drawbacks: 
+
+- triple the processing time
+- subject to MITM attack ([ref](https://sandilands.info/crypto/EncryptionandAttacks.html#x15-700007.3))
+
+### AES (Advanced Encryption Standard)
 
 new, good
 
@@ -117,56 +149,116 @@ new, good
 
 2. Operations: (all are reversible)
 
-   - sub bytes: b[i] = table[b[i]]
+   - sub bytes: b[i] = table[b[i]]. can use hash table or **inverse table**
 
-   - Shift rows
+   - Shift rows: rotate row i left by i columns (so row 0 won't move, row 1 move left by 1 column, row 2 move left by 2 columns, ...)
 
-   - mix columns (?)
+   - mix columns 
 
      ```
      for each column:
      	for each row:
      		look up column for byte[row][col]
-     		rotate that result
-     	rotate all the oclumn entries together
+     		rotate that result so it's top in the current row (// TODO how to rotate?)
+     	xor all the looked-up columns together
      ```
-
+   
    - Add rounkey key: xor with the round key
-
-3. how to deal with long messages? stream cypher
-   - Encryption: plaintext xor key
-   - Decryption: cyphertext xor key
-   - We need to get a good pseduo random number generator. repeated key string can cause compromised data
 
 # 3 Stream Cypher
 
-1. key stream: pseudo random
+Main idea: generate a **keystream** (pseudo random bits) and XOR with the plaintext byte by byte. This requires us to implement a good pseduo random number generator. 
+
+- Encryption: plaintext xor key
+- Decryption: cyphertext xor key
 
 ## CSPRNG
 
-// review this part of video!!!
+Cryptographically Secure Pseudo Random Number Generator
 
-## RC4
+Requirement: If the attacker sees k bits of output, they can't predict next bit.
 
-Homework: implement RC4 algorithm!
+Properties we want for CSPRNG:
 
-RC - Ron's Code. this way is broken. don't use it!!
+- The secrete internal states should be complicated enough so that the output won't reveal it
+- If the internal state is revealed, you can't figure out previous outputs
+- Maxize the "period" as long as possible before getting a duplicate internal state
+  - The length of the PRNG sequence before it repeats is called its **period**
 
-expected period = 10 ** 100
+
+## RC4 Algorithm
+
+RC - Ron's Code. RC4 is broken. Don't use it in practice! (expected period = 10 ** 100)
+
+<img src="./assets/RC4.png" alt="RC4 Block Diagram" style="zoom:50%;" />
+
+1. Initialize internal state: create a 1 * 255 array with values ranges from 0 - 255 in order
+
+   ```c++
+   		std::array<uint8_t, 256> state{};
+       for (int i = 0; i < 256; i++) {
+           state[i] = i;
+       }
+   ```
+
+2. Key Scheduling Algorithm: use the secrete key to rearrange the array
+
+   ```c++
+   		int j = 0;
+       for (int i = 0; i < 256; i++) {
+           j = (j + state[i] + key[i % key.size()]) % 256;
+           std::swap(state[i], state[j]);
+       }
+   ```
+
+3. PRGA(Pseudo Random Generation Algorithm) -- generate the keystream
+
+   ```c++
+   		int i = 0, j = 0;
+       while (true) {
+         	i = (i + 1) % 256;
+           j = (j + state[i]) % 256;
+           std::swap(state[i], state[j]);
+           uint8_t output = state[(state[i] + state[j]) % 256]; // this is the next byte of the keystream
+       }
+   ```
+
+Advantages:
+
+- easy to implement, fast to compute, at the same time has good quality
+
+Drawbacks:
+
+- the first few bytes generated from PRGA are not very random, which might leak some inforamtion of the key
 
 ## ChaCha20
 
-modern stream cypher
-
-1. Confidential: canno't know the plaintext without knowing the key
-2. Integrity: if the output is changed, can we detect it?
-
-stream cypher vs. block cypher:
-
-- if one bit is changed in block cypher, the plaintext decrypted will be huge different. So block cypher is closer to integerity than stream cypher. (???)
-- stream cypher & bloc cypher are both confidential
+ChaCha20 is the most popular stream cypher algorithm now. It takes in three parameters: key, stream position, nonce (number used once. Nonce is not secrete, but helps avoid accidental stream reuse) and use operations like add, xor, and rotate.
 
 ## Bit Flipping Attacks
+
+The attacker can change the cyphertext which will result in a predictable change of the plaintext, although the attacker is not able to learn the plaintext itself. The attack is especially dangerous when the attacker knows the format of the message. In such a situation, the attacker can turn it into a similar message but one in which some important information is altered.
+
+If the attacker knows part of the plaintext, they can easily modify the cyphertext and trick the receiver.
+
+- Alice -> Bob: C = M xor K
+- Attacker forges a fake message M' and compute X = M xor M'
+- Attacker -> Bob: C xor X 
+- Bob decrypts the message:  C xor X xor K = M xor K xor M xor M' xor K = M'
+
+The receiver gets a modified message!
+
+## Summary
+
+1. RC4 is confidential but can't guarantee data integrity. 
+
+   - Confidential: canno't know the plaintext without knowing the key
+
+   - Integrity: can we detect the message is modified by the attacker?
+
+2. stream cypher vs. block cypher:
+   - stream cypher & bloc cypher are both confidential
+   - block cypher has beeter data integrity. If one bit is changed in the cyphertext, the plaintext decrypted will by huge different, which is easier to detect.
 
 # 4 Message Authentication
 
@@ -267,3 +359,78 @@ Elliptic curve is a way to generate private and public keys. It can generate muc
 https://www.youtube.com/watch?v=NF1pwjL9-DE
 
 In Diffie-Hellman, the private key is g<sup>x</sup> % N, while in Elliptic Curve Cryptography, the private key is e * g. The curve has 2 properties: given g an e * g (g is a point, e is an integer), it's super hard to figure out e. (Why??? it seems like just a simple math.)
+
+# Operation Mode
+
+Write a new protocol for the network stack, which one is the easiest and hardest? (sample question for midterm)
+
+- application layer easiest: only talk to the program
+- hardest: network layer. need to make many routers to agree with the protocol
+
+1. ECB Mode
+
+   - pros: efficient
+   - Cons:
+
+2. Cypher Block Chaining Mode
+
+   - Pros:
+     - can detect bit flipping attacks because in a certain round the decrypted text would be garbage
+   - cons: must encrypt consequentially (in order), 
+
+   <img src="./assets/image-20230227094912712.png" alt="image-20230227094912712" style="zoom:50%;" />
+
+3. Output Feedback Mode
+
+   - turns block cypher into stream cypher
+   - Cons: must be done sequential 
+
+   <img src="./assets/image-20230227095624475.png" alt="image-20230227095624475" style="zoom:50%;" />
+
+   <img src="./assets/image-20230227095352018.png" alt="image-20230227095352018" style="zoom:50%;" />
+
+4. Counter Mode
+
+   each block can be done in parallel
+
+   <img src="./assets/image-20230227095501293.png" alt="image-20230227095501293" style="zoom:50%;" />
+
+for stream cyphers, don't repeat key stream, which means IV should not be repeated
+
+5. Galois Counter Mode (GCM): most popular operations. what's the difference between GCM and counter mode? the encryption part is the same, but GCM has authentication code (HMAC)
+
+# Authentication Protocols
+
+1. Shared secret based protocols -- How can Bob verify the sender is Alice? (how to chanllenge A)
+   - first method:
+     - A -> B: I am Alice. 
+     - B -> A: a randome number R
+     - A -> B: f(R, key) (f i a encrypt hash/ HMAC)
+   - Attacks:
+     - Trudy: intercept the message from A and get authentication
+     - Snoopy: save R and f(R, key), and will offline guesses key
+   - Second method:
+     - A -> B: 
+     - B -> A: f(R, key)
+     - A decrypt R and send back to B
+   - Attacks:
+     - trudy can collect f(R, key) collections and guess keys. To check if the key is right, see if the R is likely 
+   - challenge type: use timestamp instead of a random number
+     - A -> B: I am Alice + f(time, key)
+       - the Trudy can intercept the message and send it to other server since the timestamp is still valid
+
+2. public key crypto:
+
+   - first method: signature
+
+     - A -> B: I am Alice
+
+     - B -> A: a randome number
+
+     - A -> B: sign(R)
+
+   - second method:
+
+     - A -> B: I am Alice
+     - B -> A: encrypt(R, A-public key)
+     - A decrypt the message and send R back
