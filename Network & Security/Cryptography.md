@@ -405,13 +405,13 @@ Elliptic curve is a way to generate private and public keys. It can generate muc
 
 In Diffie-Hellman, the private key is g<sup>x</sup> % N, while in Elliptic Curve Cryptography, the private key is e * g. The curve has 2 properties: given g an e * g (g is a point, e is an integer), it's super hard to figure out e. (Why??? it seems like just a simple math.)
 
-## Certificate
+## Signed Certificate
 
-A biggest problem in the Diffie Hellmen is that everybody can use your public key to send you messages. For example, Trudy can trick Alice and Bob with Trudy's own public key. Alice/Bob assumes it's Bob/Alice's public key, so they will establish shared secret keys with Trudy.  
+A biggest problem in the public key cryptography is that everybody can use your public key to send you messages. For example, in Diffie Hellmen, Trudy can trick Alice and Bob with Trudy's own public key. Alice/Bob assumes it's Bob/Alice's public key, so they will establish shared secret keys with Trudy.  
 
 <img src="./assets/image-20230301214827717.png" alt="image-20230301214827717" style="zoom: 25%;" />
 
-To avoid this problem, we should use public key certificate to verify that a public key belongs to a specific entity. Certification Authorities (CA) can verify the identity and issue certificates.
+To avoid this problem, we should use **public key certificate** to verify that a public key belongs to a specific entity. **Certification Authorities (CA)** can verify the identity and issue certificates.
 
 Selected fields in a certificate:
 
@@ -431,37 +431,52 @@ trust store: set of certificates that we trust without further authentication
 
 # 6 Block Cypehr Modes of Operation
 
-1. ECB Mode
+The way we use block cypher to send long message is known as its "mode of operation".
+
+1. Electronic Code Book (ECB) Mode: 
+
+   - encrypt each block with the same key
 
    - pros: efficient
-   - Cons:
+   - cons: 
+     - plaintext and cyphertext are deterministic -> vulnerable for konwn-plaintext attack
+     - the attacker can rearrange (move, delete) the cyphertext to modify the message -> vulnerable for **block arrangement attack**
 
-2. Cypher Block Chaining Mode
+   <img src="./assets/image-20230301230412122.png" alt="image-20230301230412122" style="zoom:80%;" />
+
+2. Cypher Block Chaining Mode: 
+
+   - xor the first message with a random block (the initialization vector), and encrypt other blocks with the previous cyphertext
 
    - Pros:
-     - can detect bit flipping attacks because in a certain round the decrypted text would be garbage
-   - cons: must encrypt consequentially (in order), 
+     - susceptible to bit flipping attack: can detect bit flipping attacks because in a certain round the decrypted text would be garbage
+   - cons: 
+     - must encrypt the message consequentially (in order)
+
 
    <img src="./assets/image-20230227094912712.png" alt="image-20230227094912712" style="zoom:50%;" />
 
-3. Output Feedback Mode
+3. Output Feedback (OFB) Mode
 
-   - turns block cypher into stream cypher
-   - Cons: must be done sequential 
+   - Generate keystream in each block and xor with plaintext. This mode turns block cypher into stream cypher (unsyncrhonized stream cypher), and has many advantages:
+     - 1) F doesn't need to be invertible, since xor itself is invertible. 
+       2) the message doesn't need to be the multiple of block size 
+
+   - Cons: 
+     - must be done sequentially (but the computation of the keystream can be done independently from the message encryption)
+
 
    <img src="./assets/image-20230227095624475.png" alt="image-20230227095624475" style="zoom:50%;" />
 
-   <img src="./assets/image-20230227095352018.png" alt="image-20230227095352018" style="zoom:50%;" />
+4. Counter (CTR) Mode
 
-4. Counter Mode
-
-   each block can be done in parallel
+   - cons: each block can be done in parallel
 
    <img src="./assets/image-20230227095501293.png" alt="image-20230227095501293" style="zoom:50%;" />
 
-for stream cyphers, don't repeat key stream, which means IV should not be repeated
-
-5. Galois Counter Mode (GCM): most popular operations. what's the difference between GCM and counter mode? the encryption part is the same, but GCM has authentication code (HMAC)
+5. Galois Counter Mode (GCM): most popular operations. 
+   -  GCM can be viewed as **encrypt-then-authenticate** paradigm, with CTR as the underlying encryption scheme and GMAC as the underlying message authentication code (GCM = CTR + GMAC)
+   - One thing to notice for this mode is that if the IV repeats, the integrity of the scheme might be completely broken. So never repeat the IV!
 
 # Authentication Protocols
 
