@@ -338,7 +338,7 @@ If Alice wants to send a message to Bob:
 
 <img src="./assets/image-20230225175800441.png" alt="image-20230225175800441" style="zoom:80%;" />
 
-Since anyone can use Bob's public key to send him a encrypted message, a digital signature is needed to bind a sender to a message.
+Since anyone can use Bob's public key to send him a encrypted message, a **digital signature** is needed to bind a sender to a message.
 
 ## Diffie-Hellman
 
@@ -349,9 +349,9 @@ Since anyone can use Bob's public key to send him a encrypted message, a digital
 
 Note, g and N are public. A common choice of g is 2.
 
-To decode the private key, we need to solve g<sup>x</sup> % N = T<sub>A</sub>.  With the mod N, this will be really really hard! This is called **discrete logarithm problem** and it's impractical to solve for big numbers. (That's why DH generates long keys)
+To decode the private key, we need to solve g<sup>x</sup> % N = T<sub>A</sub>.  With the mod N, this will be really really hard! This is called **discrete logarithm problem** which is impractical to solve for big numbers. (That's why DH generates long keys)
 
-Diffie-Hellman allows the parties to compute the private key without sending the secrete numbers over the network. After each party gets the private key, they switch to symmetric cryptography (like AES) to communicate. 
+Diffie-Hellman allows the parties to compute the private key without sending the secrete numbers over the network. After each party gets the private key, they switch to symmetric cryptography (like AES) to communicate with that secret key. 
 
 ## RSA
 
@@ -362,7 +362,7 @@ RSA is similar to Diffie-Hellman, with the equation that m<sup>ed</sup> % N = m,
    - Compute `n` = p * q, `z` = (p - 1) * (q - 1)
    - Choose a number `e`: e < n && e and z has no common factors (e and z are relatively prime)
    - Choose a number `d`: e * d % z = 1
-   - <e, n> is public key, <d, n> is private key
+   - `<e, n>` is public key, `<d, n>` is private key
 2. If Alice wants to send a message (`m` in bit pattern, which is smaller than `n`) to Bob:
    - Alice encrypts the message: C = m<sup>e</sup> % n
    - Bob decrypts the cyphertext: C<sup>d</sup> % n = m<sup>de</sup> % n = m,
@@ -371,9 +371,9 @@ RSA is similar to Diffie-Hellman, with the equation that m<sup>ed</sup> % N = m,
    - you sign the message with your private key: s = m<sup>d</sup> % n
    - people verify the message with your public key: m = s<sup>e</sup> =  m<sup>de</sup> % n. They will get the original message if the signature is valid! 
 
-The security of RSA lies in the fact that there's no algorithms for quickly factoring a number, in this case `n`, into primes `p` and `q`. This is called **prime factoration** problem. If one knew `p` and `q`, and given the public key `e`, one could easily compute the secrete key `d`.
+The security of RSA lies in the fact that there's no algorithms for quickly factoring a number, in this case `n`, into primes `p` and `q`. This is called **prime factoration** problem. If one knew `p` and `q`, and given the public key `e`, they could easily compute the secrete key `d`.
 
-// TODo 
+Summary:
 
 - encrypt with public key: encryption
 - encrypt with private key: signature
@@ -399,22 +399,37 @@ public static int fastExponentiation(int x, int n, int m) {
 }
 ```
 
-
-
 ## Elliptic Curve
 
-Elliptic curve is a way to generate private and public keys. It can generate much shorter keys and are slightly more difficult to be decoded than the descrete logarithm problem. 
-
-https://www.youtube.com/watch?v=NF1pwjL9-DE
+Elliptic curve is a way to generate private and public keys. It can generate much shorter keys which are slightly more difficult to be decoded than the descrete logarithm problem. ref: https://www.youtube.com/watch?v=NF1pwjL9-DE
 
 In Diffie-Hellman, the private key is g<sup>x</sup> % N, while in Elliptic Curve Cryptography, the private key is e * g. The curve has 2 properties: given g an e * g (g is a point, e is an integer), it's super hard to figure out e. (Why??? it seems like just a simple math.)
 
-# Operation Mode
+## Certificate
 
-Write a new protocol for the network stack, which one is the easiest and hardest? (sample question for midterm)
+A biggest problem in the Diffie Hellmen is that everybody can use your public key to send you messages. For example, Trudy can trick Alice and Bob with Trudy's own public key. Alice/Bob assumes it's Bob/Alice's public key, so they will establish shared secret keys with Trudy.  
 
-- application layer easiest: only talk to the program
-- hardest: network layer. need to make many routers to agree with the protocol
+<img src="./assets/image-20230301214827717.png" alt="image-20230301214827717" style="zoom: 25%;" />
+
+To avoid this problem, we should use public key certificate to verify that a public key belongs to a specific entity. Certification Authorities (CA) can verify the identity and issue certificates.
+
+Selected fields in a certificate:
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230301213650643.png" alt="image-20230301213650643" style="zoom:80%;" />
+
+trust store: set of certificates that we trust without further authentication
+
+# Summary
+
+| Crypto Scheme     | Purpose                                                      |
+| ----------------- | ------------------------------------------------------------ |
+| Block Cypher      | Encrypt messages with the blocksize (not exactly)            |
+| Stream Cypher     | Encrypt messages with any sizes                              |
+| Crptographic Hash | Guarantee message integrity (HMAC); user authentication (salted hash) |
+| Diffie Hellmen    | generate secret key                                          |
+| RSA               | signature, encryption                                        |
+
+# 6 Block Cypehr Modes of Operation
 
 1. ECB Mode
 
