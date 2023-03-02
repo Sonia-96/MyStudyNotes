@@ -20,7 +20,7 @@
    - **Confidentiality:** only the sender and the intended receiver can understand the message
    - **Message Integrity**: the message between the sender and the receiver should not be altered in transit, either maliciously or by accident
    - **End-point Authentication**: both the sender and the receiver can verify the identity of the other party involved in the communication
-   - Non-repudiation: the assurance that someone cannot deny the validity of something. For example, if I receive a message from you, you cannot say this is not from you.
+   - **Non-repudiation**: the assurance that someone cannot deny the validity of something. For example, if I receive a message from you, you cannot say this is not from you.
 
 3. Cryptographic Components
 
@@ -242,9 +242,9 @@ The attacker can change the cyphertext which will result in a predictable change
 If the attacker knows part of the plaintext, they can easily modify the cyphertext and trick the receiver.
 
 - Alice -> Bob: C = M xor K
-- Attacker forges a fake message M' and compute X = M xor M'
-- Attacker -> Bob: C xor X 
-- Bob decrypts the message:  C xor X xor K = M xor K xor M xor M' xor K = M'
+- Attacker intercepts the message M, forges a fake message M' and compute X = M xor M'
+- Attacker intercepts the cyphertext, and send to Bob: C' = C xor X 
+- Bob decrypts the message:  C' xor K = M xor K xor M xor M' xor K = M'
 
 The receiver gets a modified message!
 
@@ -260,26 +260,70 @@ The receiver gets a modified message!
    - stream cypher & bloc cypher are both confidential
    - block cypher has beeter data integrity. If one bit is changed in the cyphertext, the plaintext decrypted will by huge different, which is easier to detect.
 
-# 4 Message Authentication
+# 4 Cryptographic Hashing
 
-1. Crypto Hash Function properties:
+## Intro to Crypto Hash
+
+1. What's Hash function useful for?
+   - verify data integrity (checksum): The sender sends you the message and its hash value. After receiving the message, you can compute its hash value and compare it with the expected value. If they are the same, your data is not modified by the attacker.
+   - Authentication: salt hash
+   - a short way of referring to an object
+   - generating unique names: git use this to name commits
+2. Properties of Crypto Hash Functions:
    - Collision resistant: 
      - attackers cannot find 2 messages that hash to the same value
      - attackers know the hash value but still cannot know anything about the key
    - irreversible
    - output should appear random
-   - avalanche effect: any change to a message will cause a big change in hash
+   - avalanche effect: any changes to a message will cause a big change in hash
+3. **Collision Attacks**: try to find two different inputs producing the same hash value
+   - **Chosen Prefix Collision Attack**: Given two different prefixes *p*1 and *p*2, find two appendages *m*1 and *m*2 such that *hash*(*p*1 ∥ *m*1) = *hash*(*p*2 ∥ *m*2), where ∥ denotes the concatenation operation.
+4. **Collision Avoidance**
+   - "Birthday Paradox": With a group of 23 people, there is a 50% chance that two share a birthday. When the number of people is increased to 80, the odds jump to a staggering 99.98%!
+   - for a b-bit key, there are 2<sup>b</sup> possible hashes. To get a 50% chance to make a collision, there should be at least 2<sup>b/2</sup> hashes. Therefore, increase the key size can decrease the collision rate.
+
+## Common Crypto Hash Functions
+
+1. Merkle Damgard Hash Functions
+
+   <img src="./assets/image-20230301081551221.png" alt="image-20230301081551221" style="zoom:50%;" />
+
 2. Hash functions:
    - MD5: broken
-   - SHA-1: 128 bits
-   - SHA-2: similar to SHA-1. 256 bits
-   - SHA-3 are totally different from SHA-2. So if there's an attack on SHA-2, hope it won't work on SHA-3
-   - Black: the best hash function so far
-3. Message Integrity Checking: H(message + key) --> HMAC algorithm
+   - SHA-1: 128-bit key
+   - SHA-2: similar to SHA-1, but use long key size, which is 256 or 512 bits
+   - SHA-3's design are totally different from SHA-2. So if there's an attack on SHA-2,  it won't work on SHA-3
+   - Blake: the best hash function so far
 
-## HMAC
+## HMAC(Hash Message Authentication Code)
 
-H(K | H(K|M))
+1. Message Integrity Checking. 
+
+   - If the attacker knows the message and the hash algorithm, they can reproduce the hash value of the message and send it to the receiver. This will cause the problem of confidentiality.
+   - To avoid this problem, we'll add an authentication code to the message. We just hash the message with a secrete key. The attacker doesn't know the key, so they can't forge the message.H(message | key) --> HMAC algorithm
+2. HMAC algorithm:
+
+   - compute H(K |H(K|M)) (| means concatenantion, K is the secret key)
+   - H(K|M) or H(K|M | K) is not secure
+3. To perform the message integrity:
+   - Alice computes H(K + H(K + M)) (HMAC)
+   - Alice apppend HMAC to the message (K xor M, HMAC)
+   - Bob receives the message, decrypts it as M', and calculate HMAC . If they are equal, then Bob concludes everything is fine. 
+
+## Salted Hash -- Storing passwords
+
+Main idea: compute Hash(password + salt) for 40k+ times
+
+- the salt value is random, whcih means that each user has a different salt 
+- the server only stores the username, salt, and the hash of each user. (Password is not stored!!!)
+- when a user logs in, the server computes the hash of their password + salt, and compares it with the stored hash. If they are equal, then the user logs in successfully. 
+
+The properties for the hash function:
+
+- the hash function should be slow for password, so it would take attackers longer time to crack it
+- the hash function should work well on CPU but bad on GPU
+
+A common algorithm for this is BCrypt.
 
 # 5 Public key (Asymmetric) Crypto
 
@@ -328,6 +372,11 @@ RSA is similar to Diffie-Hellman, with the equation that m<sup>ed</sup> % N = m,
    - people verify the message with your public key: m = s<sup>e</sup> =  m<sup>de</sup> % n. They will get the original message if the signature is valid! 
 
 The security of RSA lies in the fact that there's no algorithms for quickly factoring a number, in this case `n`, into primes `p` and `q`. This is called **prime factoration** problem. If one knew `p` and `q`, and given the public key `e`, one could easily compute the secrete key `d`.
+
+// TODo 
+
+- encrypt with public key: encryption
+- encrypt with private key: signature
 
 ## Fast Exponentiation
 
@@ -434,3 +483,26 @@ for stream cyphers, don't repeat key stream, which means IV should not be repeat
      - A -> B: I am Alice
      - B -> A: encrypt(R, A-public key)
      - A decrypt the message and send R back
+
+## Mutual Authentication
+
+A and B challenge each other
+
+1. method 1:F is  HMAC or encrypt:
+   - A -> B: I am Alice
+   - B -> A: R1
+   - A -> B: f(R1, Kab), R2
+   - B -> A: f(R2, Kab)
+
+2. method 2: cut down the message from 4 to 3
+
+   - A send R2 in the first message
+
+   - Refraction Attack: Trudy fakes that they are Alice and send message to Bob. To pass the challenge, Trudy will send a second message with the random number then they can get the answer from Bob.
+
+     <img src="./assets/image-20230301094743258.png" alt="image-20230301094743258" style="zoom:40%;" />
+
+3. improved:
+   - A -> B: I am Alice, encrypt(R2, Bob's public key )
+   - B->A: R2, encrypt(R1, Alice's public key)
+   - A->B: R1

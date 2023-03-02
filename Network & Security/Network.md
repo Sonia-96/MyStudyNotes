@@ -60,10 +60,9 @@ From top to bottom, the network layers and corresponding protocols are:
    - `propogation_delay = scale * distance / speed_of_light`
      - the type of the connection will influence the scale
 
-2. **Processing Delay**: the time devices spend on examining packets (often just read the header)
-
+2. **Processing Delay**: the time devices spend on examining packets (often just read the header, usually negligible)
    - processing delay is usually in the order of nanoseconds, which is constant and negligible
-
+   
 3. **Transmission Delay**: the time to convert packets from bits to physical signals. This kind of delay depends on devices.
    - Devices are rated by their transmission delay, e.g., 1 Gbps ethernet device, 54 Mbps wireless device
    - `transmission_delay = data_length / device_transmission_rate`
@@ -79,13 +78,13 @@ From top to bottom, the network layers and corresponding protocols are:
 1. It's hard to measure the time from host1 to host2, because we will get delays to get the timestamp. But we can measure the time on the same host -- **Round Trip Time** (RTT)
    - RTT = 2 processing delays (~0) + 2 * (4 delays for each hop)
 
-2. Queuing delay: test RTT for the packets of the same size between the same hops; the variability should be due to queueing delay (but probably they go different paths). 
+2. **Queuing delay**: test RTT for the packets of the same size between the same hops; the variability should be due to queueing delay (but probably they go different paths). 
 
    - For example, send 5 packets of the size 500 bytes from hop A to hop B. The time is 10 ms, 2.8 ms, 2.4 ms, 4 ms, and 5.5 ms (Note that this would be a difficult measurement to actually perform!). Assuming that the samllest time has no queuing delay, then the queuing delay for each packet is: 7.6 ms, 0.4 ms, 0 ms, 1.6 ms, 3.1 ms. Then the average queuing delay is 2.54ms.
 
-3. Propagation delay: we can estimate propagation delay based on distance, but we don't actually calculate it directly. 
+3. **Propagation delay**: we can estimate propagation delay based on distance, but we don't actually calculate it directly. 
 
-4. Transmission delay: Vary packet sizes and test RTT of each size for multiple times. The difference in the smllest time should be due to transmission delay.
+4. **Transmission delay**: Vary packet sizes and test RTT of each size for multiple times. The difference in the smllest time should be due to transmission delay.
 
    - For example:
 
@@ -527,7 +526,7 @@ The network layer is responsible for moving packets from a sending host to a rec
 
 A router uses a **forwarding table** to decide which output port a packet should be sent to. Forwarding table is a hash table with IP prefix as key and output port number as value. If a packet's destination IP matches the prefix stored in the forwarding table, the packet will be switched to the corresponding output port. If there're multiple matches, the router uses **longest prefix matching rule**.
 
-For example, a router uses the folowing forwarding table. For the prefixes in the table, the number after the slash means the number of bits of the prefix, "0" after the prefix means any number. For example, "1.2.3.0/24" matches any IP address starts with "1.2.3". The packet with destination IP "1.2.3.5" will be swtiched to interface 0 (not 1!!), and "127.0.28.5" will be switched to default interface 3.
+For example, a router uses the folowing forwarding table. For the prefixes in the table, the number after the slash means the number of bits of the prefix, "0" after the prefix means any number. For example, "1.2.3.0/24" matches any IP address starts with "1.2.3". The packet with destination IP "1.2.3.5" will be swtiched to interface 0 (not 1!!), and "127.0.28.5" will be switched to default interface 3. (free bits are set to 0)
 
 | Prefix     | Output Link Interface |
 | ---------- | --------------------- |
@@ -849,7 +848,7 @@ In the old days, the ethernet use hubs (like a switch but always broadcasts), wh
 
 #### Switch vs. Router
 
-1. switches have a swtichiing tbale (a entry for each device), so it is not suitable for gigantic network
+1. switches have a swtichiing table (a entry for each device), so it is not suitable for gigantic network
 2. Routers: forwarding table -- big network
    - downside: forwarding table has to be manually by softwares, but switches are self-configuring
 3. switch only works in a tree topology network (a loop wil crash the switches because it broadcast messages) (a switch cannot work in a cycle!!!). routers can work in any topology 
