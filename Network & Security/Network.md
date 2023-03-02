@@ -584,17 +584,19 @@ A subnet is a segmented piece of a larger network. The devices in a subnet are c
 
 <img src="./assets/image-20230130225222620.png" alt="image-20230130225222620" style="zoom:80%;" />
 
-#### DHCP
+#### DHCP (Dynamic Host Configuration Protocol)
 
 DHCP is used for **small-scale** IP addresses assignment. Server tracks allocated IP addresses or which IP addresses are available.
 
-DHCP is a client-server protocol. When a client just enters a subnet, they doesn't have an IP. They need to ask for the server for it. There are 4 steps:
+DHCP is a client-server protocol. When a client just enters a subnet, they doesn't have an IP. They need to ask for the server for it. 
+
+There are 4 steps to assign an IP to a client:
 
 1. client sends a **broadcast** message "DHCP Discover" to `255.255.255.255` 
 
-2. server broadcasts DHCP OFFER
+2. server broadcasts DHCP Offer
 
-3. client broadcasts DHCP ACKNOWLEDGE
+3. client broadcasts DHCP Request: choose one from many offers
 
 4. server broadcasts ACK
 
@@ -604,19 +606,21 @@ Then the client can use the allocated IP address.
 
 DHCP potential issue: doesn't have anything like "bye" handshake, cannot track if a device has already left the network
 
-### NAT
+### NAT (Network Address Translation)
 
-There are only 2<sup>32</sup> IPv4 = 4 billion addresses, but there are more than 4 billion connected devices in the world. How do they each get an IP? One trick used by ISPs is **Network Address Translation (NAT)**.
+There are only 2<sup>32</sup> IPv4 = 4 billion addresses, but there are more than 4 billion connected devices in the world. How do they each get an IP? One trick used by ISPs is **Network Address Translation (NAT)**. NAT is a way to share 1 public IP address with many devices, then use extra **port number info** to track each device.
 
-NAT: share 1 public IP address with many devices. use extra port number info to tell connections apart
+For a NATed network, the hosts have IP addresses that are only valid within the subnet, not the whole internet. The hosts in this subnet can communicate with each other through these IP addresses. But when they try to communicate to the outside network, the router that connects to the outside network will manipulate the IP header data (change the src IP. e.g. `10.0.0.1 : 11111` to the public IP address + an arbitrary port like `45678`). (see the picture below)
 
-my homerouter IP address: `10.0.0,1`, `197.186.1.1`
+<img src="./assets/image-20230302082813498.png" alt="image-20230302082813498" style="zoom:50%;" />
 
-each device in the network has a port number
+Note, IP address `10.0.0,0/24` is reserved for home network
 
-Modem: NAT router. will change the src IP. e.g. `10.0.0.1 : 11111` -> public IP address + an arbitrary port
+-  Q: what is `197.186.1.1`???
 
+ // TODO review the part below in the lecture
 
+Modem: NAT router
 
 issues:
 
@@ -659,62 +663,69 @@ Match and Action:
 
 # 6 Network Layer 2: Control Plane
 
-Many modern networks use centralized controller to collect the information from routers and come up with routing palns for the network. This is usually runnign a software program, so this approach is called "Software Defined Networking (SDN)".
+The control plane refers to the systems/algorithms that determine the forwarding table for  routers.
 
-Modern networks use  (SDN) to come up with the routing plans. 
+Many modern networks use centralized controller to collect the information from routers and come up with routing palns for the network. This is usually runnign a software program (meaning very flexible and adaptable), so this approach is called "**Software Defined Networking (SDN)**".
 
 ## Routing Algorithms
 
 Routing algorithms are to find a good path from senders to receivers through the network of routers. Typically, a good path is the one that has the least cost.
 
-"single source shortest path" algorithm
+If we think of the network as a weighted graph, we need to solve "single source shortest path" problem.
 
 ### The "Link-State" Algorithm (Dijkstra's Algorithm)
 
-Each node knows the cost to all nodes linked to it, so it can run Dijkstra's Algorithm locally. 
+The **OSPF protocol** allows each node to send "link-state broadcasts" to share the costs of all links attached to that node. Then all nodes have identical and complete view of the whole network, so they can run Dijkstra's Algorithm locally. 
 
-- only store first edge in each path in my forwarding table
-- OSPF protocol
+LS is a centralized algorithm. It requires each router first obtain a complete map of the network before they run Dijkstra's algorithm. 
 
 ### Distance Vector Algorithm (Bellman Ford)
 
-Bellman-Ford algorithm: keep track of the shortest distance and the neighbor that's the first hop on the route
+**Distance Vector (DV) algorithm (Bellman-Ford algorithm)** is a decentralized algorithm and does not use global information, the only information they need is the costs to their directly attached neighbors. (only store the first edge in each path in their forwarding table.)
+
+Bellman-Ford algorithm keeps track of the shortest distance and the neighbor that's the first hop on the route
 $$
-dist(x, y) = min_{n in neighbors}( cost(x, neighbor) + dist(neighbor, y))
+dist(x, y) = min_{n\ in\ neighbors}( cost(x, neighbor) + dist(neighbor, y))
 $$
-each node store "distance vector". 
+In practice, each node stores a "distance vector". If DV updates, they will send the updated DV to neighbors. Neighbors will update their DVs with the improved distances. If the DV changes, they will broadcast their updated DVs to neighbos again.
 
-send DV to neighbors, and they will update DV with improved distances.
-
-If table changes, send updated DB to neighbors.
-
-each node only need to know their distance to neighbors.
+<img src="./assets/image-20230302152306775.png" alt="image-20230302152306775" style="zoom:80%;" />
 
 ## Autonomous System
 
-An **Autonomous system** is a group of routers + hosts that manages itself and has some connection points to other ASs. Each As has its AS number. With ASs, we're interested in 2 different types of routing: routing within an AS (intra-AS routing), and routing among ASs (inter-AS routing).
+It's impractical to connect every router on the internet. Also, different network providers might have diferent routing goals. To solve this problem, we divide the internt into network of sub-networks called "**Autonomous System (AS)**", which is a group of routers and hosts that manages itself and has some connection points to other ASs. Each As has its AS number. And routers under the same AS use the same routing algorithm.
 
-### Intra-AS rounting
+With ASs, we're interested in 2 different types of routing: routing within an AS (**intra-AS routing**), and routing among ASs (**inter-AS routing**).
 
-OSPF - use Dijkstra's algorithm
+### Intra-AS rounting - OSPF
 
-### Inter-AS routing
+We use OSPF protocol, which uses Dijkstra's algorithm in intra-AS routing.
 
-**border routers/gateway routers/edge routers**: connect a AS with another AS, talk with each other using protocol **BGP (Border Gateway Protocol)** - protocol for sharing AS paths
+### Inter-AS routing - BGP
 
-1. BGP manages paths to a IP prefix and contains: 
-   - IP prefix
-   - list of AS's on the way
-   - the IP address of the first border router in the first AS on the route (next hop)
-2. Hot potato routing: 
-   - Definition:
-   - Solution: 
-     - choose fastest path that gets me to the next hop
-     - can also assign preference to different path
-3. IP Anycast: multiple machiens use the same IP address, then the router can find the shortest path to the machine. They don't care about the packet goes to different places.
-   - this works great for DNS since there's only a packet and a response
-   - for TCP, if packets got routed to different devices, this wouldn't work
-4. BGP Hijack: ???
+#### BGP
+
+"**Border Gateway Protocol (BGP)**" is the main protocol for inter-AS routing. BGP is arguably the most important of all the Internet procols, as it is the protocal that glues thousands of ISPs in the Internet together.
+
+A node in an AS that conencts to other AS is called  a "**gateway router**" or "border node". Gateway routers talk to other connected gateways over eBGP (e for external) and communicate with routers within their own AS over iBGP (i for internal). As shown in the picture below, there are 3 ASs, and AS3 includes a subnet with prefix x.
+
+<img src="./assets/image-20230302155817505.png" alt="image-20230302155817505" style="zoom:80%;" />
+
+A BGP message contains: IP prefix they route to, list of ASs on the way, and the IP address of a border router in the next hop. In the above picture, to advertise the rechability information for prefix x to all routers in AS1 and AS2, the following process will be gone through:
+
+<img src="./assets/image-20230302162436446.png" alt="image-20230302162436446" style="zoom: 25%;" />
+
+#### BGP routing
+
+Now that nodes know about the routes to all prefixes, how do they route packets there? Within an AS, they often use **hot potato routing** algorithm, which is routing a packet out of the AS as quickly as possible. Among ASs, they choose the path cross the fewest ASs and use hot potato routing to break the tie. But they can also assign preference values to paths based on business relationships.
+
+#### IP Anycst
+
+Anycast is a network routing methodology in which a single destination IP address is shared by devices (generally servers) in different locations. Routers will route the packet to the nearest server with that IP address. They don't care about the packet goes to different places.
+
+Anycast is commonly used in DNS since it uses UDP and is stateless. TCP connection doesn't use Anycast because it might route the packet to a different host.
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230302164028630.png" alt="image-20230302164028630" style="zoom:67%;" />
 
 # 7 Link Layer
 

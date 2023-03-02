@@ -19,7 +19,7 @@ Write a new protocol for the network stack, which one is the easiest and hardest
 ## Network Layer
 
 * How do routers know where to forward packets?
-* What is an autonomous system?
+* What is an **autonomous system**?
 * What algorithms might we use to route within or between ASs
 * How are IP addresses assigned to make life easier on routers?
 * What is NAT, why do we need it, and how does it work?
