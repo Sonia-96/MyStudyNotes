@@ -43,8 +43,11 @@ From top to bottom, the network layers and corresponding protocols are:
      - IP packets + port numbers
 3. **Network Layer**: host to host communication (IP) (multiple-hop communication)
    - IP protocol: IP networks are often described as **"best-effort" networks** because they deliver every packet as fast as they can but don't guarantee the full packets will be received.
+   - DHCP
+   - BGP
 4. **Link Layer**: one-hop communication, e.g. Wifi, Ethernet
    - breaks up packets into frames and sends them from source to destination
+   - ARP: address resolution protocol, IP -> MAC
 5. Physical Layer: mechanism for one hop communication, e.g., electrocal/optical/eletromagnetic wave stuff. This layer is responsible for transmitting raw bits over a physical medium
 
 "Programmers work in the application layer, have to make choices about the transport layer, and have to understand what goes wrong in the network layer."
@@ -459,6 +462,25 @@ Disadvantages:
   - doesn't guarantee fairness between hosts
   - a UDP socket can use all resources while TCP connections politely lower their transmission rate
 
+## Summary: TCP vs. UDP
+
+1. Similarities:
+
+   - both used in transport layer
+   - both specifies src/destination  IP and ports in the header
+
+2. Differences:
+
+   |                 | TCP                                                          | UDP                                                          |
+   | --------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+   | Connection type | connection-oriented: one socker for one sender; need to do 3-way handshake | connectionless: one socket for all senders; no need to do handshake |
+   | Reliable?       | Reliable, make sure all data received in order               | Non-reliable                                                 |
+   | State           | Stateful, has ACK + sequence numbers in the packet           | stateless                                                    |
+   | Uses            | reliable -- commonly used for apps like email, web browsing, file transfer | fast -- commonly used for DNS, video streaming, online gaming |
+   | sequencing      | yes                                                          | No                                                           |
+
+   
+
 ## QUIC
 
 Google has been frustrated with some issues of TCP. This led them to develop a new protocol called QUIC (Quick UDP Internet Connections). 
@@ -633,7 +655,7 @@ An IPv4 has the following important informaiton in its header:
 
 protocol, header checksum, and fragmentation are the things we want to get rid of! (TODO why???)
 
-## IPv6
+### IPv6
 
 Some improvements over IPv4:
 
@@ -642,7 +664,7 @@ Some improvements over IPv4:
   
 - no fragmentation: packets that are too big are dropped and the sender will be notified
 
-## IPv4 -> IPv6
+### IPv4 -> IPv6
 
 Since the network layer includes every node in the internet, switching from IPv4 to IPv6 requires us to update all devices including routers. (Only endpoints in the path need to do transport things, but every router need to do network things.)
 
@@ -731,7 +753,7 @@ Anycast is a network routing methodology in which a single destination IP addres
 
 Anycast is commonly used in DNS since it uses UDP and is stateless. TCP connection doesn't use Anycast because it might route the packet to a different host.
 
-<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230302164028630.png" alt="image-20230302164028630" style="zoom:67%;" />
+<img src="./assets/image-20230302164028630.png" alt="image-20230302164028630" style="zoom:67%;" />
 
 # 7 Link Layer
 
@@ -832,6 +854,8 @@ That's why in your home network, you find that usually upload speed is much slow
 <img src="./assets/image-20230206102127275.png" alt="image-20230206102127275" style="zoom:30%;" />
 
 ## Local Area Networks
+
+A **local area network** (LAN) is a collection of devices connected together in one physical location, such as a building, office, or home. A LAN can be small or large, ranging from a home network with one user to an enterprise network with thousands of users and devices in an office or school.
 
 LAN uses link-layer **switches** rather than network-layer routers to connect devices. The link layer devices are basically just "**plug and play**" and don't require administration to set up routing/flow tables.
 
