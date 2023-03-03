@@ -32,9 +32,9 @@ the Internet:
 
 From top to bottom, the network layers and corresponding protocols are:
 
-1. **Application Layer**: how applications parse the data
+1. **Application Layer**: how applications parse the data. This layer is responsible for providing services to end-users, such as email, web browsing, and file transfer. Its main purpose is to enable communication between applications on different devices, using standard protocols such as HTTP, FTP, and SMTP.
    - HTTP protocol: web page. a type of client-server protocol
-   - SATP protocol: email
+   - SMTP protocol: email
    - DNS: turn human-readable domain names to numeric numbers
 2. **Transport Layer**: process to process communication (port)
    - TCP (Transmission Control Protocol): gurantees your will receive all data because it will resend lost packages
@@ -42,10 +42,10 @@ From top to bottom, the network layers and corresponding protocols are:
    - UDP (User Datagraph Protocol): cannot gurantee you receive all data
      - IP packets + port numbers
 3. **Network Layer**: host to host communication (IP) (multiple-hop communication)
-   - IP protocol. IP networks are often described as "best-effort" networks because they deliver every packet as fast as they can but don't guarantee the full packets will be received.
+   - IP protocol: IP networks are often described as **"best-effort" networks** because they deliver every packet as fast as they can but don't guarantee the full packets will be received.
 4. **Link Layer**: one-hop communication, e.g. Wifi, Ethernet
    - breaks up packets into frames and sends them from source to destination
-5. Physical Layer: mechanism for one hop communication, e.g., electrocal/optical/eletromagnetic wave stuff
+5. Physical Layer: mechanism for one hop communication, e.g., electrocal/optical/eletromagnetic wave stuff. This layer is responsible for transmitting raw bits over a physical medium
 
 "Programmers work in the application layer, have to make choices about the transport layer, and have to understand what goes wrong in the network layer."
 
@@ -53,15 +53,13 @@ From top to bottom, the network layers and corresponding protocols are:
 
 ## Four Common Delays
 
-1. **Propogation Delay**: the time physical signal takes to travel between hops
-
+1. **Propagation Delay**: the time physical signal takes to travel between hops
    - depends on the distance and the speed of the connection (radio, fiber optics > electrical signal)
-
+   
    - `propogation_delay = scale * distance / speed_of_light`
      - the type of the connection will influence the scale
-
-2. **Processing Delay**: the time devices spend on examining packets (often just read the header, usually negligible)
-   - processing delay is usually in the order of nanoseconds, which is constant and negligible
+   
+2. **Processing Delay**: the time devices spend on examining packets (often just read the header), which is usually in the order of nanoseconds, so it's usually constant and negligible
    
 3. **Transmission Delay**: the time to convert packets from bits to physical signals. This kind of delay depends on devices.
    - Devices are rated by their transmission delay, e.g., 1 Gbps ethernet device, 54 Mbps wireless device
@@ -107,24 +105,22 @@ From top to bottom, the network layers and corresponding protocols are:
 
 ## traceroute
 
-Each packet has a "time to lie (TTL)" packet which specifys the number of hops it is allowed to travel. Many devices send a response when TTL gets 0.
+Each packet has a "time to live (TTL)" packet which specifys the number of hops it is allowed to travel. Many devices send a response when TTL gets 0.
 
 - `traceroute`: sends packet with increasing TTL values and measure the RTT of any packet that gets a response
 
 ## Throughput
 
-- Throughput: the amount of data (bits/s) that can be transmitted etween hosts
+- Throughput: the amount of data (bits/s) that can be transmitted between hosts
 - bottleneck node: the minimum throughput device on a path
 
 A bottleneck node is usually the access network. For example, if I send data from my laptop through my wifi to Google server, the bottleneck node is highly propably my own wifi. The internet backbone usually has a big capacity so is rarely a bottleneck.
 
-# 3 Application Layer
-
-Q: TCP - stream?
+# 3 Application Layer 
 
 ## Application Layer
 
-1. Application layer is the highest layer, but it need to interace with lower layers:
+1. Application layer is the highest layer, but it needs to interace with lower layers:
 
    - get IP address from network layer
 
@@ -142,7 +138,7 @@ Q: TCP - stream?
 
    - client/server model (most commonly used):
      - HTTP, web socket
-   - peer to peer model: programs behave as both clients and clients at various times. e.g., BitTorrent
+   - peer to peer model: programs behave as both clients at various times. e.g., BitTorrent
      - Disadvantages: 
        - can be very slow if multiple computers access to the same computer
        - limited security (viruses, file security)
@@ -186,7 +182,7 @@ Your email server has to understand both SMTP and POP or IMAP to allow users to 
 
 - a P2P protocol, used for sharing large files
 - How to find peers? 
-  - Originally, trackers servers track who are sharing the data via HTTP
+  - Originally, servers track who are sharing the data via HTTP
   - Now, use a distrbuted hash table. You just need to know about one of your connected peer to bootsrap your peers list.
 - originally used TCP, but now switch to UDP (uTP - UDP Torrent Protocol)
 
@@ -213,7 +209,7 @@ Your email server has to understand both SMTP and POP or IMAP to allow users to 
    
         - cached answer: respond the queries with answers in **cache** with the cached values
         - recursive query: ask another resolver for the answer
-        - iterative query: find th answer themselves
+        - iterative query: find the answer themselves
           - e.g., for the address "shell.cs.utah.edu" (`.edu` is a top level domain)
             - ask a **root server** "where can I find DNS servers for .edu domains"
             - ask a .edu DNS server for the authorative server for `utah.edu` domains
@@ -240,7 +236,7 @@ Your email server has to understand both SMTP and POP or IMAP to allow users to 
 2. port - process ID
    - usualy uint_16 (0 ~ 2<sup>16</sup> - 1 = 65535)
    - ports < 1024 are priviledged by the OS, so you need elevated priviledges to listen on those ports
-   - the server choose its own port number
+   - the server chooses its own port number
      - standard port: 80 for HTTP, 443 for HTTPS, 53 for DNS
    - clients are assigned an ephemeral port number (usually a high arbitrary number) by the OS
 3. TCP/UDP connections
@@ -273,7 +269,7 @@ To handle bit errors, three additional pieces are added to the protocol:
   - an ACK with a wrong sequence number will be treated as a NAK
 - **retransmission**: resend the packet until it ges an ACK
 
-The sender will not send a new packet until it is sure that the receiver has corectly received the current packet. Because of this behavior, rdt 2.0 is called stop-and-wait protocol. In this case, 1 bit (0/1) is enough for the sequence number.
+The sender will not send a new packet until it is sure that the receiver has corectly received the current packet. Because of this behavior, rdt 2.0 is called **stop-and-wait** protocol. In this case, 1 bit (0/1) is enough for the sequence number.
 
 ### rdt 3.0: lossy channel with bit errors
 
@@ -285,7 +281,7 @@ If the timeout is too small, the sender resends packets unnecessarily. If it's t
 
 ### rdt4.0: pipeling
 
-The stop-and-wait protocol is too inefficient -- it will spend too much time in waiting for ACKs. Now, to solve this problem, the sender is allowed to send multiple packeted without waiting for ACKs. This technique is called **pipeling**. Pipeling has the following consequences for the RDT protocols:
+The stop-and-wait protocol is too inefficient -- it will spend too much time in waiting for ACKs. Now, to solve this problem, the sender is allowed to send multiple packets without waiting for ACKs. This technique is called **pipeling**. Pipeling has the following consequences for the RDT protocols:
 
 - The range of sequence numbers must be increased, since each in-flight (in-transit) packet must have a unique sequence number.
 - The sender and the receiver need to buffer more than one packet (ACKed packets, sent but un-ACKed packets, unsent packets)
@@ -303,11 +299,11 @@ The sequence numbers that are bigger or equal than base + N cannot be used until
 
 <img src="./assets/image-20230212085420349.png" alt="image-20230212085420349" style="zoom:80%;" />
 
-In GBN protocol, an acknowledged packet wih a sequence number n will be taken to be a cumulative acknowledgement, indicating that packets with a sequence numver <= n are all receivec. However, if a packet is not ACKed after the timeout, then all the packets after its sequence number need to be retransmitted. This causes many unnecassary retransmissions. 
+In GBN protocol, an acknowledged packet wih a sequence number n will be taken to be a cumulative acknowledgement, indicating that packets with a sequence numver <= n are all received. However, if a packet is not ACKed after the timeout, then all the packets after its sequence number need to be retransmitted. This causes many unnecassary retransmissions. 
 
 #### Selective Repeat (SR)
 
-Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledge acorrectly received packet whether or not it is in order. The out-of-order packets will be buffered until the missing packet is received, at which point these packets can be delivered to the upper layer.
+Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledge correctly received packet whether or not it is in order. The out-of-order packets will be buffered until the missing packet is received, at which point these packets can be delivered to the upper layer.
 
 <img src="./assets/image-20230212132128360.png" alt="image-20230212132128360" style="zoom:80%;" />
 
@@ -318,27 +314,28 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
 ### TCP Overview
 
 1. Basic features of TCP:
-   - **conenction oriented**: unlike UDP which doesn’t really know or care whether the receiver gets anything, TCP needs to know that the packet was received. It finds out because the receiver sends an acknowledgement (or ACK) packet.
+   - **conenction oriented** (stateful): Unlike UDP which doesn’t really know or care whether the receiver gets anything, TCP needs to know that the packet was received. It finds out because the receiver sends an acknowledgement (or ACK) packet.
    - Point to point: between a single sender to a singgle receiver. communication between two processes, no broadcast
    - Full **duplex**: once the connection is established, both sides can send data at any time, even simultaneously
    - throttles senders to protect receiver and network
    - reliable data transmission
-2. TCP segments (packet - network layer, frame - UDP, segment - TCP. They basically are the same things.)
-   - headers: (in plain text)
-     - src/dest ports: 2 bytes each
-     - sequence number & ACK number: the unit is **byte** (in UDP, it's packet).  
-       
-       - **sequence number** is the last received ACK number
-       - **ACK number** is the number of the next byte that the receiver wants (or the first un-ACKed byte in the stream) (usually = last seq number + 1)
-       - ACK number on one side goes up as we send data
-       
-       - ACK number on one side goes up as we receive **in-order** data
-       - even a message with no data should contain these 2 fields. An empty ACK will have as a sequence number for the next byte it would send (but the data will have a length of zero). If a client sends several empty ACKs in a row, they'll all have the same sequence number.
-     - Flags: `SNC`, `ACK`, `FIN`, `RST` (reset)
+2. TCP segments header: (packet - network layer, frame - UDP, segment - TCP. They basically are the same things.)
+   - src/dest ports: 2 bytes each
+   - sequence number & ACK number: the unit is **byte** (in UDP, it's packet).  
      
-       - the RST flag is set whenever a TCP packet doesn't comply with the protocol's criteria for a connection. It signifies that we should immediately terminate the connection.
-     - `rwnd` (**receive window**): the number of available bytes in the **receive buffer**. `rwnd` limits how fast the sender can send the data
-       - The `rwnd` increases when the application reads data out of the buffer and decreases when it receives a message.
+     - **sequence number** is the last received ACK number
+     - **ACK number** is the number of the next byte that the receiver wants (usually equals last seq number + 1)
+     - ACK number on one side goes up as we send data
+     
+     - ACK number on one side goes up as we receive **in-order** data
+     - even a message with no data should contain these 2 fields. An empty ACK will have a sequence number for the next byte it would send (but the data will have a length of zero). If a client sends several empty ACKs in a row, they'll all have the same sequence number.
+     
+     <img src="./assets/image-20230302212144904.png" alt="image-20230302212144904" style="zoom: 67%;" />
+   - Flags: `SNC`, `ACK`, `FIN`, `RST` (reset)
+   
+     - the RST flag is set whenever a TCP packet doesn't comply with the protocol's criteria for a connection. It signifies that we should immediately terminate the connection.
+   - `rwnd` (**receive window**): the number of available bytes in the **receive buffer**. `rwnd` limits how fast the sender can send the data
+     - The `rwnd` increases when the application reads data out of the buffer and decreases when it receives a message.
 
 ### Setup + Teardown
 
@@ -357,15 +354,13 @@ Based on GBN, SR only retransmits un-ACKed packets. The receiver will acknowledg
 
 #### Fast Retransmit
 
-what if sender gets multiple segments with the same ACK number? This indicates a gap in the receiver buffer because packets arrive out of order (why ACK would be duplicate? since it is based on seq + Len)
+The sender expects 1 ACK for each segment, with ACK number as `last seq number + length of segment + 1`. If it gets more than one of this, it means either packet loss or packet reordering. Once the sender receive 3 duplicate ACKs, rather than wait for timeout, the sender will immediately retranmit the packet starting with that sequence number. 
 
-fast retransmit: resend packet after 3 duplicate ACKs
-
-https://www.isi.edu/nsnam/DIRECTED_RESEARCH/DR_HYUNAH/D-Research/fast-retransmit.html
+<img src="./assets/image-20230302212514494.png" alt="image-20230302212514494" style="zoom:80%;" />
 
 #### Delayed ACK
 
-Q: what's the purpose of delayed ACK?
+If TCP receive an in-order segment with an exepcted sequence number, and all data up to the expected sequence number are acknowleged (no pending ACKs), the sender will will wait for 500ms for another in-order segment. If next in-order segment doesn't arrive in this interval, send ACK. This ACK generation policy is called "delayed ACK".
 
 #### Timeouts
 
@@ -389,11 +384,20 @@ timeout interval computation:
   $$
   
 
+#### Summary: TCP ACK generation policty
+
+| Event                                                        | TCP Receiver Action                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Receive an in-order packet with no pending ACK               | delayed ACK                                                  |
+| Receive an in-order packet with pending ACKs                 | ACK now with the ACK number for the most recent packet       |
+| Receive an out-of-order packet with a high sequence number (gap created) | Immediately send a duplicate ACK for the last in-order segment |
+| Receive a segment filling in the beginning of the gap        | ACK it immediately                                           |
+
 ### Flow Control - receiver protection
 
 The flow control prevents the sender from overwhelming the receiver. To explain, the sender at each side of the TCP connection has a receive buffer. They send a TCP segment with a field “rwnd” (receive window), which tells the other side the number of available bytes in their receiver buffer. Then the sender on the other side should keep unacknowledged data less than the last rwnd it received.
 
-Special care should be taken when rwnd = 0. Suppose the host B tells the host A its rwnd = 0, and also B has nothing to send to A. Now, consider what happens. As the application process at B empties the buffer, TCP doesn't send any new segments to A with a new rwnd value. Therefore, A will never be informed that some space has opened up in B's buffer -- A is blocked and cannot transmit any more data. To solve this problem, TCP requires A to continue to send data with one byte when B's rwnd is 0.
+Special care should be taken when rwnd = 0. Suppose the host B tells the host A its rwnd = 0, and also B has nothing to send to A. Now, consider what happens. As the application process  at B empties the buffer, TCP doesn't send any new segments to A with a new rwnd value. Therefore, A will never be informed that some space has opened up in B's buffer -- A is blocked and cannot transmit any more data. To solve this problem, TCP requires A to continue to send data with one byte when B's rwnd is 0.
 
 // TODO draw a picture similar to the following, but consider the case when rwnd = 0
 
@@ -464,7 +468,7 @@ Problems of TCP & how QUIC overcomes them
 1. Ossification (not flexible): 
 
    - TCP:
-     - middle boxes don't let Google send unusual or nonstrandar TCP packet
+     - middle boxes don't let Google send unusual or nonstrandard TCP packet
      - updating TCP requires update middle boxes + servers + clients, which is estimated to take 5 - 15 years
    - QUIC: built on UDP and all features are added in user space
 
@@ -477,9 +481,9 @@ Problems of TCP & how QUIC overcomes them
 
    - TCP: the content of multiple files are in the same stream. the application need to split them. TCP only send full data to the application. So even the received data is fine, the application cannot use it until TCP received all data  （理解可能不对）
 
-   - QUIC: a single TCP connection can have multiple streams
+   - QUIC: a single QUIC connection can have multiple streams
 
-4. Parking lor problem: 
+4. Parking lot problem: 
 
    - TCP: TCP connections are identified by IP + port. When you walk from your office to the parking lot, your phone will switch from using  WIFI to LTE. TCP connection can't be transferred during this switch.
    - QUIC: connection is based on 64-bit connection ID -> no parking-lot problem
@@ -537,7 +541,7 @@ For example, a router uses the folowing forwarding table. For the prefixes in th
 
 ### Switching 
 
-Switching means switching a packet from an input port to a output port. There are a number of ways to accomplish this:
+Switching means switching a packet from an input port to an output port. There are a number of ways to accomplish this:
 
 - shared memory: the routing processor read from the input port then write to the output port
 - a bus: a packet is written to all output ports through the bus, but only the port that should output the packet receive the packet, other ports just ignore it. Only a packet can be written to the bus at a time, so other ports have to wait their turn to forward their packets.
@@ -552,23 +556,9 @@ A router contains several queues that can cause packet delays or packet loss:
 - input queueing: waiting for the switching fabric to send them to the output port
 - output queueing: waiting for transmission at the outgoing links
 
-If we want to forward packets besed on their priorities, we can use several normal queues with different priorities (the queue with higher priority will send packets first) or a priority queue. This could compeletely block lower-priority queue.
+If we want to forward packets besed on their priorities, we can use several normal queues with different priorities (the queue with higher priority will send packets first) or a priority queue. 
 
-## IPv4
-
-IPv4 is the major network protocol in use today. IPv6 is increasing its market share, but fairly slowly. 
-
-An IPv4 has the following important informaiton in its header:
-
-- src/dest IP address
-- packet length
-- TTL: the number of hops before a packet should be dropped. 
-  - TTL changes at each hop, then checksum should be recomputed at each hop
-- Protocol: TCP/UDP/ICMP
-- header checksum: check to see if the header is corrupted or not
-- fragmentation info: The link layer may not support sending large packets. If a packet is bigger than the maximum packet size (which is Maximum Transfer Unit, MTU) that a link layer can handle, the network layer will break it into smaller packets. This process is called fragmentation. Fragmentation is hard to implement, so transport protocols just avoid sending packets bigger than MTU.
-
-protocol, header checksum, and fragmentation are the things we want to get rid of!
+## IP
 
 ### IP Address Assignment
 
@@ -614,9 +604,7 @@ For a NATed network, the hosts have IP addresses that are only valid within the 
 
 <img src="./assets/image-20230302082813498.png" alt="image-20230302082813498" style="zoom:50%;" />
 
-Note, IP address `10.0.0,0/24` is reserved for home network
-
--  Q: what is `197.186.1.1`???
+Note, IP address `10.0.0,0/24`  and `192.168.1.0/24` are reserved for home network
 
  // TODO review the part below in the lecture
 
@@ -627,6 +615,23 @@ issues:
 - Bottleneck
 - port forwarding ???
 - Connection-based
+
+### IPv4
+
+IPv4 is the major network protocol in use today. IPv6 is increasing its market share, but fairly slowly. 
+
+An IPv4 has the following important informaiton in its header:
+
+- src/dest IP address
+- packet length
+- **TTL**: the number of hops before a packet should be dropped. 
+
+  - TTL changes at each hop, then checksum should be recomputed at each hop
+- Protocol: TCP/UDP/ICMP
+- header checksum: check to see if the header is corrupted or not
+- fragmentation info: The link layer may not support sending large packets. If a packet is bigger than the maximum packet size (which is **Maximum Transfer Unit, MTU**) that a link layer can handle, the network layer will break it into smaller packets. This process is called fragmentation. Fragmentation is hard to implement, so transport protocols just avoid sending packets bigger than MTU.
+
+protocol, header checksum, and fragmentation are the things we want to get rid of! (TODO why???)
 
 ## IPv6
 
@@ -639,24 +644,25 @@ Some improvements over IPv4:
 
 ## IPv4 -> IPv6
 
-Only endpoints in the path need to do transport things, but every router need to do network things. So, switching from IPv4 to IPv6 requires us to update all devices including routers. 
+Since the network layer includes every node in the internet, switching from IPv4 to IPv6 requires us to update all devices including routers. (Only endpoints in the path need to do transport things, but every router need to do network things.)
 
-- Dual Stacking: routers can understand both IPv4 and IPv6
+The transition has include a mix of **dual stacking** and **tunneling**: 
 
-- Tunneling:  
+- Dual Stacking: routers can understand and process both IPv4 and IPv6
 
-  > when an IPv6 packet hits an IPv4 only link, it puts the whole IPv6 packet in an IPv4 packet and forwards it on. When it gets to a node that understands IPv6, the IPv6 packet is unwrapped and sent onward.
+- Tunneling:  when an IPv6 packet hits an IPv4-only link, it puts the whole IPv6 packet in an IPv4 packet and forwards it on. When it gets to a node that understands IPv6, the IPv6 packet is unwrapped and sent onward.
+
 
 Since it takes extra costs to transit from IPv4 to IPv6, and NAT kind of solves the problem of running out of IPv4 addresses, many operators have decided not to invest in supporting IPv6.
 
 ## Match and Action
 
-Match and Action: 
+Match and Action paradigm: match a feature then perform an action. 
 
 - forwarding table (prefix -> output link) : 
-  - on the "match" side, we can look at src/dest IP addresses (some src IP has higher priority, some src IP like sendign spams, so we can give them lower priority), port numbers
+  - on the "match" side, we can look at src/dest IP addresses (some src IP has higher priority, some src IP like sending spams so we can give them lower priority), port numbers
   - on the action side: forwarding
-- flow table: similar to forwarding table, but looks at more fields in the header (we can think flow table is a generalized version of forwarding table)
+- flow table: similar to forwarding table, but looks at more fields in the header (we can think flow table is a generalized forwarding)
 - NAT router:
   - Action: change src IP/port
 - firewall
@@ -693,13 +699,13 @@ In practice, each node stores a "distance vector". If DV updates, they will send
 
 ## Autonomous System
 
-It's impractical to connect every router on the internet. Also, different network providers might have diferent routing goals. To solve this problem, we divide the internt into network of sub-networks called "**Autonomous System (AS)**", which is a group of routers and hosts that manages itself and has some connection points to other ASs. Each As has its AS number. And routers under the same AS use the same routing algorithm.
+It's impractical to connect every router on the internet. Also, different network providers might have diferent routing goals. To solve this problem, we divide the internt into network of sub-networks called "**Autonomous System (AS)**", which is a group of routers that are under the same administrative control. Each AS has its own AS number. And routers under the same AS use the same routing algorithm.
 
 With ASs, we're interested in 2 different types of routing: routing within an AS (**intra-AS routing**), and routing among ASs (**inter-AS routing**).
 
 ### Intra-AS rounting - OSPF
 
-We use OSPF protocol, which uses Dijkstra's algorithm in intra-AS routing.
+We use OSPF (Open Shortest Path First) protocol, which uses Dijkstra's algorithm in intra-AS routing.
 
 ### Inter-AS routing - BGP
 
@@ -711,7 +717,7 @@ A node in an AS that conencts to other AS is called  a "**gateway router**" or "
 
 <img src="./assets/image-20230302155817505.png" alt="image-20230302155817505" style="zoom:80%;" />
 
-A BGP message contains: IP prefix they route to, list of ASs on the way, and the IP address of a border router in the next hop. In the above picture, to advertise the rechability information for prefix x to all routers in AS1 and AS2, the following process will be gone through:
+A BGP message announces a path to an IP prefix and contains: the IP prefix they route to, list of ASs on the way, and the IP of the first border router in the next hop. In the above picture, to advertise the rechability information for prefix x to all routers in AS1 and AS2, the following process will be gone through:
 
 <img src="./assets/image-20230302162436446.png" alt="image-20230302162436446" style="zoom: 25%;" />
 
@@ -733,9 +739,9 @@ The lInk layer is reponsible for transmiting **frames** of data between 2 adjace
 
 1. There are 2 types of link layer protocols: 
 
-   - point to point: only two devices are in the channel, so there's no interference (easy mode)
+   - point to point: only two devices are in the channel, so there's no interference, e.g., ethernet (easy mode)
 
-   - broadcast channels: many hosts shares the same channel and must coordinate to avoid interfering with each other
+   - **broadcast channels**: many hosts shares the same channel and must coordinate to avoid interfering with each other, e.g., Wifi
 
 2. frame: // reiew video - what is included in frame
 
@@ -745,10 +751,10 @@ The frame is easier to be corrupted during routers, it's easier to handle the er
 
 - tradeoff: reliability & minimizing checksum size and computation
 
-### Parity Checking
+### Parity Check
 
 1. **parity bit**: count the number of bit 1 in the message, and add a parity bit to the end, for which 1 is odd, 0 is even. So the total number of 1 bits + the parity bit is even. When the receiver checks the message and counts an even number of ones (in pratical, they just xor all bits to check if they can get an 0), there must be an even number of bit flips in the message. Hopefully, but not granted, there's 0 error!
-   - disadvantage: can only detect odd-number bit flips
+   - disadvantage: can only detect **odd-number bit flips**
 2. 2D parity bit
 
    - cyclic redundancy check: 4 * 4 matrix -> check parity bit for each row and column (9 parity bits). This way we can find the location of the error then fix it! This is forward error detection.
@@ -756,15 +762,17 @@ The frame is easier to be corrupted during routers, it's easier to handle the er
 
 ## Broadcast Channels
 
+When many devices use the same physical channel for sending data, we call it "broadcast channel". All devices can receive all messages sent over that channel. Link layer need to deal with collisions when 2 devices are sending at the same time and interfere with each other.
+
 1. Collision: there are at least 2 devices transmitting at the same time
 2. Assume the sender can detect collisions. Our goals are:
    - main goals: 
-     - Fairness: when multiple devices are transmitting, they should get equal recourses
+     - Fairness: when multiple devices are transmitting, they should get equal resources
      - If there's only 1 device transmitting, it should get all bandwith (transmission time)
    - others:
      - robust when the program crash
-     - don't add much overhead
-     - decentralized (???)
+     - don't add much overhead, either computational, or extra usage of the channel
+     - decentralized
 
 ### Protocol 1: Taking Turns - centralized time scheduling
 
@@ -780,21 +788,19 @@ This method is fair but not efficient. If there's only 1 device transmiting, the
 
 ### Protocol 2: Slotted ALOHA
 
-All devices have a synchronized clock. If a device has data to send, it will tries the next time slot. If there are collisions, they will "flip a coin" to decide if they should resend the data in the next time slot. Only if there's only one device deciding to retransmitting the data, can the time slot be used.
+All devices have a synchronized clock. If a device has data to send, it will try the next time slot. If there are collisions, they will "flip a coin" to decide if they should resend the data in the next time slot. Only if there's only one device deciding to retransmitting the data, can the time slot be used.
 
  Cases:
 
-- not collision: that device resend the data
+- no collision: that device resend the data
 
 - Collisions: this time slot is wasted, everyone will wait and flip a coin again
 
-  
-
-  If there are multiple devices are sending the data at the same time, there's only 37% of time slots are used. (Really?? this method is so stupid, so 37% is pretty high for me)
+If there are multiple devices are sending the data at the same time, there's only 37% of time slots are used. (Really?? this method is so stupid, so 37% is pretty high for me)
 
 ### Protocol 3: Unslotted ALOHA
 
-This protocol is the same as slotted ALOHA, except that devices don't have syncrhonized clocks. Now collisions can occur with 2 time slots for each node (why???), so only 50% time slots are used. (why 50%???)
+This protocol is the same as slotted ALOHA, except that devices don't have syncrhonized clocks. Now collisions can occur with 2 time slots for each node,  so only 50% time slots are used. (why 50%???)
 
 <img src="./assets/image-20230206101417161.png" alt="image-20230206101417161" style="zoom:50%;" />
 
@@ -812,48 +818,55 @@ CSMA - Carrier Sense Multiple Access
 
 ### Cable Internet: DOCSIS
 
-what does DOCSIS stands for???
+DOCISIS -- Data Over Cable Service Interface Specification
 
-CMTS, cable modem termination system
+CMTS -- cable modem termination system
 
-1. Downloading: the ISP (internet service provider) **broadcast** to all the neighbors but modem will drop packets that are not meant for them
+1. Downloading: the ISP (internet service provider) **broadcast**s to all the neighbors but modem will drop packets that are not meant for them
 2. Uploading: there are 2 phases:
    - request: clients send upload requests (they pick slots randomly and hope for no collisions)
-   - Announcement: the CMTS assigns time slots based on the requests and annouces which customers get which time slots in the next upload cycle
+   - Announcement: the CMTS assigns time slots based on the requests and annouces which customers get which time slots in the next upload cycle. If a client doesn't get an upload slot, it was probably due a collision of the request, then they need to wait for the "upload request" round.
 
 That's why in your home network, you find that usually upload speed is much slower than the download speed. 
 
-<img src="./assets/image-20230206102127275.png" alt="image-20230206102127275" style="zoom:50%;" />
+<img src="./assets/image-20230206102127275.png" alt="image-20230206102127275" style="zoom:30%;" />
 
 ## Local Area Networks
 
-LAN uses link-layer **switches** rather than network-layer routers to connect devices. The link layer devices are basically just "plug and play" and don't require administration to set up routing/flow tables.
+LAN uses link-layer **switches** rather than network-layer routers to connect devices. The link layer devices are basically just "**plug and play**" and don't require administration to set up routing/flow tables.
 
-### MAC Addresses
+### MAC Addresses & ARP
 
-MAC:
+1. MAC addresses:
+   - link layer identifiers
+   - MAC address ranges are allocated to device manufactures
+   - no organization
 
-- link layer identifiers
-- no organization
-- Address Resolution Protocol (ARP): 
-  - ARP table: IP address -> MAC address mapping. 
-  - "Who has this IP?" . broadcast this message to all devices, the address is FF-FF-FF-FF-FF-FF
+2. **Address Resolution Protocol (ARP)**: 
+   - ARP is like DNS and answers queries like "what is the MAC address for the device with this IP?"
+   - devices store ARP table with mappings for IP address -> MAC address 
+   - "Who has this IP?" . broadcast this message to all devices, the address is FF-FF-FF-FF-FF-FF
 
 - frames has src and dest MAC addresses
 
 ### Switch
 
-A link layer switch is a **transparent**, automatically self-configuing device. Hosts basically don't realize that switches are there!
+A switch is a transparent device that forwards packets based on their destiniation MAC address. A **switch** is like a router but operates in link layer. 
 
-Q: what is transparent???
+- operate transparant to hosts: hosts can't tell there's a switch
+- Self-configuring: you don't need to provide them with a forwarding table
 
-assume 10.0.0.1 want to send packets to 10.0.0.3
+
+
+If a switch gets a packet to a MAC address not in it's table, it broadcasts it to all links except the one it came from. When that host responds, then it can fill in an entry for that MAC address. For example, assume 10.0.0.1 wants to send packets to 10.0.0.3:
 
 1. 10.0.0.1: broadcast "who has 10.0.0.3 IP address?"
-2. switch doesn't know which device, so it broadcast the message
-   - Switch keeps a switching table: MAC -> link number
+2. switch doesn't know which device, so it broadcasts the message
+   - Switch keeps a **switching table**: MAC -> link number
 3. 10.0.0.3 sends a response to switch
 4. swtich sends the respnse to 10.0.0.1
+
+
 
 In the old days, the ethernet use hubs (like a switch but always broadcasts), which cause lots of collisions. Now we use switch, avoid colliding. 
 
@@ -868,13 +881,14 @@ In the old days, the ethernet use hubs (like a switch but always broadcasts), wh
 ### Ethernet
 
 1. ethernet header:
-   - Src/dest MAC
-   - CRC checksum
+   - Src/dest MAC addresses
+   - checksum (use CRC algorithm)
    - Network layer type: usually IPv4
-   - Preamble: an alternating sequence of 1s and 0s that basically join the link and physical layers. It provides information about the physical signal being transmitted (MARKER)
+   - Preamble: an alternating sequence of 1s and 0s that basically join the link and physical layers. It provides the information about the physical signal being transmitted (MARKER)
      - 1010101010... : clock signal
-   - 
 
 ### Link Layer Tricks: Virtual LANs (VLANs)
 
-I don't understand this part. need to review this part of vedio. 
+A single switch can support multiple "virtual LANs" by grouping its links together into LANs. Within one of these groups, the switch operates like a normal link layer switch. Such switches can also act as network layer routers to route packets between the VLANs.
+
+<img src="./assets/image-20230303010338763.png" alt="image-20230303010338763" style="zoom:80%;" />

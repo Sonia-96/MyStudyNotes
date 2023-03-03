@@ -252,10 +252,6 @@ The receiver gets a modified message!
 
 1. RC4 is confidential but can't guarantee data integrity. 
 
-   - Confidential: canno't know the plaintext without knowing the key
-
-   - Integrity: can we detect the message is modified by the attacker?
-
 2. stream cypher vs. block cypher:
    - stream cypher & bloc cypher are both confidential
    - block cypher has beeter data integrity. If one bit is changed in the cyphertext, the plaintext decrypted will by huge different, which is easier to detect.
@@ -478,61 +474,82 @@ The way we use block cypher to send long message is known as its "mode of operat
    -  GCM can be viewed as **encrypt-then-authenticate** paradigm, with CTR as the underlying encryption scheme and GMAC as the underlying message authentication code (GCM = CTR + GMAC)
    - One thing to notice for this mode is that if the IV repeats, the integrity of the scheme might be completely broken. So never repeat the IV!
 
-# Authentication Protocols
+# 7 Authentication Protocols
 
-1. Shared secret based protocols -- How can Bob verify the sender is Alice? (how to chanllenge A)
-   - first method:
-     - A -> B: I am Alice. 
-     - B -> A: a randome number R
-     - A -> B: f(R, key) (f i a encrypt hash/ HMAC)
+## Shared secret based protocols
+
+How can Bob verify the sender is Alice? (how to challenge A)
+
+1. P1
+
+   - A -> B: I am Alice. 
+   - B -> A: a randome number R
+   - A -> B: f(R, key) (f can be a hash function like HMAC)
+   - Issues:
+     - Alice doesn't know whether she's actually talking to Bob. Trudy can pretend to be Bob and talk to Alice. (need authentication for Bob)
+     - Trudy can intercept the message from Alice, save R and f(R, key), then offline guesses key
+
+2. P2, a minor tweak
+
+   - A -> B: 
+   - B -> A: f(R, key)
+   - A decrypt R and send back to B
+   - Attacks: Now Alice is pretty sure she's talking to Bob, but
+     - If there's some structure to R, Trudy can pretend to be Alice, get f(R, key)  from Bob and guess the key offline
+     - If R has no structure, Trudy can evasdrop from Alice to get R
+
+3. Using a timestamp
+
+   - A -> B: I am Alice + f(time, key)
+   - Bob will decrypt the the message and make sure he got a recent timestamp
    - Attacks:
-     - Trudy: intercept the message from A and get authentication
-     - Snoopy: save R and f(R, key), and will offline guesses key
-   - Second method:
-     - A -> B: 
-     - B -> A: f(R, key)
-     - A decrypt R and send back to B
-   - Attacks:
-     - trudy can collect f(R, key) collections and guess keys. To check if the key is right, see if the R is likely 
-   - challenge type: use timestamp instead of a random number
-     - A -> B: I am Alice + f(time, key)
-       - the Trudy can intercept the message and send it to other server since the timestamp is still valid
+     - the Trudy can intercept the message and send it to other server since the timestamp is still valid
 
-2. public key crypto:
+4. public key crypto:
 
-   - first method: signature
+      - first method: signature
 
-     - A -> B: I am Alice
+        - A -> B: I am Alice
 
-     - B -> A: a randome number
+        - B -> A: a randome number
 
-     - A -> B: sign(R)
+        - A -> B: sign(R) with Alice's private key
 
-   - second method:
+        - issues: Alice can sign any message from Bob, even like "I hearby agree to give Bob all my money"
 
-     - A -> B: I am Alice
-     - B -> A: encrypt(R, A-public key)
-     - A decrypt the message and send R back
+      - second method:
 
-## Mutual Authentication
+        - A -> B: I am Alice
+        - B -> A: encrypt(R, Alice's public key)
+        - A decrypt the message and sends R back
+        - issues: Alice is decrypting anything she's given
 
-A and B challenge each other
+5. Mutual Authentication with shared secrets
 
-1. method 1:F is  HMAC or encrypt:
-   - A -> B: I am Alice
-   - B -> A: R1
-   - A -> B: f(R1, Kab), R2
-   - B -> A: f(R2, Kab)
+      - method 1: F is  HMAC or encrypt:
 
-2. method 2: cut down the message from 4 to 3
+        - A -> B: I am Alice
 
-   - A send R2 in the first message
+        - B -> A: R1
 
-   - Refraction Attack: Trudy fakes that they are Alice and send message to Bob. To pass the challenge, Trudy will send a second message with the random number then they can get the answer from Bob.
+        - A -> B: f(R1, Kab), R2
 
-     <img src="./assets/image-20230301094743258.png" alt="image-20230301094743258" style="zoom:40%;" />
+        - B -> A: f(R2, Kab)
 
-3. improved:
+      - method 2: cut down the message from 4 to 3 (nog good)
+
+        - A send R2 in the first message
+
+        - issues:
+
+          - Refraction Attack: Trudy fakes that they are Alice and send a message to Bob. To pass the challenge, Trudy will send a second message with the random number then they can get the answer from Bob.
+          
+            <img src="./assets/image-20230303001216818.png" alt="image-20230303001216818" style="zoom:30%;" />
+          
+          - Trudy can collect plaintext/encrypted pair (R, F(Kab, R)) from Bob and guess the key offline
+        
+
+6. Mutual authentication with public keys: avoids refraction attack since they use different public keys
    - A -> B: I am Alice, encrypt(R2, Bob's public key )
    - B->A: R2, encrypt(R1, Alice's public key)
    - A->B: R1
