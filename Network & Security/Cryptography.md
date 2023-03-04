@@ -31,7 +31,7 @@
      - Public key  (**asymmetric cryptography**): parties have a public key (everyone knows) and a secret key (only Alice and Bob knows)
      - Symmetric crypto is usually faster than asymmetric crypto, so in practice we often use a combination of both //TODO what's the advantages of public key crypto?
 
-   <img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Network & Security/assets/image-20230210093741719.png" alt="image-20230210093741719" style="zoom:50%;" />
+   <img src="./assets/image-20230210093741719.png" alt="image-20230210093741719" style="zoom:50%;" />
 
 ## Cryptography Building Blocks
 
