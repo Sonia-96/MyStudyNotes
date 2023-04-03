@@ -517,7 +517,7 @@ The seperation of `fork()` and `exec()` is essential in building a Unix shell. W
    - kernel must be isolated with processes
    - hardware must be isolated with processes
 3. Limited Direct Execution: run code on CPU with constraints
-   - restrict access to sensitie state (anything that need to be protected), like the memory (addresses in RAM), addresses (registers), interrupts
+   - restrict access to sensitive state (anything that need to be protected), like the memory (addresses in RAM), addresses (registers), interrupts
    - prevent **denial-of-service** (what's this???)
 4. Problem #1: Sensitive Table
    - hide **control registers** (convert virtual addresses to physical addresses) from applications
@@ -533,7 +533,7 @@ The seperation of `fork()` and `exec()` is essential in building a Unix shell. W
    - **Page table** holds the virtual addresses and corresponsing physical addresses
    - `%cr3`: page directory base register
    - CPU will translate virtual address to physical address 
-   - what is **kstack**???
+   - kstack(kernal stack):
    
 6. Virtual Address Space
 7. Exceptioinal Control Flow: switch from user mode to kernel mode
@@ -576,7 +576,7 @@ The seperation of `fork()` and `exec()` is essential in building a Unix shell. W
    - Policy: choose what to run in a consistent way. e.g., process scheduler
    - Mechanism: low-level code that implements the decision. e.g., dispatcher, context switch 
 
-2. Dispatch mechanism
+2. **Dispatch mechanism**
 
    ```bash
    while (1) { // infinit loop
@@ -592,9 +592,9 @@ The seperation of `fork()` and `exec()` is essential in building a Unix shell. W
 
    - **cooperative multitasking**: not used in modern operating system
      - OS trusts that processes to behave reasonably -- they will relinquish CPU to OS through traps (e.g., making system calls, page fault, errors).
-     - such system often have a explicit **yield()** system call, which transfers control to the OS so it can run other processes.
+     - such system often has a explicit **yield()** system call, which transfers control to the OS so it can run other processes.
      - disadvange: if an unfriendly process avoids all the traps and performs no I/O, it will take over the entire machine!
-   - **preemptive multitasking**: the OS takes control
+   - **preemptive （抢占式）multitasking**: the OS takes control
      - **timer interrupt**: the timer raises a interrupt every so many milliseconds. When the interrupt is raised, the OS will regain control, then it will stop the current process and start a different one.
 
 4. context switch: 
@@ -623,7 +623,7 @@ The seperation of `fork()` and `exec()` is essential in building a Unix shell. W
 
 # 9 Scheduling + IPC
 
-## Multi-level Feedback Queue (MLFQ)
+## Multi-Level Feedback Queue (MLFQ)
 
 Multiple queues, different priorities. The higher-priority queue runs its jobs first.
 
@@ -645,7 +645,7 @@ Approach:
 2. whoever wins runs
 3. more tickets means higher priority
 
-### Interprocess Communication
+### Interprocess Communication (IPC)
 
 ![img](/Users/sonia/Documents/CSStudy/MyStudyNotes/ComputerSystems/assets/Half-vs-Full-duplex-e1657701720121.jpg)
 
@@ -664,9 +664,95 @@ Approach:
 3. Stack & heap:
    - Stack: no fragmentation
      - backup `sp` when doing context switch
-   - Heap: fragmentation
+   - Heap: end up with small truncks of free spaces -- fragmentation
 4. Memorry Accessing: review the example in the slide
-5. Virtualizing Memory
-   - time sharing: not good. we do space sharing
-   - static relocation
-   - dynamic relocation
+5. Virtualizing Memory -- possible solutions:
+   - time sharing: not good. need to back up memory to disk, which is exremely slow.
+   
+     - better alternative: space sharing
+   - static relocation: rewrite code and addresses before running
+   
+     - // TODO not quite understand the mechanism of static relocation
+   - dynamic relocation: relocation at runtime and protect process from one another
+   
+     - base & bound: virtual address + base > bound ? error : physical address
+     - Segmentation: divide address space into logical segments (A segment is a region of logically contiguous memory)
+   
+     <img src="./assets/image-20230216215712982.png" alt="image-20230216215712982" style="zoom:50%;" />
+     
+     - Paging
+
+## Paging
+
+1. Fragmentation: free memory that can't be usefully allocated
+   - external fragmentation: visible to allocator (OS)
+     - Problem: free memory is too small and scattered
+   - internal fragmentation: visible to requester
+     - problem: unit of allocation doesn't match unit of need
+
+2. Paging: divide address spaces and physical memory into fixed-sized pages
+3. translation of paging address
+   - Q: why 4KB page size corresponds to 32 bits Virtual Address?
+
+4. Disadvantages:
+   - big tables due to the hole between the heap and the stack
+
+## Multi-level Paging
+
+TLB: Translation Lookaside Buffer
+
+1. Motivation: use more complex page tables instead of just a big array
+2. possible solutions:
+   - inverted page tables: PPN -> VPN
+   - segmented pag tables: 
+     - divide address space into segments (code, heap, stack)
+     - each segment has a page table
+     - advantages:
+       - we don't need to map unallocated memory -> decrease the size of page tables
+     - Disadvantages:
+       - still have external fragmentation due to variable sized page tables
+   - multi-level page tables: page the page tables
+3. Multi-level page tables
+   - page directory -> page table -> pages
+   - one page table should be fitted into one page, so we can access all of its contents by once
+   - modern OS use 4-level page tables
+4. MMU manages hash
+
+base and bound -> segmentation -> paging -> multi-level paging
+
+## Swapping / Page Replacement
+
+1. Swapping:
+   - Idea: keeps unreferenced pages on disk
+   - OS and hardware cooperate to provide an illusion of large disk as fast as the main memory
+     - mechanism to identify the location of each page in address
+     - policy for determining which on RAM or disk
+
+2. Mechanism
+   - Present bit: 
+     - 1 - in RAM
+     - 0 - on disk
+       - cause a "Page Fault". OS will find the actual disk location for the page in page table
+   - Mechanism
+3. Page Selection
+   - Demand Paging
+   - Anticipatory/Prefetching
+   - Hints
+
+4. Victim Selection:
+   - OPT
+   - FIFO
+   - LRU
+
+# 19 Intro to Multithreading
+
+1. Process vs. Threads
+
+   - process: an instance of a running program
+     - can be represented by its own Process Control Block (PCB)
+
+   - Thread:
+     - share the same address space
+     - each thread has its own Thread Control Block (TCB)
+
+   
