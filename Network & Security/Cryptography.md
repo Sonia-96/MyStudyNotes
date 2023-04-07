@@ -178,11 +178,11 @@ Cryptographically Secure Pseudo Random Number Generator
 
 Requirement: If the attacker sees k bits of output, they can't predict next bit.
 
-Properties we want for CSPRNG:
+**Properties we want for CSPRNG:**
 
 - The secrete internal states should be complicated enough so that the output won't reveal it
 - If the internal state is revealed, you can't figure out previous outputs
-- Maxize the "period" as long as possible before getting a duplicate internal state
+- Maxize the "**period**" as long as possible before getting a duplicate internal state
   - The length of the PRNG sequence before it repeats is called its **period**
 
 
@@ -553,3 +553,6 @@ How can Bob verify the sender is Alice? (how to challenge A)
    - A -> B: I am Alice, encrypt(R2, Bob's public key )
    - B->A: R2, encrypt(R1, Alice's public key)
    - A->B: R1
+
+
+
