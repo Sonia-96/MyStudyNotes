@@ -188,7 +188,7 @@ The CPU guesses which way the branch will go, then starts on the expected branch
 
 ## Spectre
 
-Spectre also uses the same trick, but instead of reading protected memory, it tres to circumvent bounds checks. For example, for the fowlloing code snippets:
+Spectre also uses the same trick, but instead of reading protected memory, it tres to circumvent bounds checks. For example, for the fowlloing code example:
 
 ```c++
 if (index > array.length) {
@@ -270,3 +270,39 @@ We've talked about: the ways to make a program to do waht they shouldn't:
 4. TCP SYN spoofies:
    - delay allocation of buffers (SYN Cookie???)
 5. Rate limiting
+
+# 6 Firewalls
+
+Firewall: seperate your private entwork from the internet, and forwared some packets and drop other packes.
+
+## Network Layer
+
+1. network layer: src/dest IP addresses
+2. transport layer: port numbers
+3. potential policies: 
+   - public web servers listen on 80, 443 (https)
+   - strategy 1: allow packets to web server IP + port 80 / 443, drop other incoming packets
+   - strategy 2: allow packets to ports > 1024 to all IPs + with ACK flag 
+     - probelm: others outside the private network cannot onnect to the server; only work for TCP since UDP doesn't have ACK flag
+   - add state info for the connection. 
+     - This is easy for TCP connection, just check the header
+     - UCP connection is not stateful. We'll just also som period of time to accept packets from the other side.
+4. Packet Filter Firewalls
+   - data packet inspection: firewall examines the data part. But since most traffic is now encrypted, this way is less common now.
+
+## Application Proxy Firewalls
+
+Proxy: 代理服务器，即Proxy服务器，在互联网上的完成跑腿服务。当你在浏览器中设置了某个Proxy服务器之后，由你的浏览器所发出的任何要求，都会被送到Proxy服务器上去，由这台Proxy服务器代为处理。
+
+TODO why we use proxy server?
+
+The same idea at transport layer: circuit level gateways
+
+## Host Firewalls
+
+Run on host machine between kernel and applications. This is like the last defence for the traffic attacking the kernel.
+
+Example: DMZ
+
+
+
