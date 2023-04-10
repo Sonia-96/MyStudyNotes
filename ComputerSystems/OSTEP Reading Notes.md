@@ -10,7 +10,8 @@
    <img src="./assets/image-20230331193831707.png" alt="image-20230331193831707" style="zoom:80%;" />
 
 2. Process vs. Thread:
-   - the address remains the same during context switch (no need to switch page table)
+   - the address remains the same during context switch for threads(no need to switch page table), thus switching between threads is much quicker
+   
 3. Why threads?
    - Parallism: transforming a single-threaded program to run on multiple CPUs. Using a thread per CPU can make the program run faster.
    - Avoid blocking program due to slow I/O
@@ -147,3 +148,108 @@ Condition variables are useful when some kind of signaling take place between th
 3. Never pass a reference to a varaible on a stack
 4. Initialize locks and condition variables
 5. Always use condition variable to signal between threads
+
+# 32 Common Concurrency Problems
+
+## Non-Deadlock Bugs
+
+1. Atomicity Violation
+   - Solution: lock
+2. Order Violation: the desired order between two memory accesses is flipped, i.e., A should always be executed before B, but the order is not enforced during execution.
+   - Solution: condition variables
+
+## Deadlock bugs
+
+### Why do deadlocks occur?
+
+- In large systems, complex dependencies arise between components. We must be very careful to avoid **circular dependencies**.
+
+- Encapsulation: For example, Java's `Vector` is thread-safe. For `v1.addAll(v2`), it acquires locks in arbitrary order for v1 and v2. However, if `v2.addAll(v1)` is called in the same time, a deadlock might happen.
+
+### Conditions for Deadlock
+
+1. Mutual exclusion: Resources cannot be shared
+
+2. Hold-and-wait: A thread is holding some resources but still waiting for some other resources
+
+3. No preemption（非抢占，即不能被抢）: Once a thread gets a resource, it cannot be taken away. 
+
+4. Circular wait: There is a cycle in the threads' dependency graph, e.g., 
+
+![image-20230407144246631](./assets/image-20230407144246631.png)
+
+If any of the above conditions is not satisfied, the deadlock won't happen.
+
+### Prevention
+
+#### Circular Wait
+
+- total ordering
+- partial ordering
+- Tip: If a function need to acquire multiple locks, we can always acquire the lock with the higher/lower address first to avoid deadlocks.
+
+#### Hold-and-wait
+
+Acquire all locks at once (atomatically). For example:
+
+```c++
+lock(prevention);
+lock(L1);
+lock(L2);
+...
+unlock(prevention);
+```
+
+Even other thread tries to first aquire L2 then L1, the deadlock won't happen.
+
+This technique has following disadvantages:
+
+- Must know which locks to acquire in advance. So this is not suitable for encapsulation.
+- May decrease concurrency since we will have a big lock
+
+#### No Preemption
+
+If a thread can't get what it wants, release what it holds. For example,
+
+```c++
+top:
+	lock(A);
+	if (trylock(B) == -1) {
+    unlock(A);
+    goto top;
+  }
+```
+
+This might cause **livelock**. Two threads keep attempting this sequence but repeatedly failing to acquire both locks.
+
+Solution: Exponential backoff.
+
+#### Mutual Exclusion
+
+Use lock-free algorithm. For example, when adding with a lock:
+
+```c++
+void add(int* val, int amt) {
+  mutext_lock(&m);
+  *val += amt;
+  mutext_unlock(&m);
+}
+```
+
+We can make it lock-free by using `CompareAndSwap()`, which is an **atomic instruction** provided by CPU.
+
+```c++
+void add(int* val, int amt) {
+  do {
+    int old = *val;
+  } while (CompareAndSwap(val, old, old + amt) == 0);
+}
+```
+
+#### Deadlock Avoidance via Scheduling
+
+Run threads acquiring the same locks on the same CPU, so they won't run concurrently.
+
+#### Detect and Recover
+
+Allow deadlock occurs occasionally (like once a year) and take some action once such a deadlock has been detected.

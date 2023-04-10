@@ -756,3 +756,69 @@ base and bound -> segmentation -> paging -> multi-level paging
      - each thread has its own Thread Control Block (TCB)
 
    
+
+# 24 Locked Data Structures
+
+## Concurrent Linked List
+
+
+
+## Concurrent Queue
+
+1. Enqueue:
+
+2. Dequeue:
+
+   ```c
+   int dequeue(queue_t *q, int *value){
+     head_m.lock();
+     node_t *tmp = q->head; // q->head is shared among thead, so this line has race condition
+     node_t *new_head = tmp->next;  // tmp points to the head, so this line also has race condition (really?)
+     if (new_head==NULL){
+       head_m.unlock();
+       return -1; 
+     }
+     *value = new_head->value; // race condition
+     q->head = new_head;  // race conditoin
+     head_m.unlock();
+     return 0;
+   }
+   ```
+
+## Concurrent Hash Table
+
+Chaining Hashtable: an array of LinkedList
+
+the concurrent hash table scales better than linked list (because we only need to lock one bucket)
+
+Q: why quadratic probing is slightly better than linear probing? Because the cluseter is smaller?
+
+Extensions:
+
+- merge sort can be thread-safe
+
+# 25 Dead Lock & Concurrency Bugs
+
+1. Atomicity
+   - Q: for the solution, Can different locks work?
+2. Ordering
+   - always use condition variable + lock together
+
+## Deadlock Theory
+
+1. Necessary and sufficient conditions for deadlock:
+
+   - mutual exclusion
+     - lock-free algorithms
+   - hold and wait
+     - acquire all locks once
+     - if thread can't get what it wants, release waht it holds 
+       - disadvantages: may cause livelock 听不懂
+   - no preemption: once a thread gets a resource, it cannot be taken away
+     - supportting preemption: 完全听不懂
+   - circular wait
+
+   We can eliminate deadlock by eliminating any one of these conditions
+
+## 26 Lock-free Data Structures
+
