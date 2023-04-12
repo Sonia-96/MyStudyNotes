@@ -643,3 +643,93 @@ From the top to the bottom, the difficulty to achieve 100% coverage is increasin
 4. generate a pdf file:
    - Install ghostscript interpreter: `brew install ghostscript`
    - Enter `latex` foler: `make pdf`
+
+# 11 Test Generation
+
+## Fuzz Testing
+
+Fuzz testing or fuzzing provides random generated input to a program. And our goal is to make sure that the program won't crash due to these tests.
+
+# 12 Design Patterns
+
+## Singleton Pattern
+
+A class that has only a single instance.
+
+<img src="/Users/sonia/Documents/CSStudy/MyStudyNotes/Software Engineering/assets/image-20230223092113966.png" alt="image-20230223092113966" style="zoom:50%;" />
+
+## Builder Pattern
+
+This part is interesting. I should study this.
+
+## Facade Pattern
+
+## Interpreter Pattern
+
+This part is related to MSDScript project. I should study this.
+
+# 13 Library
+
+1. create all object files
+2. create a library: `ar -ru libmsdscript_library.a expr.o parser.o tests.o cmdline.o`
+3. mv the library to the directory
+4. linke main.cpp with the library: `$(CC) $(CFLAGS) main.cpp -L $(LIB_DIR) -lmsdscript_library -o $@`
+
+
+
+# 14 Smart Pointers
+
+regular expressions:
+
+| Search       | Replace       | Search-reg                 | Replace-reg |
+| ------------ | ------------- | -------------------------- | ----------- |
+| Expr\*/Val\* | PTR(Expr/Val) | ([a-zA-Z]*(Expr\|Val))\*\s | PTR($1)     |
+|              |               |                            |             |
+|              |               |                            |             |
+|              |               |                            |             |
+|              |               |                            |             |
+
+# 15 Profiling
+
+1. Intention:
+2. Types:
+   - instrumentation profiler
+   - Sampling profiler
+3. Profiling tools
+   - manual instrumentation: print, logging calls, checking time
+   - static instrumentation: gprof, instruments/time profiler
+     - the GNU profiler, `gprof`, can determine which parts of a program are taking most of the execution time.
+   - dynamic instrumentation: 
+     - valgrind tools
+   - performance counters: perf
+   - heap profiling: massif, google-perftools
+
+## gprof
+
+1. steps:
+   - compile and link the program with profiling flag: `-pg`
+   - Execute the program to generate a profile data file
+   - run `gprof` to analyze the profiled data
+2. Output:
+   - flat profile
+   - call graph
+
+# 23 Optimization
+
+```assembly
+imul %rcx,%rdx
+xor %eax,%eax
+lea (%rdi,%rdx,8),%rdx
+nop
+movsd (%rsi,%rax,8),%xmm0
+movsd %xmm0,(%rdx,%rax,8)
+add $0x1,%rax
+cmp %rax,%rcx
+jne 401160 <set_row(double*, double*, long, long)+0x10>
+```
+
+1. code motion
+2. strength reduction
+3. Aliasing
+4. sharing common results (Common subexpression elimination)
+5. initialize at compile time
