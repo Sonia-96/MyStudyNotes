@@ -679,12 +679,12 @@ If you are working with bits, it's better to use types like `int8_t`（signed in
    - `x | 0 == x`
    - `x & 1 == x`
    - `x & 0 == 0`
-   - `x ^ 1 == x`
-   - `x ^ 0 == 0`
+   - `x ^ 1 == ~x`
+   - `x ^ 0 == x`
    
 2. **Masking**
 
-   We can use `x ^ 1 == x` and `x ^ 0 == 0` to design a mask, which is used to remove the bits we don't need and remain the bits we want. For the bits you want to use, set the values as 1, otherwise 0. For example: 
+   We can use `x & 1 == x` and `x & 0 == 0` to design a mask, which is used to remove the bits we don't need and remain the bits we want. For the bits you want to use, set the values as 1, otherwise 0. For example: 
 
    ```c++
    uint32_t x = 0xDEADBEEF;
@@ -728,7 +728,7 @@ If you are working with bits, it's better to use types like `int8_t`（signed in
    Endianness referes to the order of the bytes as stored in memory.
 
    - Big-endian (BE): stores the most significant byte at the smallest address and the lease significant byte at the largest address
-   - Little-endian (LE): stores the least significant byte at the smallest address
+   - **n** (LE): stores the least significant byte at the smallest address
      - MAC is little endianness
 
 # 14 Stack And Heap Memory
