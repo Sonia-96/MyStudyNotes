@@ -142,7 +142,7 @@ Solution: zero out the key bytes while the compiler won't ompimize it away (real
 
 Mmap returns zeroed pages
 
-# Meltdown / Spectre
+# 5 Meltdown / Spectre
 
 Knowledge included: page table, virtual memory, caches, kernel, concurrency, CPU Architecture
 
@@ -198,9 +198,9 @@ if (index > array.length) {
 
 Spectre will make bounds check as slow as possible, so it can read out-of-bound memory and copy it into the cache before the program crashes.
 
-# 5 Denial of Service
+# 6 Denial of Service
 
-We've talked about: the ways to make a program to do waht they shouldn't:
+We've talked about: the ways to make a program to do what they shouldn't:
 
 - code injection: use user input as code
 - stack smashing: change control flow
@@ -271,7 +271,7 @@ We've talked about: the ways to make a program to do waht they shouldn't:
    - delay allocation of buffers (SYN Cookie???)
 5. Rate limiting
 
-# 6 Firewalls
+# 7 Firewalls
 
 Firewall: seperate your private entwork from the internet, and forwared some packets and drop other packes.
 
@@ -306,3 +306,122 @@ Example: DMZ
 
 
 
+# 8 Authenication & Access Control
+
+1. 4 ways for authentication
+
+   - Somgthing the user knows: password
+
+   - Something the user has: key card, tokens (CSPRNG),  Phone (ZFA App), email, SMS, private key
+
+     - Cons:
+       - can be stolen
+
+   - Something the user is: face, fingerprint, retina scan (possibly better to consider this as a username than a password)
+
+     - pros: 
+
+       - hard to stolen
+       - nothing to remember
+
+     - cons:
+
+       - ethic issues -- having a database of fingerprints is pretty scary
+       - not revocable
+
+   - Something the user can do: 
+     - gait analysis
+     - Voice prompt: suseptible to "replay" or need a more accurate model. We need to handle false positive (allow access to imposter) and false negative (deny access to user)
+     - signature
+
+2. Mix + match
+   - most common: password + "has"
+   - encrypted private key (?)
+3. Attacks to consider
+   - "client" attacks: password guessing
+     - defense: verification
+   - Denial of Service: 
+     - defense: rate limiting, locking accounts
+   - Reelay ??? 
+   - Host attacks
+4. After Authentication
+   - keep track of user
+     - Unix systems 
+       - use PCB (has user_id). fork - new pid, same user_id
+       - Main control: file permissions
+     - My web server: make a new user for this program and run all processes as that user, then I can limit access via permissions
+   - Access Contro Lists (ACLs)
+     - files can have mutliple owners/groups
+   - Role Bases Access Control
+     - assign permissions to roles, and assign roles to users
+5. Authentication after login
+   - after login, the server gives me a token. I will include it in my all future requests.
+
+# 9 Malware, Intrusioin Detection
+
+1. What attackers want to do: "payload"
+   - Data theft
+   - Inject/falsify data
+   - Encrypt data and ransom it
+   - delete data
+   - Break stuffs controlled by a computer
+   - Establish persistent accesses
+   - Spamming
+
+2. Computer Viruses: attach to some hosts, which are usually files that execute some code when opened, then hosts reproduce the viruses
+   - hosts examples: word doce + VBA macros, PDF with JS in it
+3. Propagation: spam all contacts via email
+   - if I and my friend have many mutual contacts, it will reinfect for many times. To avoid this, the attacker need to mark the contact that has been infected.
+4. Worms
+   - Worms are even more scary than viruses because they are not dependent on the file to be opened. They can run as their own processes.
+   - Morris Worm: 3 exploits on common software
+     - sendmain -> code injection
+     - fingerd (d stands for daemon) -> buffer overflow vulnerability
+     - username/password guessing
+5. WannaCrypt: WannaCry_ransomware_attack
+6. RootKits: 
+   - malware that runs in the kernel, can modify the operation of syscalls (they can use `ps` syscall to hide the process of this malware)
+   - a case: SONY BMG. CDs contained a RootKit modified the windows explorer to hide all files starts with "$sys$", so other malwares can hide themselves by naming start with "$sys$"
+
+7. Who are the attackers?
+
+   - state sponsored group
+   - criminals
+   - political group
+
+8. What are the skills?
+
+   - script kiddies: running published malware code
+
+     - defense: the malware usually is old, so make sure to update the software because they might be already patched
+
+     > 脚本小子（script kiddie）是一个[贬义词](贬义词.html)，用来描述以「[黑客](黑客.html)」自居并沾沾自喜的初学者。脚本小子不像真正的黑客那样发现系统漏洞，他们通常使用别人开发的进程来恶意破坏他人系统。通常的[刻板印象](刻板印象.html)为一位没有专科经验的[少年](少年.html)，破坏无辜网站企图使得他的朋友感到惊讶，因而称之为脚本小子。
+     >
+     > 脚本小子常常从某些网站上复制[脚本](脚本.html)代码，然后到处粘贴，却并不一定明白他们的方法与原理。他们钦慕于黑客的能力与探索精神，但与黑客所不同的是，脚本小子通常只是对计算机系统有基础了解与爱好，但并不注重进程语言、[算法](算法.html)和[数据结构](数据结构.html)的研究，虽然这些对于真正的黑客来说是必须具备的素质。
+
+   - Midrange: can modity existing tools
+
+   - Pros: NSA, NSO
+
+9. Intrusion Lifecycle
+   - Pre-intrusion: should know about:
+     - network reconnaissance
+       - defense: a attacker need to do port scanning to find the server. This traffic is unusual. We can recognize the attacker and block them on this step.
+     - victims' software versions
+     - Info on admins/users info
+   - Intrusion: actually use BO (buffer overflow) + CI (code injection) to gain some accesses
+   - Privilege Escalation
+     - exploits
+     - social engineering
+     - install keylogger
+   - Exploitation
+     - data theft
+     - destruction
+     - surveillance
+   - Maintaining access
+     - turn off software updates
+     - create a user account
+     - steal credentials
+     - install backdoor server
+   - Cover up 掩盖
+     - delete files and logs
