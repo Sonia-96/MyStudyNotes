@@ -797,6 +797,16 @@ Extensions:
 
 - merge sort can be thread-safe
 
+# 24 Locked Data Structures
+
+## Linked List
+
+### Insert
+
+```c++
+
+```
+
 # 25 Dead Lock & Concurrency Bugs
 
 1. Atomicity
@@ -820,5 +830,76 @@ Extensions:
 
    We can eliminate deadlock by eliminating any one of these conditions
 
-## 26 Lock-free Data Structures
+# 26 Lock-free Data Structures
 
+## Stack
+
+1. push
+
+   ```c++
+   void push(Node* in) {
+     do {
+       in->next = head;
+     } while (!CAS(&head, in->next, in));
+   }
+   ```
+
+2. pop
+
+   ```c++
+   Node* pop() {
+     Node* ret;
+     do {
+       ret = head;
+     } while (!CAS(&head, ret, head->next));
+   }
+   ```
+
+## ABA Problem
+
+1. ABA problem
+
+   In lock-free multithreading, if a memory is read twice and has the same value, say A,  for both reads, we would conclude that nothing happens during the interim. However, another thread can execute between 2 reads, change the value to B, do other work, then change the value back to A. This will fool the first thread into assumption that nothing has changed even though the second thread did work that violates that assumption. We call this "ABA problem".
+
+2. Solutions:
+   - ABA counter + **double-length CAS instruction** ( TODO review lecture + code)
+   - Lazy collection: write a garbage collector that doesn't recycle the memory too soon
+   - In practice, a mutext is a more elegant solution for a stack
+
+## Linked List
+
+### Insert
+
+```c++
+void insert(Node* n, Node* p) { // insert n after p
+  do {
+    n->next = p->next;
+    Node* old_next = p->next;
+  } while (&p->next, old_next, n);
+}
+```
+
+### Search
+
+How to write search method?
+
+### ABA problem
+
+Solution: place a 'mark' in the node to be deleted and its next node
+
+# 27 Parallel Programming
+
+1. efficiency computation
+
+## Designing a parallel algorithm
+
+1. Strategy
+   - data or domain decomposition
+   - task decomposition
+   - Synchronization/communication
+   - Limit overhead
+2. Example: MapReduce: sum the values of list nodes
+   - each thread computes a partial sum of the list, the number of nodes if `size / num_threads`
+   - Barrier: condition variable + notify_all
+
+3. openMP Parallel Reductions
