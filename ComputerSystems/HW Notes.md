@@ -92,3 +92,8 @@ mov rdi, 1
 
 2. I/O redirection & pipes: https://homepages.uc.edu/~thomam/Intro_Unix_Text/IO_Redir_Pipes.html
 3. `head -n <N> <filename>`: display top N lines of the file. If `-n <N>` is missed, it will print top 10 lines by default.
+
+# OpenMP
+
+1. run in linux: 
+   - `clang++ -std=c++20 -fopenmp main.cpp ParallelReduction.cpp tests.cpp -o program`

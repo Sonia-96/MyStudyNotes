@@ -26,7 +26,7 @@
    - write or execute: the stack is writable is not executable, so jumping to the shell code will get a seg fault
    - BSD "pledge"
 
-## Low Level Tools
+### Low Level Tools
 
 1. `c++filt __ZNSt3__14coutE`
 2. `otool`
@@ -36,6 +36,10 @@
 3. Lldb
 
 // TODO: read the assembly code, preparing for the lab on Friday. Know how to draw the stack picture. 
+
+### Defense
+
+1. isolation: processes, containers, VMs, Physical Isolation
 
 # 2 Code Injection - SQL
 
@@ -425,3 +429,9 @@ Example: DMZ
      - install backdoor server
    - Cover up 掩盖
      - delete files and logs
+
+# 10 Isolation
+
+感觉这章很重要，有时间要重温这节lecture。
+
+Isolation Spectrum

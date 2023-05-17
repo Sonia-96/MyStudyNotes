@@ -50,8 +50,6 @@ TLS for secure communication in transport layer
 
 The last 2 steps are to prevent Trudy from modifying the first 2 messages to trick server/client into using some broken cypher suites like RC4.
 
-Q: what's Reshma's question and answer?
-
 ### Cypher Suites
 
 TLS let the server and the client to choose cyphers to use for the different parts of the communication. A cypher suite specifies:
