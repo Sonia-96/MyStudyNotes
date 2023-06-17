@@ -238,3 +238,344 @@ WHERE author = "Herbert"
 
 # 6 Relational Algebra
 
+Relational Algebra: algebra that operate on relations 
+
+1. π: projection. No duplicates. Examples: 
+
+   - $π_{Title, Autor} (Titles)$
+   - $π_{Title, Serial} (Titles × Inventory)$
+
+2. σ: selection
+
+   - $σ_{CardNum > 3}(Patrons)$
+   - $π_{Phone}(σ_{CardNum > 3}(Patrons × Phones))$
+
+3. ×: Cartesian product (A x B = the set of all ordered pairs (a,b) where a in A and b in B)
+
+   - R1 × R2 == R2 × R1
+
+4. ∪: set union
+
+   - relations must be **union compatible** (same column types in same order)
+   - duplicates will be removed
+   - R1 ∪ R2 == R2 ∪ R1
+
+5. : set difference
+
+6. ∩: set intersection
+
+   - R1 ∩ R2 = R1  (R1  R2)
+
+7. ρ: rename operation (unary operator - single input)
+
+   - syntax: $ρ_x(E)$
+
+8. /: devision
+
+   > Division operator A**÷**B or A/B can be applied if and only if:
+   >
+   > - Attributes of B is proper subset of Attributes of A.
+   > - The relation returned by division operator will have attributes = (All attributes of A – All Attributes of B)
+   > - The relation returned by division operator will return those tuples from relation A which are associated to every B’s tuple.
+
+# 9 Advanced Queries II
+
+## JOIN
+
+1. Self-join
+
+   ```sql
+   -- find all students share the same phonenumbers --
+   SELECT *
+   FROM Phones a
+   INNER JOIN Phones b
+   	ON a.Phone = b.Phone AND a.CardNum != b.CardNum;
+   ```
+
+2. Join
+
+   - `INNER JOIN`: We can use either `JOIN ... ON...` or `JOIN ... WHERE ...`
+
+     - `JOIN`, `INNER JOIN`, `,` are all inner join (but for `,` we can only use `JOIN ... WHERE ...`)
+
+       ```sql
+       SELECT * FROM 
+       Phones p1, Phones p2
+       WHERE p1.CardNum != p2.CardNum AND p1.Phone = p2.Phone;
+       ```
+
+   - OUTER JOIN: `LEFT/RIGHT [OUTER] JOIN` -- must use `ON` clause!!
+
+     - Shortcut: if the column names are the same, you can use `NATURAL LEFT/RIGHT JOIN`, so you don't need to use `ON` clause
+
+   ![img](./assets/FYwNJ.png)
+
+## NULL
+
+1. `NULL` doesn't have **reflexive property** (a number always equals to itself), which means `NULL != NULL`
+
+2. Different from programming languages, SQL supports 3 logic values: `TRUE`, `FALSE`, `NULL`. And `NULL` means unknown.  
+
+   - Boolean Operators on `NULL` always return NULL!!!
+
+     ```sql
+     5 = NULL // NULL
+     NULL = NULL // NULL
+     ```
+
+3. Use `IS [NOT]` for `NULL`:
+
+     - `WHERE CardNum != NULL` // wrong
+
+       - `SELECT * FROM Patrons NATURAL LEFT JOIN CheckedOut WHERE Serial != NULL;` will return an empty set
+       
+     - `WHERE CardNum IS NOT NULL` // right
+
+       - ```sql
+         mysql > SELECT * FROM Patrons NATURAL LEFT JOIN CheckedOut WHERE Serial IS NOT NULL;
+         +---------+------+--------+
+         | CardNum | Name | Serial |
+         +---------+------+--------+
+         |       1 | Joe  |   1001 |
+         |       1 | Joe  |   1004 |
+         |       4 | Dan  |   1005 |
+         |       4 | Dan  |   1006 |
+         +---------+------+--------+
+         4 rows in set (0.10 sec)
+         ```
+
+
+## Nested Query as Condition
+
+1.  `ANY`/`ALL`: compare between a single column value with a range of other values
+
+   - `ANY`: returns true if the operation is true for **any** of the values in the range. For exampe, find any students who have ever get an "A"
+
+     ```sql
+     SELECT Name
+     FROM Students
+     WHERE sID = ANY (
+     	SELECT sID
+       FROM Enroll
+       WHERE grade = 'A'
+     );
+     ```
+     
+   - `ALL`: returns true if the operation is true for **all** of the values in the range. For example, find students who are younger than all the students enrolled in "Databases"
+   
+     ```sql
+     SELECT s.Name, s.DOB
+     FROM Students s
+     WHERE s.DOB > ALL (
+     	SELECT DOB
+       FROM Enroll e
+       NATURAL JOIN Courses c
+       NATURAL JOIN Students
+       WHERE c.Name = 'Databases'
+     );
+     ```
+
+
+2. 
+     EXISTS: 
+     - syntax: 
+       
+       - `EXISTS`: returns TRUE if the subquery returns one or more records
+       
+       - `NOT EXISTS`: select TRUE if the subquery returns no record
+       
+         ```sql
+         select x from y where
+         [NOT] EXISTS
+         (select ...);
+         ```
+       
+       - Note, the `EXISTS` clause in SQL operates on a **row-by-row** basis. It evaluates the subquery for each row in the outer query individually.
+       
+     - Examples:
+       
+       - select students who are enrolled in Databases courses:
+       
+         ```sql
+         SELECT sid, name, grade
+         FROM enroll e
+         NATURAL JOIN students s
+         WHERE EXISTS (
+         	SELECT sid
+           FROM courses c
+           WHERE c.name = 'Databases' AND c.cid = e.cid
+         )
+         ```
+       
+         result:
+       
+         ```sql
+         +-----+----------+-------+
+         | sid | name     | grade |
+         +-----+----------+-------+
+         |   1 | Hermione | A     |
+         |   2 | Harry    | B     |
+         +-----+----------+-------+
+         ```
+       
+         Note, you must use `c.cid = e.cid` to **correlate** the inner query to the outer query. (we call this **correlated subquery**)
+       
+       - In comparison, the following query will return every sid because the inner query returns TRUE to every row in outer query.
+       
+         ```sql
+         SELECT sid, name
+         FROM students
+         WHERE EXISTS (
+         	SELECT sid
+           FROM enroll
+           NATURAL JOIN courses c
+           WHERE c.name = 'Databases'
+         );
+         ```
+       
+       - SELECT students id, name, course name, and grade who are not enrolled in "Databases"
+       
+         ```sql
+         SELECT e.sid, s.name, cc.name, e.grade
+         FROM enroll e
+         NATURAL JOIN courses cc
+         JOIN students s
+         	ON e.sid = s.sid
+         WHERE NOT EXISTS (
+         	SELECT s.sid
+           FROM courses c
+           WHERE c.name = 'Databases' AND c.cid = e.cid
+         )
+         ```
+
+## Practice
+
+1. CREATE tables and insert data:
+
+   ```sql
+   CREATE TABLE students (
+     sid INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
+     name VARCHAR(100) NOT NULL,
+     DOB SMALLINT NOT NULL
+   );
+   
+   CREATE TABLE courses (
+     cid INT UNSIGNED NOT NULL PRIMARY KEY,
+     name VARCHAR(100) NOT NULL
+   );
+   
+   CREATE TABLE enroll (
+     sid INT NOT NULL,
+     cid INT UNSIGNED NOT NULL,
+     grade ENUM('A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E', 'X', 'WF', 'EW', 'EU', 'F'),
+     PRIMARY KEY (sid, cid),
+     CONSTRAINT FK_student_id FOREIGN KEY (sid) REFERENCES students(sid),
+     CONSTRAINT FK_class_id FOREIGN KEY (cid) REFERENCES courses(cid)
+   );
+   
+   INSERT INTO students (Name, DOB) VALUES ('Hermione', 1980), ('Harry', 1979), ('Ron', 1980), ('Malfoy', 1982); 
+   
+   INSERT INTO courses (cID, name) VALUES 
+   (3500, 'SW Practice'),
+   (3810, 'Architecture'),
+   (5530, 'Databases');
+   
+   INSERT INTO enroll (sID, cID, grade) VALUES 
+   (1, 3500, 'A'),
+   (1, 3810, 'A-'),
+   (1, 5530, 'A'),
+   (2, 3810, 'A'),
+   (2, 5530, 'B'),
+   (3, 3500, 'C'),
+   (3, 3810, 'B'),
+   (4, 3500, 'C');
+   ```
+
+2. Find Names of Patrons who have not checked out a book. Use outer join. [Exclusive left join!]
+
+   ```sql
+   SELECT Name
+   FROM Patrons
+   NATURAL LEFT JOIN CheckedOut
+   WHERE Serial IS NULL;
+   ```
+
+
+3. Find students who are not enrolled in databases
+
+   ```sql
+   SELECT sID, Name
+   FROM Students
+   WHERE sID NOT IN (
+   	SELECT sID
+     FROM Enrolled
+     NATURAL INNER JOIN Courses
+     WHERE Name="Databases"
+   );
+   ```
+
+3. Find all students younger than *everyone* taking Databases
+
+   ```sql
+   SELECT name, DOB
+   FROM students
+   WHERE DOB > ALL (
+   	SELECT DOB
+     FROM students
+     NATURAL INNER JOIN enroll e
+     INNER JOIN courses c
+     	ON e.cid = c.cid
+     WHERE c.name = 'Databases'
+   );
+   ```
+
+3. Find students who take every courses:
+
+   ```sql
+   SELECT s.name
+   FROM students s
+   WHERE NOT EXISTS (
+   	SELECT c.cid
+   	FROM courses c
+   	WHERE NOT EXISTS (
+   		SELECT e.cID
+   		FROM enroll e
+   		WHERE e.cID = c.cID AND e.sID = s.sID
+   	)
+   );
+   
+   ```
+
+3. Find students who doesn't take every course:
+
+   ```sql
+   SELECT s.name
+   FROM students s
+   WHERE EXISTS (
+   	SELECT c.cid
+   	FROM courses c
+   	WHERE NOT EXISTS (
+   		SELECT e.cID
+   		FROM enroll e
+   		WHERE e.cID = c.cID AND e.sID = s.sID
+   	)
+   );
+   
+   ```
+
+3. Find students who take all the courses that the student with a sid 2 takes
+
+   ```sql
+   SELECT s.sid, s.name
+   FROM students s 
+   WHERE s.sid != 2 AND NOT EXISTS (
+   	SELECT e1.cid
+     FROM enroll e1
+     WHERE e1.sid = 2 AND NOT EXISTS (
+     	SELECT e2.cid
+       FROM enroll e2
+       WHERE e2.sid = s.sid AND e2.cid = e1.cid
+     )
+   );
+   ```
+
