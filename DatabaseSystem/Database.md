@@ -77,6 +77,10 @@ Keys uniquely identify each tuple.
 2. login to CADE: `ssh u1428723@lab1-17.eng.utah.edu`
 3. run mysql: `mysql -h cs-db -u u1428723 -p`; enter the password
 
+OR:
+
+1. `mysql -h cs-db.eng.utah.edu -u <uid> -p` (don't need to use UConnect)
+
 # 3 Entity-Relationship (ER) Model
 
 1. Entity & Relationship
@@ -101,9 +105,9 @@ Practice: Lecture3 slides 27
 
 # 4 SQL Tables
 
-## SQL Data Types
+## Data Types
 
-1. number:
+1. Numeric:
 
      - TINYINT: 1
 
@@ -188,54 +192,90 @@ Practice: Lecture3 slides 27
 
 1. DBMS vs. Query Language
    - SQL: language
-     - SQK=L implementations: MySQL, PostgreSQL, SQL Server, ...
+     - SQL implementations: MySQL, PostgreSQL, SQL Server, ...
    - DBMS (Database Management System): implementation
 2. SQL is a combination of DDL (Data Definition Language) and DML (Data Manipulation Language)
 
 ### DDL
 
-1. Create Tables
+#### Create Tables
 
-   ```mysql
-   create table <name> (
-     <column1Name> <type> <properties>,
-     <column2Name> <type> <properties>,
-     ...
-     <table properties>
-   );
+1. Syntax: 
+
+   ```sql
+   CREATE TABLE <name> (
+      <column1Name> <type> <properties>,
+      <column2Name> <type> <properties>,
+      ...
+      <table properties>
+    );
    ```
 
-   - `SHOW CREATE TABLE <table_name>`
-     - `CHARSET=utf8mb4`: ??? one character is 4 bytes
+2. Column constraints:
 
-2. Drop Tables
+     - NOT NULL | UNIQUE | PRIMARY KEY |FOREIGN KEY | AUTO_INCREMENT
+     - CHECK (expression)
+     - REFERENCES refutable (column) ON UPDATE action ON DELETE action
+     - Give constraint a name: `CONSTRAINT <constraint_name> <constraint>`
+     
+       ```sql
+       CREATE TABLE assignment_categories (
+         id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+         class_id INT UNSIGNED NOT NULL,
+         name VARCHAR(100) NOT NULL,
+         weight SMALLINT UNSIGNED NOT NULL,
+         CONSTRAINT unique_name_class_id UNIQUE (name, class_id),
+         CONSTRAINT check_weight_range CHECK (weight >= 0 AND weight <= 100),
+         CONSTRAINT FK_class_id_2 FOREIGN KEY (class_id) REFERENCES classes(id) 
+         	ON UPDATE CASCADE ON DELETE CASCADE
+       );
+       ```
 
-3. Alter Tables
+#### Drop Tables
 
-   ```mysql
-   ALTER TABLE titles
-   ADD COLUMN pubDate date
-   DROP COLUMN pubDate;
-   ```
+```sql
+DROP TABLE <table_name>
+```
 
-4. Column constraints
+#### Alter Tables
 
-   - NOT NULL | UNIQUE | PRIMARY KEY | AUTO_INCREMENT
-   - CHECK (expression): ???
-   - NULL: ???
-   - REFERENCES regtable (ref column)
-   - ON DELETE action | ON UPDATE action
-     - actions:
-       - RESTRICT (default)
-       - CASCADE
-       - SET NULL
-       - SET DEFAULT: set to column's default value
+add, delete or modify columns in an existing table
 
-5. table properties:
-   - UNIQUE (col1, col2, ...)
-   - PRIMARY KEY (col)
-   - FOREIGN KEY :TODO 完整整个property
-6. Give constraint a name: `CONSTRAINT <constraint_name> <constraint>`
+- add columns:
+
+  ```sql
+  ALTER TABLE titles
+  ADD COLUMN pub_date DATE;
+  ```
+
+- drop columns:
+
+  ```sql
+  ALTER TABLE titles
+  DROP COLUMN pub_date;
+  ```
+
+- rename columns:
+
+  ```sql
+  ALTER TABLE <table>
+  RENAME COLUMN <old_name> TO <new_name>;
+  ```
+
+- modify column datatypes:
+
+  ```sql
+  ALTER TABLE Inventory
+  MODIFY COLUMN Serial INT UNSIGNED;
+  ```
+
+- add a foreign key:
+
+  ```sql
+  ALTER TABLE Phones
+  ADD FOREIGN KEY CardNum 
+  REFERENCES Patrons(CardNum);
+  ```
 
 ### DML
 
@@ -249,21 +289,9 @@ FROM relation-list
 [LIMIT number]
 ```
 
-##### JOIN
-
-1. natural join: join two tables on the columns (must have the same name) they have in common
-2. Inner join
-3. Outer join
-4. left join
-5. right join
-
-Q: use `where` or `on` on join. I think use where is not efficient. Why nabil prefer to use where?
-
-TODO: How to improve SQL query efficiency? 
-
 #### INSERT
 
-1. Insert into every column in order, you don't need to specify column names:
+1. Insert into every column **in order**, you don't need to specify column names:
 
    ```mysql
    INSERT INTO Titles 
@@ -284,6 +312,16 @@ TODO: How to improve SQL query efficiency?
 DELETE FROM Titles
 WHERE author = "Herbert"
 ```
+
+#### UPDATE
+
+```sql
+UPDATE Titles
+SET Title = 'Dune', ISBN = 1003
+WHERE ISBN = '978-0441172719';
+```
+
+Be careful when updating records. If you omit the `WHERE` clause, **ALL** records will be updated!
 
 # 6 Relational Algebra
 
@@ -343,10 +381,12 @@ Relational Algebra: algebra that operate on relations
 
 2. Join
 
+   - `NATURAL JOIN`: join two tables on the columns (must have the same name) they have in common
+
    - `INNER JOIN`: We can use either `JOIN ... ON...` or `JOIN ... WHERE ...`
 
      - `JOIN`, `INNER JOIN`, `,` are all inner join (but for `,` we can only use `JOIN ... WHERE ...`)
-
+   
        ```sql
        SELECT * FROM 
        Phones p1, Phones p2
@@ -356,7 +396,7 @@ Relational Algebra: algebra that operate on relations
    - OUTER JOIN: `LEFT/RIGHT [OUTER] JOIN` -- must use `ON` clause!!
 
      - Shortcut: if the column names are the same, you can use `NATURAL LEFT/RIGHT JOIN`, so you don't need to use `ON` clause
-
+   
    ![img](./assets/FYwNJ.png)
 
 ## NULL
