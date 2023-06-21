@@ -61,6 +61,7 @@ Keys uniquely identify each tuple.
    - a superkey may not be a key
 4. **Primary Key & Candidate Key:** If there are more than one keys in a schema, DBA should specify one key as a primary key, then the other keys are candidate keys.
    - specify primary key in SQL:`PRIMARY KEY (id)`
+     - primary key should be simple, int preferred
    - specify candidate keys in SQL: `UNIQUE (name)`
 5. **Referential Integrity**: Reference between values should always be valid. (When you delete a record in a table, then the referential to this record are all invalid ) 
 6. **Foreign Key**: a Primary Key in another table
@@ -79,72 +80,100 @@ Keys uniquely identify each tuple.
 # 3 Entity-Relationship (ER) Model
 
 1. Entity & Relationship
-   - Entity: entity is a definable thing or concept within a system, like a person, object (e.g. invoice), concept (e.g. Profile) or event (e.g. transactions).
+   - Entity: entity is a definable thing or concept within a system, like a student
+   - **Entity Set**: a set of entities, e.g., all students
+   - Relationship: how two entities are linked
+2. **Weak Entity** (use double square to represent): In a relational database, a weak entity is an entity that cannot be uniquely identified by its own attributes alone. Therefore, it must use foreign keys in conjuction with its attributes to create a primary key. 
+   - Partial Keys: the fields in the key except for the foreign keys are called partial keys. For example, a class must belongs to a course, so a class is a weak entity. `course_id, semester` is the key of class, then `semester` is the partial key.
 
-Q: what is cardinallity in relationship in ER Model?
+   - Non-supporting relationship (use double diamond): 
+     - must be 1-to-many
+     - use at least a key from the entity it links to
+3. **Cardinality**: In the relationship in ER model, cardinality refers to the maximum number of times an instance in one entity can relate to instances of another entity, e.g., 1-to-1, 1-to-many, many-to-many.
+4. bold line / a double line indicates all entities in the set must participate in the relationship
+5. ER to Relational Model Algorithm
+   - 1-to-M: merge relationship table to "many" side
+   - 1-to-1: merge relationship to one side. If the participation of one side is required, use that side and set the column to be `NOT NULL`
+   - M-to-M: need a seperate table for relationship
+   <img src="./assets/image-20230621154654823.png" alt="image-20230621154654823" style="zoom:67%;" />
 
-Cardinality refers to **the maximum number of times an instance in one entity can relate to instances of another entity**.
-
-bold line / a double line indicates all entities in the set must participate in the relationship
+Practice: Lecture3 slides 27
 
 # 4 SQL Tables
 
-1. **Weak Entity**: In a relational database, a weak entity is an entity that cannot be uniquely identified by its own attributes alone. Therefore, it must use foreign keys in conjuction with its attributes to create a primary key. The foreign key is typically a primary key of the entity it is related to. 
-2. Q: what is partial key?
+## SQL Data Types
 
-How to set default value of a field?
+1. number:
 
-alter table?
+     - TINYINT: 1
 
-Data types
+     - SMALLINT: 2
 
-- number:
+     - MEDIUMINT: 3
 
-  - TINYINT: 1
-  - SMALLINT: 2
-  - MEDIUMINT: 3
-  - INT: 4
-  - BIGINT: 8
-  - UNSIGNED
+     - INT: 4
 
-- string:
-  - VARCHAR (N): 
-    - pick N: n bytes + 1 / 2 bytes for size
-      - ASCII: size = 1
+     - BIGINT: 8
 
-      - LATIN: size = 2
+     - **UNSIGNED**
 
-- blob (???)
 
-install mysql on MAC
+2. Dates
+   - TIME
+   - DATE
+   - DATETIME
+   - TIMESTAMP
+3. string:
+     - VARCHAR (N): up to N characters
+       - pick N: n bytes + 1 / 2 bytes for size
+         - ASCII (<=255) : size = 1
 
-## Foreign Keys
+         - LATIN (>255) : size = 2
+     - CHAR(N): exact N characters
+4. Blobs (Binary Large Objects): a binary string of variable length, generally used to store large files like images, audios, and videos
+5. Enums
 
-```sql
-FOREIGN KEY (<column>) REFERENCES <table>(<table’s key>)
-ON DELETE <action>
-ON UPDATE <action>
-```
+## Properties
 
-`<action>` can be:
+1. Columns properties:
 
-- RESTRICT(default): disallow the change
-- CASCADE: also delete/update in child table
-- SET NULL
-- SET DEFAULT
+   - NOT NULL
+   - PRIMARY KEY
+   - AUTO_INCREMENT
 
-for example:
+2. Table properties:
 
-```sql
-FORREIGN KEY (ISBN) REFERECENS Titles(ISBN)
-ON UPDATE CASCADE
-```
+   - PRIMARY KEY (col1, col2, ...)
+   - FOREIGN KEY (col1) REFERECES table (col)
+   - UNIQUE (col1, col2, ...)
 
-In this case, if an ISBN also appears in the child table, the record won't be allowed to be deleted.
+3. Foreign Keys
 
-## Algorithm
+   - Syntax: 
 
-TODO
+     ```sql
+     FOREIGN KEY (<column>) REFERENCES <table>(<table’s key>)
+     ON DELETE <action>
+     ON UPDATE <action>
+     ```
+
+   - `<action>` can be:
+
+     - RESTRICT (**default**): disallow the change
+     - CASCADE: also delete/update in child table
+     - SET NULL: nullify the key in child table
+     - SET DEFAULT: set to column's default value
+
+   - for example:
+
+     ```sql
+     FORREIGN KEY (ISBN) REFERECENS Titles(ISBN)
+     ON UPDATE CASCADE ON DELETE RESTRICT
+     ```
+
+     In this case, if an ISBN also appears in the child table, the record won't be allowed to be deleted.
+
+4. Set default values for a column: `date DATE DEFAULT CURDATE()`
 
 # 5 Intro to SQL
 
