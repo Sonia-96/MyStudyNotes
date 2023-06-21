@@ -29,26 +29,46 @@ Passcode: 657611
    - Database Management System (DBMS): underlying machinery
    - Query Language: common interface
 2. Relational Database: store structured data
+   - each row is a tuple and must be unique
+3. Basic Design goals:
+   - Don't store lists /arrays
+   - Build compound information by referencing other tables
+   - Enable powerful reasoning about data and relationships, cleaner design
+   - Enable DBMS to optimize
 
 # 2 Relational Database
 
 ## Terms
 
-1. Schema: a schema is a set of attributes, which specifies the structure and rules of a table
-2. Attribute: a name and a type (column heading)
-3. Instance: the values in a table, which are a set of tuples
-4. Tuple: one row
-5. Relation: a schema + instance
-6. Key: a key uniquely identify each tuple
-   - :star: a set of fields is a key if:
-     - it's a superkey
-     - None of its proper subset is a superkey
-7. Superkey: a set of fields is a superkey if no two rows have the same values in those fields
-8. Primary Key & Candidate Key: If there are more than one keys in a schema, DBA should specify one key as a primary key, then the other keys are candidate keys.
+1. **Schema**: a schema is a set of attributes (name + type), which specifies the structure and rules of a table
+   - schema doesn't specify any values!
+2. **Attribute**: a name and a type (column heading)
+3. **Instance**: the values in a table, which are a set of tuples
+4. **Tuple**: one row
+5. **Relation (a.k.a. table)**: a schema + instance
 
-9. **Referential Integrity**: Reference between values should always be valid. (When you delete a record in a table, then the referential to this record are all invalid ) 
+## Keys
 
-   > In the context of [relational databases](https://en.wikipedia.org/wiki/Relational_database), it requires that if a value of one attribute (column) of a [relation](https://en.wikipedia.org/wiki/Relation_(database)) (table) references a value of another attribute (either in the same or a different relation), then the referenced value must exist. (from Wikipedia)
+Keys uniquely identify each tuple.
+
+1. **Superkey**: a set of fields is a superkey if no two rows have the same values in those fields
+2. **Key**: a key is a **minimal** set of fields to uniquely identify rows. A set of fields is a key if:
+   - it's a superkey
+   - None of its **proper subset** is a superkey
+     - Proper subset: A proper subset of a set A is a subset of A that is not equal to A.
+3. superkey vs. key:
+   - a key must be a superkey
+   - a superkey may not be a key
+4. **Primary Key & Candidate Key:** If there are more than one keys in a schema, DBA should specify one key as a primary key, then the other keys are candidate keys.
+   - specify primary key in SQL:`PRIMARY KEY (id)`
+   - specify candidate keys in SQL: `UNIQUE (name)`
+5. **Referential Integrity**: Reference between values should always be valid. (When you delete a record in a table, then the referential to this record are all invalid ) 
+6. **Foreign Key**: a Primary Key in another table
+   - `FOREIGN KEY (sid) REFERENCES students(id) ON UPDATE CASCADE ON DELETE CASCADE`
+   - If the referenced key is deleted, there are three options to do in the referencing table
+     - delete corresponding records
+     - Nullify the foreign key (bad design!)
+     - disallow the change to the referenced table
 
 ## Using CADE MySQL
 
@@ -278,7 +298,7 @@ Relational Algebra: algebra that operate on relations
    > - The relation returned by division operator will have attributes = (All attributes of A – All Attributes of B)
    > - The relation returned by division operator will return those tuples from relation A which are associated to every B’s tuple.
 
-# 9 Advanced Queries II
+# 9 Advanced Queries II: EXISTS
 
 ## JOIN
 
@@ -579,3 +599,193 @@ Relational Algebra: algebra that operate on relations
    );
    ```
 
+8. Find course numbers of each student. This course number should be bigger than the the average course number of that student are enrolled.
+
+   ```sql
+   SELECT e1.sid, e1.cid
+   FROM enroll e1
+   WHERE e1.cid > (
+   	SELECT AVG(e2.cid)
+     FROM enroll e2
+     WHERE e1.sid = e2.sid
+   );
+   ```
+
+# 10 Advanced Queries III
+
+1. regrex
+
+   - `%`: 0 or more arbitrary chars
+     - `LIKE '%star'`: ends with star
+     - `LIKE  star%`: starts with star
+     - `LIKE %star%`: contains star
+   - `_`: any 1 char
+
+2. aggregate functions + GROUP BY
+
+   - COUNT() -- no spaces between the function name and the parenthese!
+
+     ```sql
+     -- COUNT the number of courses each student enroll
+     SELECT name, COUNT(cid) AS num_courses
+     FROM students
+     NATURAL LEFT JOIN enroll
+     GROUP BY name;
+     ```
+
+     Note, don't use `COUNT(*)`, of if a student doesn't enroll any course, their num_courses will be 1!
+
+   - MAX
+
+   - MIN
+
+   - AVG
+
+   - SUM
+
+3. WHERE vs. HAVING
+
+   - `WHERE`: used before `GROUP BY` to filter rows
+
+   - `HAVING`: used after `GROUP BY` to filter groups
+
+   - e.g., Find students with 2 or more courses earning an A
+
+     ```sql
+     SELECT sid, COUNT(*) as num_courses
+     FROM enroll
+     WHERE grade = 'A'
+     GROUP BY sid
+     HAVING num_courses >= 2;
+     ```
+
+4. CASE
+
+   ```sql
+   SELECT
+     CASE
+       WHEN grade = 'A' THEN 'Superior'
+       WHEN grade = 'B' THEN 'Good'
+       WHEN grade = 'C' THEN 'Adequate'
+       ELSE 'Poor'
+     END AS remarks
+   FROM enroll;
+   ```
+
+5. dynamic delete
+
+   - use IN and WHERE:
+
+     ```sql
+     -- delte all students who once got an A
+     DELETE FROM students
+     WHERE sid IN (
+     	SELECT sid
+       FROM enroll WHERE grade = 'A'
+     )
+     ```
+
+   - use JOIN
+
+     ```sql
+     -- delete all enroll records of "Databases"
+     DELETE t1
+     FROM enroll t1
+     JOIN courses t2
+     	ON t1.cid = t2.cid
+     WHERE t2.name = "Databases";
+     ```
+
+6. dynamic insert:
+
+   - `INSERT IGNORE`: turn errors into warning
+
+## Practice
+
+1. Find number of students in each course
+
+   ```sql
+   SELECT cid, name, COUNT(cid) AS num_students
+   FROM enroll
+   NATURAL LEFT JOIN courses
+   GROUP BY cid;
+   ```
+
+2. Find number of courses for each student
+
+   ```sql
+   SELECT sid, name, COUNT(sid) AS num_courses
+   FROM enroll
+   NATURAL LEFT JOIN students
+   GROUP BY sid;
+   ```
+
+3. Find the Name of the cheapest item from each Dept
+
+   ```sql
+   SELECT a.name, price, a.dept
+   FROM items a
+   INNER JOIN (
+   	SELECT dept, MIN(price) AS min_price
+     FROM items
+     GROUP BY dept
+   ) b
+   ON a.dept = b.dept AND a.price = b.min_price;
+   ```
+
+4. **Find the name of the oldest student in each course**
+
+   ```sql
+   SELECT e.cid, e.sid, name, s.DOB
+   FROM enroll e
+   NATURAL JOIN students s
+   INNER JOIN (
+     SELECT cid, MAX(DOB) AS max_dob
+     FROM enroll
+     NATURAL JOIN students
+     GROUP BY cid
+   ) eldest
+   ON e.cid = eldest.cid AND s.DOB = max_dob;
+   ```
+
+5. Find the average number of students per major
+
+   ```sql
+   SELECT AVG(num_students)
+   FROM (
+     SELECT major, COUNT(*) AS num_students
+     FROM students
+     GROUP By major
+   ) a
+   ```
+
+   or:
+
+   ```sql
+   SELECT COUNT(*) / COUNT(DISTINCT major)
+   FROM students;
+   ```
+
+6. Find age in years of all students
+
+   ```sql
+   SELECT name, TIMESTAMDIFFERENCE(YEAR, MAKEDATE(DOB, 1), CURDATE()) AS age
+   FROM students;
+   ```
+
+7. Write a query to checkout “The Lorax” for “Joe”
+
+   ```sql
+   INSERT INTO CheckedOut (CardNum, Serial) 
+   VALUES (
+     SELECT CardNum FROM Patrons WHERE Name = "Joe",
+     SELECT Serial FROM Inventory 
+     NATURAL JOIN Titles
+     WHERE Title = "The Lorax" AND Serial NOT IN (
+     	SELECT Serial FROm CheckedOut
+     )
+     LIMIT 1
+   )
+   ```
+
+   
