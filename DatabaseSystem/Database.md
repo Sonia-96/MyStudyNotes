@@ -466,30 +466,32 @@ Relational Algebra: algebra that operate on relations
    ```sql
    -- find all students share the same phonenumbers --
    SELECT *
-   FROM Phones a
-   INNER JOIN Phones b
-   	ON a.Phone = b.Phone AND a.CardNum != b.CardNum;
+   FROM Phones p1
+   INNER JOIN Phones p2
+   	ON p1.Phone = p2.Phone AND p1.CardNum != p2.CardNum;
    ```
 
-2. Join
-
-   - `NATURAL JOIN`: join two tables on the columns (must have the same name) they have in common
+2. Inner Join vs. Outer Join
 
    - `INNER JOIN`: We can use either `JOIN ... ON...` or `JOIN ... WHERE ...`
 
      - `JOIN`, `INNER JOIN`, `,` are all inner join (but for `,` we can only use `JOIN ... WHERE ...`)
-   
+
        ```sql
        SELECT * FROM 
        Phones p1, Phones p2
        WHERE p1.CardNum != p2.CardNum AND p1.Phone = p2.Phone;
        ```
 
-   - OUTER JOIN: `LEFT/RIGHT [OUTER] JOIN` -- must use `ON` clause!!
+   - `OUTER JOIN`: `LEFT/RIGHT [OUTER] JOIN` -- must use `ON` clause!!
 
-     - Shortcut: if the column names are the same, you can use `NATURAL LEFT/RIGHT JOIN`, so you don't need to use `ON` clause
+     - Shortcut: if the column names are the same, you can use `NATURAL LEFT/RIGHT JOIN`, then you don't need to use `ON` clause
+
+   - `NATURAL JOIN`: join two tables on the columns (must have the same name) they have in common
    
-   ![img](./assets/FYwNJ.png)
+     - `NATURAL JOIN` is INNER JOIN, but `NATURAL LEFT JOIN` is `LEFT JOIN`
+   
+   ![img](./assets/FYwNJ.png)		
 
 ## NULL
 
@@ -500,15 +502,19 @@ Relational Algebra: algebra that operate on relations
    - Boolean Operators on `NULL` always return NULL!!!
 
      ```sql
-     5 = NULL // NULL
-     NULL = NULL // NULL
+     5 = NULL -- NULL
+     5 != NULL -- NULL
+     NULL = NULL -- NULL
+     NULL != NULL -- NULL
      ```
 
-3. Use `IS [NOT]` for `NULL`:
+3. If NULL is used where a Boolean is expected, interpreted as FALSE
+
+4. Use `IS [NOT]` for `NULL`:
 
      - `WHERE CardNum != NULL` // wrong
 
-       - `SELECT * FROM Patrons NATURAL LEFT JOIN CheckedOut WHERE Serial != NULL;` will return an empty set
+       - For example, `SELECT * FROM Patrons NATURAL LEFT JOIN CheckedOut WHERE Serial != NULL;` will return an empty set
        
      - `WHERE CardNum IS NOT NULL` // right
 
@@ -545,14 +551,15 @@ Relational Algebra: algebra that operate on relations
    - `ALL`: returns true if the operation is true for **all** of the values in the range. For example, find students who are younger than all the students enrolled in "Databases"
    
      ```sql
-     SELECT s.Name, s.DOB
-     FROM Students s
-     WHERE s.DOB > ALL (
+     SELECT name, DOB
+     FROM students
+     WHERE DOB > ALL (
      	SELECT DOB
-       FROM Enroll e
-       NATURAL JOIN Courses c
-       NATURAL JOIN Students
-       WHERE c.Name = 'Databases'
+       FROM students
+       NATURAL JOIN enroll e
+       INNER JOIN courses c
+       	ON e.cid = c.cid
+       WHERE c.name = 'Databases'
      );
      ```
 
@@ -563,7 +570,7 @@ Relational Algebra: algebra that operate on relations
        
        - `EXISTS`: returns TRUE if the subquery returns one or more records
        
-       - `NOT EXISTS`: select TRUE if the subquery returns no record
+       - `NOT EXISTS`: returns TRUE if the subquery returns no record
        
          ```sql
          select x from y where
@@ -601,7 +608,7 @@ Relational Algebra: algebra that operate on relations
        
          Note, you must use `c.cid = e.cid` to **correlate** the inner query to the outer query. (we call this **correlated subquery**)
        
-       - In comparison, the following query will return every sid because the inner query returns TRUE to every row in outer query.
+       - In comparison, the following query will return every sid in students because the inner query returns TRUE to every row in outer query.
        
          ```sql
          SELECT sid, name
@@ -626,7 +633,7 @@ Relational Algebra: algebra that operate on relations
          	SELECT s.sid
            FROM courses c
            WHERE c.name = 'Databases' AND c.cid = e.cid
-         )
+         );
          ```
 
 ## Practice
@@ -634,6 +641,10 @@ Relational Algebra: algebra that operate on relations
 1. CREATE tables and insert data:
 
    ```sql
+   DROP TABLE IF EXISTS enroll;
+   DROP TABLE IF EXISTS students;
+   DROP TABLE IF EXISTS courses;
+   
    CREATE TABLE students (
      sid INT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
      name VARCHAR(100) NOT NULL,
@@ -646,7 +657,7 @@ Relational Algebra: algebra that operate on relations
    );
    
    CREATE TABLE enroll (
-     sid INT NOT NULL,
+     sid INT UNSIGNED NOT NULL,
      cid INT UNSIGNED NOT NULL,
      grade ENUM('A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E', 'X', 'WF', 'EW', 'EU', 'F'),
      PRIMARY KEY (sid, cid),
@@ -654,7 +665,8 @@ Relational Algebra: algebra that operate on relations
      CONSTRAINT FK_class_id FOREIGN KEY (cid) REFERENCES courses(cid)
    );
    
-   INSERT INTO students (Name, DOB) VALUES ('Hermione', 1980), ('Harry', 1979), ('Ron', 1980), ('Malfoy', 1982); 
+   INSERT INTO students (Name, DOB) VALUES 
+   ('Hermione', 1980), ('Harry', 1979), ('Ron', 1980), ('Malfoy', 1982); 
    
    INSERT INTO courses (cID, name) VALUES 
    (3500, 'SW Practice'),
@@ -695,7 +707,7 @@ Relational Algebra: algebra that operate on relations
    );
    ```
 
-3. Find all students younger than *everyone* taking Databases
+4. Find all students younger than *everyone* taking Databases
 
    ```sql
    SELECT name, DOB
@@ -703,14 +715,14 @@ Relational Algebra: algebra that operate on relations
    WHERE DOB > ALL (
    	SELECT DOB
      FROM students
-     NATURAL INNER JOIN enroll e
+     NATURAL JOIN enroll e
      INNER JOIN courses c
      	ON e.cid = c.cid
      WHERE c.name = 'Databases'
    );
    ```
 
-3. Find students who take every courses:
+5. **Find students who take every courses:**
 
    ```sql
    SELECT s.name
@@ -724,10 +736,9 @@ Relational Algebra: algebra that operate on relations
    		WHERE e.cID = c.cID AND e.sID = s.sID
    	)
    );
-   
    ```
 
-3. Find students who doesn't take every course:
+6. Find students who doesn't take every course:
 
    ```sql
    SELECT s.name
@@ -741,10 +752,9 @@ Relational Algebra: algebra that operate on relations
    		WHERE e.cID = c.cID AND e.sID = s.sID
    	)
    );
-   
    ```
 
-3. Find students who take all the courses that the student with a sid 2 takes
+7. Find students who take all the courses that the student with a sid 2 takes
 
    ```sql
    SELECT s.sid, s.name
