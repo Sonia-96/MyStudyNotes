@@ -327,12 +327,12 @@ Be careful when updating records. If you omit the `WHERE` clause, **ALL** record
 
 Relational Algebra: algebra that operate on relations 
 
-1. π: projection. No duplicates. Examples: 
+1. π: projection. Output is a relation and has no duplicates. Examples: 
 
    - $π_{Title, Autor} (Titles)$
    - $π_{Title, Serial} (Titles × Inventory)$
 
-2. σ: selection
+2. σ: selection. Filter rows on condition
 
    - $σ_{CardNum > 3}(Patrons)$
    - $π_{Phone}(σ_{CardNum > 3}(Patrons × Phones))$
@@ -343,11 +343,15 @@ Relational Algebra: algebra that operate on relations
 
 4. ∪: set union
 
-   - relations must be **union compatible** (same column types in same order)
+   - relations must be **union compatible** (same column name and types in same order)
    - duplicates will be removed
    - R1 ∪ R2 == R2 ∪ R1
 
 5. : set difference
+
+   - relations must be **union compatible**
+
+   <img src="./assets/image-20230621171648570.png" alt="image-20230621171648570" style="zoom:67%;" />
 
 6. ∩: set intersection
 
@@ -355,7 +359,7 @@ Relational Algebra: algebra that operate on relations
 
 7. ρ: rename operation (unary operator - single input)
 
-   - syntax: $ρ_x(E)$
+   - syntax: $ρ(NewRelationName_{NewColname/OldColname},\ Expression)$
 
 8. /: devision
 
@@ -365,7 +369,95 @@ Relational Algebra: algebra that operate on relations
    > - The relation returned by division operator will have attributes = (All attributes of A – All Attributes of B)
    > - The relation returned by division operator will return those tuples from relation A which are associated to every B’s tuple.
 
-# 9 Advanced Queries II: EXISTS
+9.  ⋈: join
+   - ⋈: natural join
+   - $⋈_{condition}$: theta join (join on condition)
+
+# 7 RA to SQL
+
+|                  | RA              | SQL                              |
+| ---------------- | --------------- | -------------------------------- |
+| Projection       | π               | SELECT                           |
+| Selection        | σ               | WHERE                            |
+| Cross Product    | ×               | JOIN                             |
+| Set Union        | ∪               | UNION ALL                        |
+| Set Difference   |                | NOT IN, exlusive left/right join |
+| Set Intersection | ∩               | IN, INNER JOIN, NATURAL JOIN     |
+| Rename           | ρ               | AS                               |
+| Natural Join     | ⋈               | NATURAL JOIN                     |
+| JOIN ON          | $⋈_{condition}$ | JOIN ... ON ...                  |
+| Division         | /               | nested EXISTS (see lec 10)       |
+
+# 8 Advanced Queries I
+
+## Nested Queries
+
+1. Every derived table must have its own alias, e.g.
+
+   ```sql
+   SELECT Serial
+   FROM (
+   	SELECT ISBN FROM Titles
+     WHERE Title = 'Lorax'
+   ) AS lorax
+   NATURAL JOIN Inventory;
+   ```
+
+2. The nested query after `IN` doesn't need alias, e.g.,
+
+   ```sql
+   SELECT Addr FROM CorporateLocs
+   WHERE Addr IN (
+     SELECT Addr FROM RetailLocs
+   );
+   ```
+
+## Union
+
+1. UNION: no duplicates
+
+   ```sql
+   SELECT Addr FROM CorporateLocs
+   UNION
+   SELECT Addr FROM RetailLocs
+   ```
+
+2. UNION ALL: allow duplicates
+
+## Practice
+
+1. All Patrons who have not checked out a book
+
+   ```sql
+   SELECT CardNum, Name
+   FROM Patrons
+   WHERE CardNum NOT IN (
+   	SELECT DISTINCT CardNum FROM CheckedIN
+   );
+   ```
+
+2. **All Patrons who have checked out ‘The Lorax’ AND ‘Harry Potter’**
+
+   ```sql
+   SELECT CardNum, Name
+   FROM (
+   	SELECT CardNum
+     FROM CheckedOut
+     NATURAL JOIN Inventory
+     NATURAL JOIN Titles
+     WHERE Title = 'The Lorax'
+   ) AS lorax
+   NATURAL JOIN (
+   	SELECT CardNum
+     FROM CheckedOut
+     NATURAL JOIN Inventory
+     NATURAL JOIN Titles
+     WHERE Title = 'The Harry Potter'
+   ) As hp
+   NATURAL JOIN Patrons;
+   ```
+
+# 9 Advanced Queries II
 
 ## JOIN
 
