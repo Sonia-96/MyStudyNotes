@@ -876,18 +876,18 @@ Relational Algebra: algebra that operate on relations
 1. Find number of students in each course
 
    ```sql
-   SELECT cid, name, COUNT(cid) AS num_students
+   SELECT cid, name, COUNT(sid) AS num_students
    FROM enroll
-   NATURAL LEFT JOIN courses
+   NATURAL RIGHT JOIN courses
    GROUP BY cid;
    ```
 
 2. Find number of courses for each student
 
    ```sql
-   SELECT sid, name, COUNT(sid) AS num_courses
+   SELECT sid, name, COUNT(cid) AS num_courses
    FROM enroll
-   NATURAL LEFT JOIN students
+   NATURAL RIGHT JOIN students
    GROUP BY sid;
    ```
 
@@ -907,16 +907,19 @@ Relational Algebra: algebra that operate on relations
 4. **Find the name of the oldest student in each course**
 
    ```sql
-   SELECT e.cid, e.sid, name, s.DOB
-   FROM enroll e
-   NATURAL JOIN students s
-   INNER JOIN (
-     SELECT cid, MAX(DOB) AS max_dob
-     FROM enroll
-     NATURAL JOIN students
+   SELECT sid, name, stu.cid, DOB
+   FROM (
+     SELECT sid, name, cid, DOB
+     FROM students s
+     NATURAL JOIN enroll e
+   ) stu
+   JOIN (
+   	SELECT cid, MIN(DOB) AS min_dob
+     FROM students
+     NATURAL JOIN enroll e
      GROUP BY cid
    ) eldest
-   ON e.cid = eldest.cid AND s.DOB = max_dob;
+   ON stu.cid = eldest.cid AND stu.DOB = eldest.min_dob;
    ```
 
 5. Find the average number of students per major
@@ -956,6 +959,104 @@ Relational Algebra: algebra that operate on relations
      	SELECT Serial FROm CheckedOut
      )
      LIMIT 1
+   )
+   ```
+
+   
+
+# Practice
+
+1. Get the Titles of all books by <Author>
+
+   ```sql
+   SELECT *
+   FROM Titles
+   WHERE Author = 'Kennedy';
+   ```
+
+2. Get Serial numbers of all books by <Author>
+
+   ```sql
+   SELECT Serial 
+   FROM Inventory
+   NATURAL JOIN Titles
+   WHERE Author = 'Tolkien';
+   ```
+
+3. Get the Titles of all books checked out by <Patron’s name>
+
+   ```sql
+   SELECT Title
+   FROM Patrons p
+   NATURAL JOIN CheckedOut
+   NATURAL JOIN Inventory
+   NATURAL JOIN Titles
+   WHERE p.Name = 'Joe';
+   ```
+
+4. Get phone number(s) of anyone with <Title> checked out
+
+   ```sql
+   SELECT Phone
+   FROM Phones
+   NATURAL JOIN CheckedOut
+   NATURAL JOIN Inventory
+   NATURAL JOIN Titles
+   WHERE Title = 'The Hobbit';
+   ```
+
+5. Find the Titles of the library's oldest <N> books. Assume the lowest serial number is the oldest book.
+
+   ```sql
+   SELECT Serial, Title
+   FROM Titles
+   NATURAL JOIN Inventory
+   ORDER BY Serial
+   LIMIT 5;
+   ```
+
+6. Find the name of the person who has checked out the most recent book. Assume higher serial numbers are newer. **Note that this query is not concerned with the absolute highest serial number, it is concerned with the highest one that has been checked out.**
+
+   ```sql
+   SELECT Name
+   FROM Patrons
+   NATURAL JOIN CheckedOut
+   JOIN (
+   	SELECT MAX(Serial) AS max_serial
+     FROM CheckedOut
+   ) a
+   ON Serial = max_serial;
+   ```
+
+   
+
+7. Find the phone number(s) of anyone who has not checked out any books. If a phone number belongs to two Patrons where one of them could have checked out a book, then that phone number should not be included in the output.
+
+   ```sql
+   SELECT Phone
+   FROM Phones
+   WHERE Phone NOT IN (
+   	SELECT Phone
+     FROM CheckedOut
+     NATURAL JOIN Phones
+   );
+   ```
+
+   
+
+8. The library wants to expand the number of unique selections in its inventory, thus, it must know the ISBN and Title of all books that it owns at least one copy of. Create a query that will return the ISBN and Title of every book in the library, but will not return the same book twice.
+
+   ```sql
+   SELECT DISTINCT ISBN, Title
+   FROM Titles
+   NATURAL JOIN Inventory;
+   ```
+
+9. Find the names of any player who played any games in 2018.
+
+   ```sql
+   WITH g AS (
+   	SELECT 
    )
    ```
 
