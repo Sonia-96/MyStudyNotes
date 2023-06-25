@@ -153,7 +153,7 @@ T-test!!!
 
 ## Strategy
 
-1. Develop a **null hypothesis (H<sub>0</sub>)** (something that is assumed to be true)
+1. Develop a **null hypothesis (H<sub>0</sub>)** (something that you want to disprove)
    - **alternative hypothesis** (H<sub>a</sub>): the hypothesis that researchers want to test again the null hypothesis
 2. Decide the **test statistic** (?): the method and value which will be used to assist in determining the truth value of the null hypothesis.
 3. calculate **p-value**: the probability that a test statistic is at least as significant as the one observed assuming that the null hypothesis was true.
@@ -195,3 +195,143 @@ T-test!!!
    
 
 ## Central Limited Therom
+
+# 7 Least Squares
+
+# 9 Logistic Regression
+
+predict categorical variables
+
+> The parameters we fit are still the slope + intercept of a line, but the logistic function turns the output of the line into something that can be understood as a probability
+
+# 10 K-Nearest Neighbors (KNN)
+
+# 11 Spatial Partitioning
+
+- KNN query: give me the K closest points (no guarantee of how close these points will be)
+- range query: give all points in the circle around a point (don't know how many points there would be)
+
+## Bucketing
+
+1. Divide the space into uniformly distributed buckets
+2. `rangeQuery(p, r)`: 
+   - find all buckets in the circle
+   - find all points in these buckets that have a distance to `p` shorter than `r`
+3. `knnQuery(p, r)`: do `rangeQuery` and increase the search radius `r` until we find enough points
+
+4. Issues:
+   - it's tricky to deside the number of buckets in each dimension
+   - curse of dimensionality -- need to store a lot of data when dimension increases!
+   - not suitable for non-uniform data
+
+## Quad Tree
+
+1. Each node stores:
+
+   - AABB (axis aligned bounding box)
+
+   - a list of nodes (leaf node) or 4 child nodes (NW, NE, SW, SE)
+
+2. Construction
+
+   ```java
+   Node Node(points, aabb) {
+   	if len(points) < threshold {
+       make it a leaf node
+     } else {
+       mid = (aabb.min + aabb.max) / 2
+     	loop through points and put them in NW, NE, SW, SE lists of points
+     	NW = new Node(NW_points, nw_aabb)
+     	...
+     }
+   }
+   ```
+
+3. RangeQuery
+
+   ```java
+   RangeQuery(p, r) {
+     if this is a leaf node {
+       loop through each point this node contains, and find points that are within r of p
+     } else {
+       loop through each child node:
+     		if they are within r +/- p:
+     			childNode.RangeQuery(p, r)
+     }
+   }
+   ```
+
+   
+
+4. KNNQuery
+
+   ```sql
+   KNNQuery(p, r, result) {
+     if leaf:
+     	for each point in bucket:
+     		if len( result ) < K:
+         	add point
+     		else if distance( point, pt ) < distance( pt, worst in result ):
+         	replace worst with point
+     else: // internal node 
+     	for each child:
+     		if len(result) < K or closestPointInAABB( pt ) < distance( pt, worst in result ):
+     			recurse
+   }
+   ```
+
+## KDTree
+
+K here specifies the number of dimensions.
+
+1. Each node stores:
+
+   - the **dimension** to split
+   - Split point (the median in this dimension)
+   - Left and right child
+
+2. Construction:
+
+   ```java
+   Node(PT[] points) {
+     if (points.length == 1) {
+       splitPoint = points[0];
+     } else {
+       // find middle poit based on the split dimension
+       // group smaller points and bigger points
+       left = new Node(smaller points);
+       right = new Node(bigger points);
+     }
+   }
+   ```
+
+3. RangeQuery:
+
+   ```python
+   PT[] rangeQuery(PT p, float r) {
+     if (distance(node, p) < r) {
+       // add this node to the list
+     }
+     if (p[splitDim] - r < node[splitDim]) {
+       node.left.rangeQuery(p, r);
+     }
+     if (p[splitDim] + r > node[splitDim]) {
+       node.right.rangeQuery(p, r);
+     }
+   }
+   ```
+
+   
+
+4. KNNQuery:
+
+   ```java
+   check point in node
+   check each child
+   ```
+
+   
+
+Each time we go down one level, we move to the next dimension.
+
+Height of KNN Tre: O(logN). Dimension won't affect its height!
