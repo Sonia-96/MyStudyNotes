@@ -335,3 +335,171 @@ K here specifies the number of dimensions.
 Each time we go down one level, we move to the next dimension.
 
 Height of KNN Tre: O(logN). Dimension won't affect its height!
+
+# 14 Support Vector Machines
+
+Support Vector Machiens (SVM) is a binary classification model. Its objective is to find a hyperplane to distincly classify data points. The principle is to maximize the distance to the closest points on each side.
+
+1. Data set is **linearly separable** if we can divide the data with a line/plane/hyperplane.
+
+2. When the data is not linearly separable, we add a "thickness" (**margin**, we call it M) to the line. 
+
+   - To caculate the line, we add costs to: (they might have different weight)
+     - misclassified points: the cost is proportional to its distance to the boundary
+     - points in the margin
+   - We can determine M through adjusting the cost:
+     - smaller cost -> smaller margin -> fast to train but easy to overfit
+     - bigger cost -> bigger margin -> slow to train and easy to underfit
+
+   <img src="./assets/image-20230625213117641.png" alt="image-20230625213117641" style="zoom:50%;" />
+
+3. Support Vector Classifier (SVC)
+
+   - SVC is the "thick line" that separates the data
+
+   - support vector: a point on the decision boundary
+
+     > Support vectors are data points that are closer to the hyperplane and influence the position and orientation of the hyperplane. Using these support vectors, we maximize the margin of the classifier. Deleting the support vectors will change the position of the hyperplane. These are the points that help us build our SVM. ([ref](https://towardsdatascience.com/support-vector-machine-introduction-to-machine-learning-algorithms-934a444fca47))
+
+     <img src="./assets/0*ecA4Ls8kBYSM5nza.jpg" alt="img" style="zoom:67%;" />
+
+4. Transforming Data
+
+   - SVM uses kernel function to transform the data so that we could classify those non-linearly separable data.
+
+   - common kernel functions: linear, nonlinear, polynomial, Radial Basis Function (RBF)
+
+   <img src="./assets/image-20230625214918543.png" alt="image-20230625214918543" style="zoom:30%;" />
+
+5. SVM
+   - the model is slow to train, but can be compact once trained
+   - fast to predict
+   - very flexible and can produce very high accuracy predictions 
+
+6. K-fold Cross Validation
+   - Split the data into K groups
+   - Train K models, each one use 1/K of the data for testing, the rest of them for training
+   - Compue the error using the maximum or average of error of all K testing sets
+
+# 15 Feature Selection
+
+# 16 K Means Clustering
+
+1. Supervised Learning & Unsupervised Learning
+
+   - supervised learning: the training set have labels (we know the correct answer)
+   - unsupervised learning: the training set doesn't have labels (no right answer)
+
+2. Clustering: unsupervised learning algorithm
+
+   - group points that are close to each other
+   - Note: clustering is not classification!!!
+
+3. **K Means Clustering**: partition n observations into K clusters in which each observation belongs to the cluster with the nearest **mean** (cluster **centroid**)
+
+   - How to find cluster centers: minize **intra-cluster distance** (ICD)
+
+   - How to measure if the clustering is good
+
+4. Lloyd's Relaxation (**Voronoi diagram**):
+
+   - Steps:
+     - for each cluster: set its center to be the average positioin of all the points in this cluster
+     - recluster: assign each point to the cluster with the closest center
+     - repeat above steps until **converged**
+   - Converge: meet either one of the following conditions:
+     - pick number number of iteratioins
+     - The cluster centers don't move
+     - No points switch to other cluster after one iteration
+   - Note, points in clusters can't overlap!
+
+5. How to choose K 
+
+   - Method 1: **Elbow Method**
+
+     - Plot ICD ~K, find the point of diminishing returns when adding new clusters, i.e., ICD will still go down but at a much slower rate
+
+     <img src="./assets/image-20230628113040797.png" alt="image-20230628113040797" style="zoom:67%;" />
+
+   - Method 2: **Silhouette Analysis**
+     $$
+     silhouette(p) = \frac{b(p) - a(p)}{max(b(p), a(p))}
+     $$
+
+     - parameters:
+       - a(p): the average distance from p to all points in its cluster
+       - b(p): the average distance from p to all points in the next-closest cluster
+     - the meaning of s(p):
+       - s(p) close to 1: p's cluster is a good fit for it
+       - close to 0: p is in the middle of two clusters
+       - close to -1: p ise mis-clustered
+     - our goal: make s(p) of most points close to 1
+
+6. Evaluation of Clustering Algorithm
+
+   We can perform clustering on labeled data, then compute homogeneity and completeness (the result should be a percentage)
+
+   - **Homogeneity**: how much of a cluster has the same label 
+   - **Completeness**: how much of points of a given lable end up in the same cluster
+   - v-measure score: harmonic mean between homogeneity and completeness. We can use it to measure the performance of a clustering algorithm
+
+7. pros & cons
+
+   - pros
+
+   - cons: 
+
+     - doesn't work well on concave points, e.g., moon dataset
+     - doesn't work well for anisotropic dataset, e.g., stretchd blobs
+     - choosing optimal positions for the cluster centers is intactably expensive to compute
+     
+     
+
+Q: "K" in KNN, KDTree, and K Means Clustering
+
+- KNN: the number of the nearest neighbors we want to look for
+- KDTree: the number of dimensions of the data
+- K Means Clustering: the number of clusters we want to create
+
+# 17 Hierarchical Clustering
+
+Hierarchical clustering can work on concave and anisotropic dataset.
+
+1. Hierarchical Clustering 
+
+   A method of cluster analysis that seeks to build a hierarchy of clusters. Strategies for hierarchical clustering generally falls into 2 categories:
+
+   - **Agglomerative**: bottom-up. each data point starts in its own clusters, and pairs of clusters are merged as one moves up the hierarchy
+   - Divisive: top-down. 
+
+2. **Dendrogram** -- a visualization of the cluster tree
+
+   - Contruct the tree:
+     - Each data point starts as left node 
+     - Merge two leaves into a new cluster (create a new internal node)
+     - Repeat the above steps until there's only one root node
+   - y-axis: The **height** of the horizontal line that connects two node shows the difference between these two nodes. The bigger the height, the more different these two clusters are.
+   - X-axis: no meaning
+   - We can choose an appropriate number of clusters by choosing the height at which to cut. For example, in the following picture, if we cut at height 5, there will be 5 clusters.
+
+   <img src="./assets/image-20230628120225163.png" alt="image-20230628120225163" style="zoom:67%;" />
+
+3. **Linkage Criteria** -- choose which nodes to combine?
+
+   The basic strategy is that if the distance between these two nodes are smaller than the threshold, then combine them. There are some common linkage criteria:
+
+   - Maximum / complete: the farthese distance between points in A and B
+   - minimum / single: the minimum distance between points in A and B
+   - Average / centroid
+   - ward: minimal intra-cluster distance
+
+4. **Affinity / Dissimilarity Metric** -- how similar two nodes are?
+
+   - Euclidean distance
+
+   - Mahattan distance
+
+   - Pairwise correlation: the angle between two points
+
+     <img src="./assets/image-20230628120936162.png" alt="image-20230628120936162" style="zoom:30%;" />
+
