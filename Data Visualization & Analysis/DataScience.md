@@ -465,6 +465,8 @@ Q: "K" in KNN, KDTree, and K Means Clustering
 
 Hierarchical clustering can work on concave and anisotropic dataset.
 
+One of the most difficult aspects of using K means clustering is choosing a good value for K. We can use hierarchical clustering to help us choose K for K Means Clustering.
+
 1. Hierarchical Clustering 
 
    A method of cluster analysis that seeks to build a hierarchy of clusters. Strategies for hierarchical clustering generally falls into 2 categories:
@@ -495,6 +497,8 @@ Hierarchical clustering can work on concave and anisotropic dataset.
 
 4. **Affinity / Dissimilarity Metric** -- how similar two nodes are?
 
+   People call the distance between two points "dissimilarity metric".
+
    - Euclidean distance
 
    - Mahattan distance
@@ -502,4 +506,37 @@ Hierarchical clustering can work on concave and anisotropic dataset.
    - Pairwise correlation: the angle between two points
 
      <img src="./assets/image-20230628120936162.png" alt="image-20230628120936162" style="zoom:30%;" />
+
+# 18 Dimensionality Reduction
+
+## Dimensionality Reduction
+
+1. Dimensionality
+   - extrinsic dimensionality: number of columns in data frame 
+   - intrinsic dimensionality: how many dimensions does this data vary in? This is an internal property of the data.
+
+2. Dementionality Reduction (DR): reduce the number of features of the data 
+   - convert the data from its extrinsic representation to its lower dimensional intrinsic representation
+   - two approaches to DR:
+     - feature selection
+     - feature extraction: transform the data from a high-dimensional space to a lower space. The most common method is called Principle Component Analysis (PCA).
+3. Why DR?
+   - Remove the redundancies and simplifies the data to make it easier to understand
+   - It's easier to visualize low-dimentionial data
+   - Reduce storage space for large datasets (because of less features)
+   - Make model training faster (because of less computation required)
+   - Reducing irrelavent or noisy features can help avoid overfitting in supervised learning tasks
+
+## Principle Component Analysis (PCA)
+
+PCA is the simplest DR algorithm. PCA is unsupervised learning. 
+
+1. Strategy: rotate the axis to make it align with the data as well as possible (maximize the variance of data on this axis)
+   - linearly
+   - Non-linear PCA
+2. How to choose which axis to throw away?
+   - a point can be represented as: p = r0 * w0 + r1 * w1 + ...
+   - A big $r_i^2$ means a big variance on this axis is big, which means this axis is very important. We can throw away the axises that has small enough $r_i^2$
+
+
 
