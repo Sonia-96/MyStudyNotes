@@ -1,4 +1,9 @@
-# Intro
+• https://utah.zoom.us/j/97754311215
+
+- Meeting ID: 977 5431 1215
+- Passcode: 169659
+
+# 1 Intro
 
 ## Python
 
@@ -42,17 +47,16 @@
 
 10. `.1 + .1 +.1 == .3` get false
 
-Q: 
-
-- Deep copy & shallow copy
-- what's 
+11. Deep copy & shallow copy
+    - shallow copy: only copy the address
+    - deep copy: copy the values
 
 ## Pandas
 
 1. series: a serie is a column. The data in a serie are the same type.
    - index: id of a row
 2. slicing:
-   - `iloc` is using the position, and the same as `[]`. loc is using index. index is included, but location is non-included
+   - `iloc` is using the position, and is the same as `[]`. `loc` is using index. index is included, but location is non-included
 
 ## NumPy
 
@@ -63,91 +67,94 @@ Q:
    x = (3 * 4, ) # tuple
    ```
 
-3. i
+# 2 Intro to Statistics
 
-# Intro to Statistics
+## Baisc Statistics
+
+1. **Descriptive Statistics**: describe the characteristics of a dataset
+
+   - e.g., min, max, avg, standard deviation
+
+   - variance: the range of possible outcomes
+
+   - covariance: describe the relationship between two random variables in which a change in the other reflects a change in one variable
+
+     <img src="./assets/cov-1.png" alt="cov-1" style="zoom:75%;" />
+
+   - Correlation = covaraince(x, y) / (std-x * std-y)
+
+2. **Inferential Statistics**: a filed of statistics that using analysis tools to **draw conclusions** about a population by examining random samples.
 
 ## Variables
 
-1. Random Variable
-   - Pdf: probability density function. pdf gives insight into the likelihood of something occurring
-     - integral of pdf: 1
-   - Sampling
+### Variable Types
+
+1. Random Variable: e.g. rolling a dice, 1-6 are random
+   - represented by probability density function (pdf). pdf gives insight into the likelihood of something occurring
 2. Discrete & Continuous Values
-3. Categorical Variables
-4. Ordinal Variable
-5. Interval Variable (?)
 
-## Inferential Statistics
+### Levels of Measurement
 
-1. pdf
-   - probability distribution: mean, variance
+1. Categorical/Nominal Variables
+2. Ordinal Variable （定序变量）: the data is ordered and the order is important, but the different between two variables is meaningless. e.g., education level - high school, college, master
+3. Interval Variable （定距变量）：the difference between two variables is meaningful and comparable but has no true zero. e.g., temperature
+4. Ratio Variables （定比变量）: a ratio variable has all the properties that a interval variable has, but also has a clear definition of 0.0. And multiplication for ratio variables make sense. e.g., weight - 60kg, 60 kg * 2
+
+<img src="./assets/image-20230628210933899.png" alt="image-20230628210933899" style="zoom:70%;" />
+
+| **OK to compute....**                                | **Nominal** | **Ordinal** | **Interval** | **Ratio** |
+| ---------------------------------------------------- | ----------- | ----------- | ------------ | --------- |
+| frequency distribution                               | **Yes**     | **Yes**     | **Yes**      | **Yes**   |
+| median and percentiles                               | **No**      | **Yes**     | **Yes**      | **Yes**   |
+| sum or difference                                    | **No**      | **No**      | **Yes**      | **Yes**   |
+| mean, standard deviation, standard error of the mean | **No**      | **No**      | **Yes**      | **Yes**   |
+| ratio, or coefficient of variation                   | **No**      | **No**      | **No**       | **Yes**   |
 
 ## Probability Distrubition
 
-1. Bernoulli Distribution: coin flip 
+1. Bernoulli Distribution: one coin flip 
    $$
    f(k) = \begin{cases} p & k=1 \\ 1-p & k = 0 \end{cases}
    $$
 
    - mean = p
-   - Variance<sup>2</sup> = p * (1 - p)
+   - Variance = p * (1 - p)
 
-2. Binomial Distribution 二项式分布： flip a coin for N times
+2. Binomial Distribution 二项式分布： the probability of get k heads up when flipping a coin for N times
    $$
    f(k) = \binom{n}{k} p^k (1-p)^{n-k}.
    $$
-   
+
 
    - mean = N * p
    - variance = N * p * (1 - p)
+   - combinations: 0! = 1
 
-3. Normal Distribution
+3. Poisson Distribution: the probability of an event happening a certain number of times within a given interval of time or space.
+
+   - The value is discrete.
+   - not a symmetric distribution
+
+4. Normal Distribution
 
    - Mean = 0
    - variance = 1
 
-4. Poisson Distribution
-5. Correlation?
+   <img src="./assets/image-20230628213425658.png" alt="image-20230628213425658" style="zoom:67%;" />
 
-## Combinations
+Note, Bernoulli, Binomial, Poisson distributions are discrete, but normal distribution is continuous.
 
-0! = 1
+## Tools
+
+1. Possibility Mass Function (PMF): the probability of a given outcome
+2. Possibility Density Function (PDF): the probability of a given range
+3. Cumulative Distribution Function (CDF): cdf(x) -- the area from -inf to x
 
 # 4 Visualization
 
-Q: what is insight?
-
-linear regression: fit a line to your data
-
-parabola/quadratic
-
-ordinal data: ordered but not mathmetically data, e.g. elementary school, junor high, high school, university
-
-## Matplotlib
-
-`figsize`
-
-`plt.style.use('ggplot')`: a R-style
-
-value_counts()
-
-sort_values()
-
-
-
-PDF vs. PMF
-
-- pdf: continuous
-- pmf: discrete
-
-plt.fill_between
-
-df.replace({key: value}, inplace=True)
-
-
-
-T-test!!!
+1. Plot types: histogram, scatter plot, scatter matrix, line plot, heat map, box plot, ...
+2. Marks: point, line, bar, 
+3. Channels: position, shape, color, size, ...
 
 # 5 Hypothesis Testing
 
@@ -155,27 +162,34 @@ T-test!!!
 
 1. Develop a **null hypothesis (H<sub>0</sub>)** (something that you want to disprove)
    - **alternative hypothesis** (H<sub>a</sub>): the hypothesis that researchers want to test again the null hypothesis
-2. Decide the **test statistic** (?): the method and value which will be used to assist in determining the truth value of the null hypothesis.
+2. Decide the **test statistic**: the method and value which will be used to assist in determining the truth value of the null hypothesis.
 3. calculate **p-value**: the probability that a test statistic is at least as significant as the one observed assuming that the null hypothesis was true.
 4. choose **significance**: how much ‘confidence’ is placed in the results
 5. get the result: if p-value < significance, the null hypothesis is false
 
 ## A/B Testing
 
-1. A/B Testing
+1. A/B Testing: show two different things to different groups of people and calculate which one is more effective.
 
 2. Methodology
 
+   - form a hypothesis and pick a significance level
+   - do experiments and collect data
+   - compute test statistics (TS)
+     - TS should come from a normal distribution. We can compute the possibility of getting that value in normal distribution
+   - draw a conclusion
+     - if the possibility < significance level, the hypothesis is wrong
+
 3. PMF (Probability Mass Function) vs. PDF (Probability Density Function)
 
-   | PMF (Probability Mass Function)                    | PDF (Probability Density Function)            |
-   | -------------------------------------------------- | --------------------------------------------- |
-   | Discrete random variable                           | Continuous random variable                    |
-   | eg., chance of someone get a temprature of 98 ~ 99 | eg., chance of get 4 heads up out of 10 flips |
+   | PMF (Probability Mass Function)                              | PDF (Probability Density Function)                           |
+   | ------------------------------------------------------------ | ------------------------------------------------------------ |
+   | Discrete random variable                                     | Continuous random variable                                   |
+   | Can only compute the possiblity of a range, eg., chance of get 4 heads up out of 10 flips | Can compute possibility for an exact value, eg., the chance of someone getting a temprature of 98 ~ 99 |
 
    <img src="./assets/image-20230527020253235.png" alt="image-20230527020253235" style="zoom:70%;" />
 
-5. Cumulative Distribution Function (CDF)
+4. Cumulative Distribution Function (CDF)
 
    if f(x) is PDF of a continuous random variable, then the probability of x in the interval [a, b] is 
    $$
@@ -192,7 +206,7 @@ T-test!!!
    \int_{-\infty}^b f(x) dx  - \int_{-\infty}^a f(x) dx =
    F(b) - F(a).
    $$
-   
+
 
 ## Central Limited Therom
 
@@ -537,6 +551,4 @@ PCA is the simplest DR algorithm. PCA is unsupervised learning.
 2. How to choose which axis to throw away?
    - a point can be represented as: p = r0 * w0 + r1 * w1 + ...
    - A big $r_i^2$ means a big variance on this axis is big, which means this axis is very important. We can throw away the axises that has small enough $r_i^2$
-
-
 
