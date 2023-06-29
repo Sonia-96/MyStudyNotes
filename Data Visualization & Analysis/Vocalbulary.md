@@ -1,0 +1,1 @@
+1. Solver: In machine learning, a solver refers to an algorithm or optimization method used to find the optimal solution for a specific problem.

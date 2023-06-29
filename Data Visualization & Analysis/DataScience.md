@@ -207,16 +207,64 @@ Note, Bernoulli, Binomial, Poisson distributions are discrete, but normal distri
    F(b) - F(a).
    $$
 
+# 6 Linear Regression
 
-## Central Limited Therom
+1. model: y = b0 + b1 * x1 + b2 * x2 + ... 
+   - Find the best fit by minimizing the squared residuals.
+2. Solver: In machine learning, a solver refers to an algorithm or optimization method used to find the optimal solution for a specific problem.
+3. Normalizing:Convertingunits(scale)toavaluethatiscomparableacrossalldatasets.
 
 # 7 Least Squares
 
+1. Least Squares: Least squares method is the procedure to find the best fit for a set of data points. This mothod works by minimizing the sum of **squared residuals**.
+
+   - residual: the difference between predicted y and observed y. We can treat it as an error
+
+   - **least squares**: pros
+     - Positive values and negative values won't cancel out each other
+     - The points with higher distance has higher weight
+     - The function is smooth. Easier to optimize than absolute distance. 
+
+2. R<sup>2</sup>: the proportion of the variance that is explained by the model. If R<sup>2</sup> is closer to 1, the model fits better to the data.
+
+3. Underfitting & Overfitting
+
+   |          | training accuracy | testing accuracy |
+   | -------- | ----------------- | ---------------- |
+   | underfit | low               | Low              |
+   | Overfit  | high              | High             |
+   | good fit | high              | high             |
+
+4. How to tell overfitting?
+   - Look at p-values of each variable: high p-value means this variable is not a good predictor (big p-value -> overfit)
+   - Cross validation: split the dataset into training data and testing data. Use training set to train the data, then use the model to predict on the test dataset and compute the error.
+
 # 9 Logistic Regression
 
-predict categorical variables
+1. Logistic Regression vs. Linear Regression
 
-> The parameters we fit are still the slope + intercept of a line, but the logistic function turns the output of the line into something that can be understood as a probability
+   - Logistic Regression predict categorical variables, Linear regression predicts continuous values
+   - Logistic regression solves classification problems 
+     - Classification: regression with a categorical output
+
+2. Logistic Regression
+   $$
+   logistic(y) = \frac{1}{1 + e^{-y}}\\
+   y = b_0 + b_1 * x_1 + b_2 * x_2 + ...
+   $$
+
+   - logistic function is also called sigmoid function, logistic(0) = 0.5
+   - This is non-linear solver
+
+3. Decision boundary: the value of x where logistic function gets 0.5 (the 50/50 probability spot)
+
+   - compute the decision boundary: $ B_0 + B_1 * x$ -> $x = - B_0/B_1$
+   - bigger $B_1$ (slope) means smaller uncertainty region -> better model
+
+4. Logistic Regression Limits:
+
+   - only works well in straight line deicion boundary
+   - Designed for 2-class classification. Have to be creative to use it for multi-class classification.
 
 # 10 K-Nearest Neighbors (KNN)
 
