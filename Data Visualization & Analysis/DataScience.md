@@ -268,10 +268,25 @@ Note, Bernoulli, Binomial, Poisson distributions are discrete, but normal distri
 
 # 10 K-Nearest Neighbors (KNN)
 
+1. KNN: predic the class of a point by looking at its K Nearest Neighbors
+2. K is the only parameter for this method:
+   - K is too small -- overfit
+   - K is too big -- underfit
+3. Distance: another "parameter" to adjust the algorithm
+   - Euclidean distance
+   - weighted terms
+4. Pros & Cons
+   - pros: works well for non-straight line decision boundary & multi-class classifaction
+   - cons: perform KNN query requires much computation -- need some data structures to make it efficient
+
 # 11 Spatial Partitioning
 
-- KNN query: give me the K closest points (no guarantee of how close these points will be)
-- range query: give all points in the circle around a point (don't know how many points there would be)
+1. Types of Proximity Queries:
+
+   - KNN query: give me the K closest points (no guarantee of how close these points will be)
+
+   - Range query: give all points in the circle around a point (don't know how many points there would be)
+
 
 ## Bucketing
 
@@ -288,13 +303,24 @@ Note, Bernoulli, Binomial, Poisson distributions are discrete, but normal distri
 
 ## Quad Tree
 
+a search tree that subdivides space at each level. (all subdivided areas are the same shape with the same area)
+
 1. Each node stores:
 
    - AABB (axis aligned bounding box)
 
    - a list of nodes (leaf node) or 4 child nodes (NW, NE, SW, SE)
 
-2. Construction
+2. Pros & cons
+
+   - pros: 
+     - data-aware structure
+     - has very regular structure, which is very important for some applications
+   - Cons: 
+     - less data-dependent than KD-tree, might have some wasted nodes
+     - Used up to 3 dimensions
+
+3. Construction
 
    ```java
    Node Node(points, aabb) {
@@ -309,7 +335,7 @@ Note, Bernoulli, Binomial, Poisson distributions are discrete, but normal distri
    }
    ```
 
-3. RangeQuery
+4. RangeQuery
 
    ```java
    RangeQuery(p, r) {
@@ -325,7 +351,7 @@ Note, Bernoulli, Binomial, Poisson distributions are discrete, but normal distri
 
    
 
-4. KNNQuery
+5. KNNQuery
 
    ```sql
    KNNQuery(p, r, result) {
@@ -398,6 +424,35 @@ Each time we go down one level, we move to the next dimension.
 
 Height of KNN Tre: O(logN). Dimension won't affect its height!
 
+# 13 Decision Trees
+
+1. Decision Tree:
+
+   - internal nodes: decision nodes -- pick a feature to look at and make a decision
+   - Leaf node: prediction nodes
+
+   - deicison boundary: piecewise lines
+
+1. pros & conss
+   - Pros:
+     - Easy to understand and interpret
+     - trees can be visualized
+     - little to no data preparation required
+     - Can be leveraged for both regression and classification (bianry & multi-class) tasks
+   - Cons:
+     - prone to overfitting
+     - High variance: small variance within dataset can product a very different decision tree
+     - Costly to train: use greedy search algorithm to construct a decision tree, which is more expensive than other algorithms
+2. Measuring node quality
+   - residuals
+   - GINI index
+   - cross entropy
+3. Heuristic: in computer science, a heuristic is a problem-solving strategy or method that is not guaranteed to find the optimal solution, but is designed to find a satisfactory solution in a reasonable amount of time.
+4. Dealing with Overfitting: smoothing by averaging
+   - bootstrapping
+   - bagging
+   - random forest
+
 # 14 Support Vector Machines
 
 Support Vector Machiens (SVM) is a binary classification model. Its objective is to find a hyperplane to distincly classify data points. The principle is to maximize the distance to the closest points on each side.
@@ -461,8 +516,6 @@ Support Vector Machiens (SVM) is a binary classification model. Its objective is
 
    - How to find cluster centers: minize **intra-cluster distance** (ICD)
 
-   - How to measure if the clustering is good
-
 4. Lloyd's Relaxation (**Voronoi diagram**):
 
    - Steps:
@@ -509,12 +562,17 @@ Support Vector Machiens (SVM) is a binary classification model. Its objective is
 
    - pros
 
-   - cons: 
+     - easy to understand and implement
 
+     - scales to large datasets
+   
+   - cons: 
+   
+     - manualy choose k
      - doesn't work well on concave points, e.g., moon dataset
      - doesn't work well for anisotropic dataset, e.g., stretchd blobs
      - choosing optimal positions for the cluster centers is intactably expensive to compute
-     
+   
      
 
 Q: "K" in KNN, KDTree, and K Means Clustering
@@ -522,6 +580,13 @@ Q: "K" in KNN, KDTree, and K Means Clustering
 - KNN: the number of the nearest neighbors we want to look for
 - KDTree: the number of dimensions of the data
 - K Means Clustering: the number of clusters we want to create
+
+Vocabulary:
+
+- Normal Vector - A perpendicular vector to a line (or plane in this case)
+- Data set is *linearly separable* if we can draw a line between all points.
+- kernel function
+  - radial basis function
 
 # 17 Hierarchical Clustering
 
@@ -552,7 +617,7 @@ One of the most difficult aspects of using K means clustering is choosing a good
 
    The basic strategy is that if the distance between these two nodes are smaller than the threshold, then combine them. There are some common linkage criteria:
 
-   - Maximum / complete: the farthese distance between points in A and B
+   - Maximum / complete: the fartheset distance between points in A and B
    - minimum / single: the minimum distance between points in A and B
    - Average / centroid
    - ward: minimal intra-cluster distance
@@ -577,7 +642,7 @@ One of the most difficult aspects of using K means clustering is choosing a good
    - extrinsic dimensionality: number of columns in data frame 
    - intrinsic dimensionality: how many dimensions does this data vary in? This is an internal property of the data.
 
-2. Dementionality Reduction (DR): reduce the number of features of the data 
+2. **Dementionality Reduction** (DR): reduce the number of features of the data 
    - convert the data from its extrinsic representation to its lower dimensional intrinsic representation
    - two approaches to DR:
      - feature selection

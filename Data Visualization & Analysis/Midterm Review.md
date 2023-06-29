@@ -34,7 +34,7 @@ The midterm exam will be in-class / written with one hand-written sheet of notes
 
 #### **Getting data**
 
-- What's the difference between web scraping/using an API?
+- **What's the difference between web scraping/using an API?**
 
 #### **Classification**
 
