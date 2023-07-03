@@ -36,6 +36,24 @@ The midterm exam will be in-class / written with one hand-written sheet of notes
 
 - **What's the difference between web scraping/using an API?**
 
+  - Web scraping:
+
+    - Web scraping involves programmatically extracting data from websites by parsing the HTML or XML structure of web pages.
+    - It typically involves sending HTTP requests to the web server and then using techniques like parsing, scraping, and extracting specific data elements from the HTML content.
+    - Web scraping can be performed on any website, even if it does not provide an API.
+    - The extracted data may not be in a structured format, and additional processing may be required to organize and transform the scraped data into a usable format.
+    - The legality of web scraping depends on the website's terms of service and the jurisdiction. Some websites explicitly prohibit scraping in their terms of service, while others may have specific guidelines or restrictions.
+
+    Using an API (Application Programming Interface):
+
+    - APIs provide a structured and controlled way to access and retrieve data from web services or online platforms.
+    - APIs are interfaces that expose specific endpoints, methods, and parameters through which developers can interact with the underlying system.
+    - APIs often provide data in a standardized format such as JSON or XML, making it easier to parse and work with the returned data.
+    - Access to APIs is typically regulated through authentication mechanisms, such as API keys or tokens, ensuring that only authorized users or applications can access the data.
+    - APIs often have rate limits and usage quotas in place to control the volume of requests and prevent abuse.
+    - The data obtained through APIs is usually in a structured format, reducing the need for extensive data parsing or cleaning.
+
+
 #### **Classification**
 
 - What is logistic regression? How is it related to/different from linear regression?
@@ -43,6 +61,9 @@ The midterm exam will be in-class / written with one hand-written sheet of notes
 - What are the common spatial partitioning data structures used to implement KNN efficiently?
 - What are the limitations of logistic regression?
 - What are the available knobs to tune with KNN, and what effect to they have on the trained classifier?
+  - K
+  - distance metric
+
 - What is a decision tree? What are their pros/cons?
 - What is bootstrapping?
 - What is bagging?
@@ -64,4 +85,5 @@ The midterm exam will be in-class / written with one hand-written sheet of notes
 
 - Why would we want to perform DR?
 - What is the geometric interpretation of PCA?
+  - finding the directions of maximum variance in a dataset.
 - What are the limitations of PCA?
